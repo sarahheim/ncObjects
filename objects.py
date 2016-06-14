@@ -117,18 +117,19 @@ Its children are 'cdip' and 'sccoos' (grandchildren 'sass' & 'caf')
         ncfile.date_modified = time.ctime(time.time())
 
     #filesize checker/resizer as a NC method
-    def fileSizeChecker(self, ncfilename):
-        filepath = os.path.join(self.ncpath, ncfilename)
-        if os.path.isfile(filepath):
-            fileMb = int(os.path.getsize(filepath) / 1000000)
+    def fileSizeChecker(self, ncfilepath):
+        nameOnly = ncfilepath.split('/')[-1]
+        if os.path.isfile(ncfilepath):
+            fileMb = int(os.path.getsize(ncfilepath) / 1000000)
             if fileMb > 10:
 #                tmpfilepath = '/tmp/' + ncfilename
-                temp = '/usr/local/bin/nccopy'
+#                temp = '/usr/local/bin/nccopy'
                 temp = '/home/scheim/NCobj/nccopy'
-                tmpfilepath = os.path.join(temp, ncfilename)
-                subprocess.call(['nccopy', filepath, tmpfilepath])
-                subprocess.call(['mv', tmpfilepath, filepath])
-                print 'RESIZED FILE'
+                tmpfilepath = os.path.join(temp, nameOnly)
+                origSz = os.path.getsize(ncfilepath)
+                subprocess.call(['nccopy', ncfilepath, tmpfilepath])
+                subprocess.call(['mv', tmpfilepath, ncfilepath])
+                print 'RESIZED FILE: prev:', origSz, os.path.getsize(ncfilepath)
 
     
     #assumes there's a 'time' variable in data/ncfile
@@ -536,13 +537,14 @@ class SASS(SCCOOS):
     
                 if len(df3.index) > 0:
                     # Group by Year and iterate making/appending to NetCDF files
-                    groupedYr = df3.groupby(df3.index.year) # is this necessary or can we just grab the year?
+                    # Do this IF its possible there could be previous year in the file
+                    groupedYr = df3.groupby(df3.index.year)
                     for grpYr in groupedYr.indices:
                         # Check file size, nccopy to bring size down, replace original file
                         ncfilename = loc + "-" + str(grpYr) + '.nc'
                         filepath = os.path.join(self.ncpath, ncfilename)
                         self.dataToNC(filepath, df3, loc)
-                        self.fileSizeChecker(ncfilename)
+                        self.fileSizeChecker(filepath)
     
         # Remember what the last value in the file was and write to a file
         if len(df) > 0:
@@ -598,9 +600,10 @@ class CAF(SCCOOS):
     def __init__(self):
         super(CAF, self).__init__()
         #print "init caf"
-        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_Latest/'
+#        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_Latest/'
+        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted'
 #        self.ncpath = '/data/InSitu/SASS/Burkolator/netcdf'
-        self.ncpath = '/home/scheim/NCobj'
+        self.ncpath = '/home/scheim/NCobj/CAF'
 #        self.fnformat = "CAF_RTproc_%Y%m%d.dat" #!!!
 
         self.attrArr = ['TSG_T', 'TSG_S', 'pCO2_atm', 'TCO2_mol_kg',
@@ -762,20 +765,30 @@ class CAF(SCCOOS):
 
         #print df.head()
         #print df.dtypes
-#!!! write to appropriate file
-        ncfilename = 'CAF_2016.nc'
-        filepath = os.path.join(self.ncpath, ncfilename)
-        self.dataToNC(filepath, df, '')
-        self.fileSizeChecker(ncfilename)
+        if len(df.index) > 0:
+            # Group by Year and iterate making/appending to NetCDF files
+            # Do this IF its possible there could be previous year in the file
+            groupedYr = df.groupby(df.index.year) # is this necessary or can we just grab the year?
+            for grpYr in groupedYr.indices:
+                # Check file size, nccopy to bring size down, replace original file
+                ncfilename = "CAF-" + str(grpYr) + '.nc'
+                filepath = os.path.join(self.ncpath, ncfilename)
+                self.dataToNC(filepath, df, '')
+                self.fileSizeChecker(filepath)
 
     def text2nc_all(self):
-        filesArr = os.listdir(self.logsdir)
-        filesArr.sort()
-        for fn in filesArr:
-            print fn
-            if fn.startswith('CAF_RTproc_'):
-                filepath = os.path.join(self.logsdir, fn)
-                CAF().text2nc(filepath)                
+        yrArr = os.listdir(self.logsdir)
+        yrArr.sort()
+        for yr in yrArr:
+            yrpath = os.path.join(self.logsdir, yr)
+            if os.path.isdir(yrpath):
+                filesArr = os.listdir(yrpath)
+                filesArr.sort()
+                for fn in filesArr:
+                    print fn
+                    if fn.startswith('CAF_RTproc_'):
+                        filepath = os.path.join(yrpath, fn)
+                        CAF().text2nc(filepath)                
 
     def text2nc_append(self):
         pass
