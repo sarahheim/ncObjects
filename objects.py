@@ -15,13 +15,35 @@ class NC(object):
 Class documentation: This root 'nc' class is an abstract class. 
 It will be the base to make a netcdf file. 
 Its children are 'cdip' and 'sccoos' (grandchildren 'sass' & 'caf')
+
+Assume: nc files end in YYYY.nc
+'time' variable in data/ncfile
     """
     __metaclass__ = ABCMeta
+    
+    #set some initial metadata
     @abstractmethod
     def __init__(self):
         #super(NC, self).__init__()
         #print "init nc"
         self.dateformat = "%Y-%m-%dT%H:%M:%SZ"
+        self.metaDict = {
+            ##base metadata, can be overwritten
+            ##Meta
+            'ncei_template_version':"NCEI_NetCDF_TimeSeries_Orthogonal_Template_v2.0",
+            'featureType':"timeSeries",
+            'Metadata_Conventions':'Unidata Dataset Discovery v1.0',
+            'Conventions':'CF-1.6',
+            'keywords':'EARTH SCIENCE, OCEANS',
+            'keywords_vocabulary':'Global Change Master Directory (GCMD) Earth Science Keywords',
+            'standard_name_vocabulary':'CF Standard Name Table (v28, 07 January 2015)',
+            'institution':'Scripps Institution of Oceanography, University of California San Diego',
+            'license':'Data is preliminary and should not be used by anyone.',
+            'geospatial_lon_units':'degrees_east',
+            'geospatial_lat_units':'degrees_north',
+            'time_coverage_units':'seconds since 1970-01-01 00:00:00 UTC',
+            'time_coverage_resolution':'1'
+            }
 
     @abstractmethod
     def createNCshell(self, ncfile):
@@ -41,23 +63,9 @@ Its children are 'cdip' and 'sccoos' (grandchildren 'sass' & 'caf')
     def text2nc_append(self):
         pass
 
+    # When creating new nc file, at some standard metadata
     def addNCshell_NC(self, ncfile):
         print "addNCshell_NC"
-        ##base metadata, can be overwritten
-        ##Meta
-        ncfile.ncei_template_version = "NCEI_NetCDF_TimeSeries_Orthogonal_Template_v2.0"
-        ncfile.featureType = "timeSeries"
-        ncfile.Metadata_Conventions = 'Unidata Dataset Discovery v1.0'
-        ncfile.Conventions = 'CF-1.6'
-        ncfile.keywords = 'EARTH SCIENCE, OCEANS'
-        ncfile.keywords_vocabulary = 'Global Change Master Directory (GCMD) Earth Science Keywords'
-        ncfile.standard_name_vocabulary = 'CF Standard Name Table (v28, 07 January 2015)'
-        ncfile.institution = 'Scripps Institution of Oceanography, University of California San Diego'
-        ncfile.license = 'Data is preliminary and should not be used by anyone.'
-        ncfile.geospatial_lon_units = 'degrees_east'
-        ncfile.geospatial_lat_units = 'degrees_north'
-        ncfile.time_coverage_units = 'seconds since 1970-01-01 00:00:00 UTC'
-        ncfile.time_coverage_resolution = '1'
 
         lat = ncfile.createVariable('lat', 'f4')
         lat.standard_name = 'latitude'
@@ -81,7 +89,36 @@ Its children are 'cdip' and 'sccoos' (grandchildren 'sass' & 'caf')
     
         return ncfile
 
+    # on a single file: run when only metadata needs updating, NOT any data
+    def updateNCattrs_single(self, ncName):
+        print ncName
+        ncfile = Dataset(ncName, 'a', format='NETCDF4')
+        #print ncfile.variables.keys()
+        #print ncfile.ncattrs()
+        print ncfile.__dict__
+        ncfile.setncatts(self.metaDict)
+        ncfile.date_modified = time.ctime(time.time())
+        print "EDITED"
+        #print ncfile.__dict__.keys()
+        #take out attributes that are no longer in the meta dictionary
+        for k in ncfile.__dict__.keys():
+            if k not in c.metaDict:
+                print 'DELETED', k
+                ncfile.delncattr(k)
+        
+        print "DONE"
+        print ncfile.__dict__#.keys()
+        ncfile.close()
 
+    # loop through nc files and apply updates to metadata
+    def updateNCattrs_all(self):
+        filesArr = os.listdir(self.ncpath)
+        filesArr.sort()
+        ##print "\n" + time.strftime("%c")
+        for fn in filesArr:
+            filename = os.path.join(self.ncpath, fn)
+            ##print "\n" + fn,
+            self.updateNCattrs_single(filename)
 
     def tupToISO(self, timeTup):
         return time.strftime('%Y-%m-%dT%H:%M:%SZ', timeTup)
@@ -103,6 +140,7 @@ Its children are 'cdip' and 'sccoos' (grandchildren 'sass' & 'caf')
     #     print secDif, days, dayRem, hrs, hrRem, mins, secs, durStr
         return durStr
 
+    # Update time metadata values
     def NCtimeMeta(self, ncfile):
         # SPECIFIC to file
         # Calculate. ISO 8601 Time duration
@@ -172,25 +210,29 @@ class CDIP(NC):
 
 class SCCOOS(NC):
     __metaclass__ = ABCMeta
+    #add general SCCOOS metadata
     @abstractmethod
     def __init__(self):
         super(SCCOOS, self).__init__()
         #print "init sccoos"
+        ##Meta
+        self.metaDict.update({
+            'naming_authority':'sccoos.org',
+            'acknowledgment':'The Southern California Coastal Ocean Observing System (SCCOOS)',
+            'publisher_name':'Southern California Coastal Ocean Observing System',
+            'publisher_url':'http://sccoos.org',
+            'publisher_email':'info@sccoos.org',
+            'source':'insitu observations'
+            })
+
 
     def addNCshell_SCCOOS(self, ncfile):
         self.addNCshell_NC(ncfile)
         print "addNCshell_SCCOOS"
-        ##Meta
-        ncfile.naming_authority = 'sccoos.org'
-        ncfile.acknowledgment = 'The Southern California Coastal Ocean Observing System (SCCOOS)'
-        ncfile.publisher_name = 'Southern California Coastal Ocean Observing System'
-        ncfile.publisher_url = 'http://sccoos.org'
-        ncfile.publisher_email = 'info@sccoos.org'
-        ncfile.source = 'insitu observations'
 
     def getLastDateNC(self, ncFilename):
         if os.path.isfile(ncFilename):
-            # open a the netCDF file for reading.
+	# open netCDF file for reading.
             ncfile = Dataset(ncFilename,'r')
             # read the last unix timestamp in variable named 'time'.
             unixtime = ncfile.variables['time'][-1:]
@@ -201,12 +243,13 @@ class SCCOOS(NC):
         return pd.to_datetime(unixtime, unit='s', utc=None)[0].isoformat()
 
 class SASS(SCCOOS):
+    #set SASS metadata
     def __init__(self):
         super(SASS, self).__init__()
         #print "init sass"
         self.logsdir = r'/data/InSitu/SASS/data/'
 #        self.ncpath = '/data/InSitu/SASS/netcdfs/'
-        self.ncpath = '/home/scheim/NCobj'
+        self.ncpath = '/home/scheim/NCobj/CAF'
         self.fnformat = "%Y-%m/data-%Y%m%d.dat"
 
 #        self.columns = ['server_date', 'ip', 'temperature', 'conductivity', 'pressure', 'aux1',
@@ -255,33 +298,36 @@ class SASS(SCCOOS):
            'salinity_flagPrimary', 'salinity_flagSecondary',
            'chlorophyll_flagPrimary', 'chlorophyll_flagSecondary']
 
+        self.metaDict = {
+            ##Meta
+            'metadata_link':'www.sccoos.org.progress/data-products/automateed-shore-stations/',
+            'summary':'Automated shore station with a suite of sensors that are ' +\
+            'attached to piers along the nearshore California coast. ' + \
+            'These automated sensors measure temperature, salinity, chlorophyll, turbidity ' + \
+            'and water level at frequent intervals in the nearshore coastal ocean.' +\
+            'This data can provide local and regional information on mixing and upwelling, ' +\
+            'land run-off, and algal blooms.',
+            'keywords':'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY,  OCEAN CHEMISTRY,' +\
+            ' CHLOROPHYLL, OCEAN TEMPERATURE, WATER TEMPERATURE, OCEAN PRESSURE, WATER PRESSURE',
+            'project':'Automated Shore Stations',
+            'processing_level':'QA/QC have been performed',
+            'cdm_data_type':'Station',
+            'geospatial_lat_resolution':'2.77E-4',
+            'geospatial_lon_resolution':'2.77E-4',
+            'geospatial_vertical_units':'m',
+            'geospatial_vertical_resolution':'1',
+            'geospatial_vertical_positive':'down'
+            }
+
     def createNCshell(self, ncfile, sta):
         self.addNCshell_SCCOOS(ncfile)
         print "SASS createNCshell"
+        ncfile.setncatts(self.metaDict)
         #Move to NC/SCCOOS class???
         flagPrim_flag_values = bytearray([1, 2, 3, 4, 9]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
         flagPrim_flag_meanings = 'GOOD_DATA UNKNOWN SUSPECT BAD_DATA MISSING'
         flagSec_flag_values = bytearray([0, 1, 2, 3]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
         flagSec_flag_meanings = 'UNSPECIFIED RANGE FLAT_LINE SPIKE'
-
-        ##Meta
-        ncfile.metadata_link = 'www.sccoos.org.progress/data-products/automateed-shore-stations/'
-        ncfile.summary = 'Automated shore station with a suite of sensors that are ' +\
-            'attached to piers along the nearshore California coast. ' + \
-            'These automated sensors measure temperature, salinity, chlorophyll, turbidity ' + \
-            'and water level at frequent intervals in the nearshore coastal ocean.' +\
-            'This data can provide local and regional information on mixing and upwelling, ' +\
-            'land run-off, and algal blooms.'
-        ncfile.keywords = 'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY,  OCEAN CHEMISTRY,' +\
-            ' CHLOROPHYLL, OCEAN TEMPERATURE, WATER TEMPERATURE, OCEAN PRESSURE, WATER PRESSURE'
-        ncfile.project = 'Automated Shore Stations'
-        ncfile.processing_level = 'QA/QC have been performed'
-        ncfile.cdm_data_type = 'Station'
-        ncfile.geospatial_lat_resolution = '2.77E-4'  # ?
-        ncfile.geospatial_lon_resolution = '2.77E-4'  # ?
-        ncfile.geospatial_vertical_units = 'm'  # ???
-        ncfile.geospatial_vertical_resolution = '1'  # ???
-        ncfile.geospatial_vertical_positive = 'down'  # ???
 
         # Create Dimensions
         # unlimited axis (can be appended to).
@@ -295,7 +341,7 @@ class SASS(SCCOOS):
         time_var.standard_name = 'time'
         time_var.units = 'seconds since 1970-01-01 00:00:00 UTC'
         time_var.long_name = 'time'
-        time_var.calendar = 'julian' #use??
+        time_var.calendar = 'julian'
         time_var.axis = "T"
         temperature = ncfile.createVariable('temperature', 'f4', ('time'), zlib=True)
         temperature.standard_name = 'sea_water_temperature'
@@ -438,6 +484,7 @@ class SASS(SCCOOS):
         return ncfile
 
     #previously dataframe2nc
+    #read SASS texts in specific format and write dataframes to nc files
     def text2nc(self, filename,lastRecorded=None):
         columns = ['server_date', 'ip', 'temperature', 'conductivity', 'pressure', 'aux1',
                    'aux3', 'chlorophyll', 'aux4', 'salinity', 'date',
@@ -551,6 +598,7 @@ class SASS(SCCOOS):
             #print " ", filename
             self.writeLastRecorded(df.index[-1:][0].strftime(self.dateformat))
 
+    #Loop through all text files and have them put into nc files
     def text2nc_all(self):
         mnArr = os.listdir(logsdir)
         mnArr.sort()
@@ -566,6 +614,7 @@ class SASS(SCCOOS):
                     ##print "\n" + fn,
                     text2nc(filename)
 
+    #Append only latest data into nc files
     def text2nc_append(self):
         looplimit = 1125
         loopCount = 1
@@ -610,23 +659,29 @@ class CAF(SCCOOS):
        'Alk_pTCO2', 'AlkS', 'calcAlk', 'calcTCO2', 'calcpCO2', 'calcCO2aq',
        'calcHCO3', 'calcCO3', 'calcOmega', 'calcpH']
 
+        ##Meta
+        self.metaDict.update({
+            'keywords':'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY, OCEAN CHEMISTRY,',##!!!
+            'processing_level':'QA/QC has not been performed', ##!!!
+            'ip':"132.239.92.62",
+            'metadata_link':'www.sccoos.org.progress/data-products/',
+            'summary': 'With funding from NOAA and IOOS, and in support of the West Coast shellfish industry; AOOS, NANOOS, CeNCOOS, and SCCOOS have added Ocean Acidification monitoring to its ongoing observations of the coastal ocean. This project funds a CO2 analyzer (Burkolator) that has been developed by scientists at Oregon State University. The SCCOOS Burkolator is located at the Carlsbad Aquafarm (carlsbadaquafarm.com) in San Diego and is operated by the Martz Lab at the Scripps Institution of Oceanography.', 
+            'project':'Carlsbad Auqafarm',
+            'processing_level':'QA/QC has not been performed',
+            'cdm_data_type':'Station'
+#            'geospatial_lat_resolution':'',  # ?
+#            'geospatial_lon_resolution':'',  # ?
+#            'geospatial_vertical_units':'',  # ???
+#            'geospatial_vertical_resolution':'',  # ???
+#            'geospatial_vertical_positive':''  # ???
+            })
+
     def createNCshell(self, ncfile, ignore):
+        self.addNCshell_SCCOOS(ncfile)	
         #NOT using: 'pH_aux', 'O2', 'O2sat'
         print "CAF createNCshell"
-        ##Meta
-        ncfile.keywords = 'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY,  OCEAN CHEMISTRY,'##!!!
-        ncfile.processing_level = 'QA/QC has not been performed' ##!!!
-        ncfile.ip = "132.239.92.62"
-        ncfile.metadata_link = 'www.sccoos.org.progress/data-products/'
-        ncfile.summary = '' ##!!!
-        ncfile.project = 'Carlsbad Auqafarm'
-        ncfile.processing_level = 'QA/QC has not been performed'
-        ncfile.cdm_data_type = 'Station'
-        ncfile.geospatial_lat_resolution = ''  # ?
-        ncfile.geospatial_lon_resolution = ''  # ?
-        ncfile.geospatial_vertical_units = ''  # ???
-        ncfile.geospatial_vertical_resolution = ''  # ???
-        ncfile.geospatial_vertical_positive = ''  # ???
+        #ncfile.ip = "132.239.92.62"
+        ncfile.setncatts(self.metaDict)
 
         # Create Dimensions
         # unlimited axis (can be appended to).
@@ -806,8 +861,11 @@ class CAF(SCCOOS):
 #s.text2nc(testTxt)
 
 c = CAF()
-testTxt = os.path.join(c.logsdir, 'CAF_RTproc_201605240042')
-print testTxt
-print "if file", os.path.isfile(testTxt)
-#c.text2nc(testTxt)
-c.text2nc_all()
+#testTxt = os.path.join(c.logsdir, 'CAF_RTproc_201605240042')
+#print testTxt
+#print "if file", os.path.isfile(testTxt)
+##c.text2nc(testTxt)
+#c.text2nc_all()
+
+#print c.ncpath
+#c.updateNCattrs_all()
