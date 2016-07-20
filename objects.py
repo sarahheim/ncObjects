@@ -249,7 +249,7 @@ class SASS(SCCOOS):
         #print "init sass"
         self.logsdir = r'/data/InSitu/SASS/data/'
 #        self.ncpath = '/data/InSitu/SASS/netcdfs/'
-        self.ncpath = '/home/scheim/NCobj/CAF'
+        self.ncpath = '/home/scheim/NCobj/SASS'
         self.fnformat = "%Y-%m/data-%Y%m%d.dat"
 
 #        self.columns = ['server_date', 'ip', 'temperature', 'conductivity', 'pressure', 'aux1',
@@ -285,7 +285,7 @@ class SASS(SCCOOS):
                     'url': 'https://sccoos.org/',
                     'inst': 'Southern California Coastal Ocean Observing System (SCCOOS) at Scripps Institution of Oceanography (SIO)'}}
 
-        # IP Address of Shorestations
+        # IP Address of Shorestations, connecting to appropriate self.staMeta dictionary
         self.ips = {'166.148.81.45': self.staMeta['UCSB'],
        '166.241.139.252': self.staMeta['UCI'],
        '166.241.175.135': self.staMeta['UCLA'],
@@ -537,21 +537,38 @@ class SASS(SCCOOS):
         # Ex. data-20140610.dat only works when this is done.
         df.index = pd.to_datetime(df.index)
 
-        print df.shape
         print df.head()
+        print df.shape
 #        print df.describe()
 
-        for ip in self.ips.keys():
-            if ip in df.ip.values:
-                df2 = df.where(df.ip == ip).dropna() # Remove all possible lines with NaN
+        grouped = df.groupby('ip')
+        for ip in grouped.indices:
+            print ip
+            df2 = grouped.get_group(ip)
+            if ip in self.ips.keys():
+                loc = self.ips[ip]['loc']
+                print ip, loc
+                print df2.shape
+
+#        ##NOT working, from Darren's dat2nc.py
+#        for ip in self.ips.keys():
+#            #print ip 
+#            #print df.ip
+#            #tmp = df.where(df.ip == ip)
+#            #print tmp.shape
+#            if ip in df.ip.values:
+#                df2 = df.where(df.ip == ip).dropna() # Remove all possible lines with NaN
+
                 df2.index = df2.index.tz_localize('UTC') #timezone, why?
                 
                 # Get proper column names for this station's dataframe.
                 archive_file_name = 'sass_'+self.ips[ip]['loc']+'_archive.csv'
-                archive_file = os.path.join(codedir, archive_file_name)
+                #archive_file = os.path.join(codedir, archive_file_name)
+                archive_file = archive_file_name
                 df2_col = pd.read_csv(archive_file, header=None, error_bad_lines=False,
                                      parse_dates=[0], infer_datetime_format=True, skipinitialspace=True, 
                                      index_col=0)
+                print df2_col.describe()
                 # Find column names to use in archive based on current dataframe's date_time index
                 col_names = df2_col[:df2.index[0]][-1:].values[0].tolist()
                 # Remove date and time columns
@@ -571,6 +588,7 @@ class SASS(SCCOOS):
     
                 # Get last recorded date 
                 LRpd = pd.to_datetime(lastRecorded, utc=None)
+                print LRpd
     
                 # Get the last time stamp recored in this location's NetCDF file.
                 lastNC = os.path.join(self.ncpath, loc + '-' + str(LRpd.year) + '.nc')
@@ -848,17 +866,18 @@ class CAF(SCCOOS):
     def text2nc_append(self):
         pass
 
-#s = SASS()
-#print s.ncpath
-#tmpFile = os.path.join(s.ncpath, 'test.nc')
-#ncfile = Dataset(tmpFile, 'w', format='NETCDF4')
-#sta = 'UCSD'
-##ncfile = s.createNCshell(ncfile, sta)
-##print ncfile
-#testTxt = os.path.join(s.logsdir, '2016-06','data-20160601.dat')
-#print testTxt
-#print "if file", os.path.isfile(testTxt)
-#s.text2nc(testTxt)
+s = SASS()
+print s.ncpath
+tmpFile = os.path.join(s.ncpath, 'test.nc')
+ncfile = Dataset(tmpFile, 'w', format='NETCDF4')
+sta = 'UCSD'
+ncfile = s.createNCshell(ncfile, sta)
+print ncfile
+testTxt = os.path.join(s.logsdir, '2016-06','data-20160601.dat')
+print testTxt
+print "if file", os.path.isfile(testTxt)
+s.text2nc(testTxt)
+
 
 c = CAF()
 #testTxt = os.path.join(c.logsdir, 'CAF_RTproc_201605240042')
