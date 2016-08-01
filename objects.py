@@ -230,26 +230,25 @@ class SCCOOS(NC):
         print "addNCshell_SCCOOS"
 
     def getLastNC(self, prefix):
-        """Use this year (or previous year) to look for last nc file"""
-        ##Another approach would be to look at all file names and get last year:
-        #ncFilesArr = os.listdir(ncDir)
-        #ncYrsArr = []
-        #for nc in ncFilesArr:
-        #    ncYr = nc.split('.')[0].split('-')[-1]
-        #    ncYrsArr.append(ncYr)
-        #ncYrsArr.sort()
-        #return os.path.join(self.ncpath,prefix+ncYrsArr[-1]+'.nc')
+        """look at all nc file names and get last year"""
+        ncFilesArr = os.listdir(self.ncpath)
+        ncYrsArr = []
+        for nc in ncFilesArr:
+            ncYr = nc.split('.')[0].split('-')[-1]
+            ncYrsArr.append(ncYr)
+        ncYrsArr.sort()
+        return os.path.join(self.ncpath,prefix+ncYrsArr[-1]+'.nc')
 
-        #First assume lastest netCDF file is this year
-        thisYr = time.strftime('%Y')
-        lastNC = os.path.join(self.ncpath,prefix+thisYr+'.nc')
-        #If this year's nc file doesn't exist, get last year
-        if not os.path.isfile(lastNC):
-            prevYr = str(int(thisYr)-1)
-            lastNC = os.path.join(self.ncpath,prefix+prevYr+'.nc')
-            ###Error if current or last year's nc's don't exist
-            #if not os.path.isfile(lastNC):
-        return lastNC
+        ##First assume lastest netCDF file is this year
+        #thisYr = time.strftime('%Y')
+        #lastNC = os.path.join(self.ncpath,prefix+thisYr+'.nc')
+        ##If this year's nc file doesn't exist, get last year
+        #if not os.path.isfile(lastNC):
+        #    prevYr = str(int(thisYr)-1)
+        #    lastNC = os.path.join(self.ncpath,prefix+prevYr+'.nc')
+        #    ###Error if current or last year's nc's don't exist
+        #    #if not os.path.isfile(lastNC):
+        #return lastNC
 
     def getLastDateNC(self, ncFilename):
         if os.path.isfile(ncFilename):
@@ -614,12 +613,13 @@ class SASS(SCCOOS):
                 #print LRpd
                 ## Get the last time stamp recored in this location's NetCDF file.
                 #lastNC = os.path.join(self.ncpath, loc + '-' + str(LRpd.year) + '.nc')
-                lastNC = getLastNC(loc + '-')
-                locLastRecordedTime = getLastDateNC(lastNC) 
-#!!! Change to epoch instead of pd datetime
+                lastNC = self.getLastNC(loc + '-')
+                print lastNC, self.getLastDateNC(lastNC)
+                ###locLastRecordedTime = getLastDateNC(lastNC) 
     
                 # Truncate data to only that which is after last recorded time 
-                df3 = df3[pd.to_datetime(df3.index,utc=None) > locLastRecordedTime ]
+                pd_getLastDateNC = pd.to_datetime(self.getLastDateNC(lastNC), unit='s', utc=None)
+                df3 = df3[pd.to_datetime(df3.index,utc=None) > pd_getLastDateNC ]
     
                 #print str(len(df3.index)), loc,
     
@@ -636,10 +636,10 @@ class SASS(SCCOOS):
     
     #Loop through all text files and have them put into nc files
     def text2nc_all(self):
-        mnArr = os.listdir(logsdir)
+        mnArr = os.listdir(self.logsdir)
         mnArr.sort()
         for mn in mnArr:
-            mnpath = os.path.join(logsdir, mn)
+            mnpath = os.path.join(self.logsdir, mn)
             if os.path.isdir(mnpath):
                 filesArr = os.listdir(mnpath)
                 filesArr.sort()
@@ -648,7 +648,7 @@ class SASS(SCCOOS):
                     startfld = time.time() # time each folder
                     filename = os.path.join(mnpath, fn)
                     ##print "\n" + fn,
-                    text2nc(filename)
+                    self.text2nc(filename)
 
     #Append only latest data into nc files
     def text2nc_append(self):
@@ -921,27 +921,20 @@ data to netcdfs. Data files are set by size. """
         for p in postFilesArr:
             self.text2nc(os.path.join(self.logsdir, self.txtFnPre+p))
 
-#s = SASS()
-#print s.ncpath
-#tmpFile = os.path.join(s.ncpath, 'test.nc')
-#ncfile = Dataset(tmpFile, 'w', format='NETCDF4')
-#sta = 'UCSD'
-#ncfile = s.createNCshell(ncfile, sta)
-#print ncfile
-#testTxt = os.path.join(s.logsdir, '2016-06','data-20160601.dat')
-#print testTxt
-#print "if file", os.path.isfile(testTxt)
+s = SASS()
+print s.ncpath
+s.text2nc_all()
 #s.text2nc(testTxt)
 
 
-c = CAF()
-print c.text2nc_append
+#c = CAF()
+#print c.text2nc_append
 #testTxt = os.path.join(c.logsdir, 'CAF_RTproc_201605240042')
 #print testTxt
 #print "if file", os.path.isfile(testTxt)
 ##c.text2nc(testTxt)
 #c.text2nc_all()
-c.text2nc_append()
+#c.text2nc_append()
 
 #print c.ncpath
 #c.updateNCattrs_all()
