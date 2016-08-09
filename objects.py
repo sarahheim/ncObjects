@@ -1,6 +1,6 @@
 #
 # Author Sarah Heim
-# Date create: May 2016
+# Date create: 2016
 # Description: adjusting to class/objects, parts taken from sass.py
 #
 import os, time, datetime, subprocess
@@ -50,7 +50,7 @@ Assume: nc files end in YYYY.nc
         pass
 
     @abstractmethod
-    def text2nc(self, filename, lastRecorded=None):
+    def text2nc(self, filename):
         pass
 
     @abstractmethod
@@ -65,8 +65,6 @@ Assume: nc files end in YYYY.nc
 
     # When creating new nc file, at some standard metadata
     def addNCshell_NC(self, ncfile):
-        print "addNCshell_NC"
-
         lat = ncfile.createVariable('lat', 'f4')
         lat.standard_name = 'latitude'
         lat.long_name = 'latitude'
@@ -177,7 +175,6 @@ Assume: nc files end in YYYY.nc
     #    loc = ips[ip]['loc']
     #    ncName = os.path.join(ncpath, loc, loc + '-' + yr + '.nc')
     
-        #print "dataToNC", os.path.dirname(ncName)
         if not os.path.isfile(ncName):
             ncfile = Dataset(ncName, 'w', format='NETCDF4')
             ncfile = self.createNCshell(ncfile, lookup)
@@ -227,17 +224,21 @@ class SCCOOS(NC):
 
     def addNCshell_SCCOOS(self, ncfile):
         self.addNCshell_NC(ncfile)
-        print "addNCshell_SCCOOS"
+       # print "addNCshell_SCCOOS"
 
     def getLastNC(self, prefix):
         """look at all nc file names and get last year"""
         ncFilesArr = os.listdir(self.ncpath)
         ncYrsArr = []
         for nc in ncFilesArr:
-            ncYr = nc.split('.')[0].split('-')[-1]
-            ncYrsArr.append(ncYr)
+            if nc.startswith(prefix):
+                ncYr = nc.split('.')[0].split('-')[-1]
+                ncYrsArr.append(ncYr)
         ncYrsArr.sort()
-        return os.path.join(self.ncpath,prefix+ncYrsArr[-1]+'.nc')
+        if len(ncYrsArr) > 0:
+            return os.path.join(self.ncpath,prefix+ncYrsArr[-1]+'.nc')
+        else:
+            return None
 
         ##First assume lastest netCDF file is this year
         #thisYr = time.strftime('%Y')
@@ -251,7 +252,7 @@ class SCCOOS(NC):
         #return lastNC
 
     def getLastDateNC(self, ncFilename):
-        if os.path.isfile(ncFilename):
+        if ncFilename is not None and os.path.isfile(ncFilename):
 	# open netCDF file for reading.
             ncfile = Dataset(ncFilename,'r')
             # read the last unix timestamp in variable named 'time'.
@@ -278,28 +279,28 @@ class SASS(SCCOOS):
 #                   'aux3', 'chlorophyll', 'aux4', 'salinity', 'date',
 #                   'time', 'sigmat', 'diagnosticVoltage', 'currentDraw']
 
-        self.staMeta = {'UCSB': {'loc': 'stearns_wharf',
+        self.staMeta = {'stearns_wharf': {'loc': 'stearns_wharf',
                     'loc_name': 'Stearns Wharf',
                     'lat': 34.408,
                     'lon': -119.685,
                     'depth': '2',
                     'url': 'http://msi.ucsb.edu/',
                     'inst': 'Marine Science Institute at University of California, Santa Barbara'},
-           'UCI': {'loc': 'newport_pier',
+           'newport_pier': {'loc': 'newport_pier',
                    'loc_name': 'Newport Pier',
                    'lat': 33.6061,
                    'lon': -117.9311,
                    'depth': '2',
                    'url': 'http://uci.edu/',
                    'inst': 'University of California, Irvine'},
-           'UCLA': {'loc': 'santa_monica_pier',
+           'santa_monica_pier': {'loc': 'santa_monica_pier',
                     'loc_name': 'Santa Monica Pier',
                     'lat': 34.008,
                     'lon': -118.499,
                     'depth': '2',
                     'url': 'http://environment.ucla.edu/',
                     'inst': 'Institute of the Environment at the University of California, Los Angeles'},
-           'UCSD': {'loc': 'scripps_pier',
+           'scripps_pier': {'loc': 'scripps_pier',
                     'loc_name': 'Scripps Pier',
                     'lat': 32.867,
                     'lon': -117.257,
@@ -308,11 +309,11 @@ class SASS(SCCOOS):
                     'inst': 'Southern California Coastal Ocean Observing System (SCCOOS) at Scripps Institution of Oceanography (SIO)'}}
 
         # IP Address of Shorestations, connecting to appropriate self.staMeta dictionary
-        self.ips = {'166.148.81.45': self.staMeta['UCSB'],
-       '166.241.139.252': self.staMeta['UCI'],
-       '166.241.175.135': self.staMeta['UCLA'],
-       '132.239.117.226': self.staMeta['UCSD'],
-       '172.16.117.233': self.staMeta['UCSD']}
+        self.ips = {'166.148.81.45': self.staMeta['stearns_wharf'],
+       '166.241.139.252': self.staMeta['newport_pier'],
+       '166.241.175.135': self.staMeta['santa_monica_pier'],
+       '132.239.117.226': self.staMeta['scripps_pier'],
+       '172.16.117.233': self.staMeta['scripps_pier']}
 
         self.attrArr = ['temperature', 'conductivity', 'pressure', 'aux1', 'aux3', 'chlorophyll',  # NOT INCLUDING 'time'
            'conductivity_flagPrimary', 'conductivity_flagSecondary',
@@ -507,7 +508,8 @@ class SASS(SCCOOS):
 
     #previously dataframe2nc
     #read SASS texts in specific format and write dataframes to nc files
-    def text2nc(self, filename,lastRecorded=None):
+    #def text2nc(self, filename,lastRecorded=None):
+    def text2nc(self, filename):
         columns = ['server_date', 'ip', 'temperature', 'conductivity', 'pressure', 'aux1',
                    'aux3', 'chlorophyll', 'aux4', 'salinity', 'date',
                    'time', 'sigmat', 'diagnosticVoltage', 'currentDraw']
@@ -538,7 +540,6 @@ class SASS(SCCOOS):
         # Drop any rows with NaN
         df = df.dropna()
 
-        print df.shape, len(columns)
         # Set column names
         df.columns = columns
         # Set date_time to pandas datetime format
@@ -559,18 +560,18 @@ class SASS(SCCOOS):
         # Ex. data-20140610.dat only works when this is done.
         df.index = pd.to_datetime(df.index)
 
-        print df.head()
-        print df.shape
+#        print df.head()
+#        print df.shape
 #        print df.describe()
 
         grouped = df.groupby('ip')
         for ip in grouped.indices:
-            print ip
+ #           print ip
             df2 = grouped.get_group(ip)
             if ip in self.ips.keys():
                 loc = self.ips[ip]['loc']
-                print ip, loc
-                print df2.shape
+ #               print ip, loc
+ #               print df2.shape
 
 #        ##NOT working, from Darren's dat2nc.py
 #        for ip in self.ips.keys():
@@ -590,7 +591,9 @@ class SASS(SCCOOS):
                 df2_col = pd.read_csv(archive_file, header=None, error_bad_lines=False,
                                      parse_dates=[0], infer_datetime_format=True, skipinitialspace=True, 
                                      index_col=0)
-                print df2_col.describe()
+                #print df2_col.describe()
+                #print df2.shape
+                #print df2.index[0]
                 # Find column names to use in archive based on current dataframe's date_time index
                 col_names = df2_col[:df2.index[0]][-1:].values[0].tolist()
                 # Remove date and time columns
@@ -600,7 +603,9 @@ class SASS(SCCOOS):
                 df2.columns = col_names
     
                 # Scale chlorophyll
-                df2['chlorophyll'] = df2['chlorophyll'] * 10.0
+                #df2['chlorophyll'] = df2['chlorophyll'] * 10.0 #SettingWithCopyWarning
+                #df2.loc[:,'chlorophyll'] = df2.loc[:,'chlorophyll'] * 10.0
+                df2['chlorophyll'].apply(lambda x: x*10)
     
                 # Apply QC tests
                 df3 = sassqc.qc_tests(df2)
@@ -614,7 +619,7 @@ class SASS(SCCOOS):
                 ## Get the last time stamp recored in this location's NetCDF file.
                 #lastNC = os.path.join(self.ncpath, loc + '-' + str(LRpd.year) + '.nc')
                 lastNC = self.getLastNC(loc + '-')
-                print lastNC, self.getLastDateNC(lastNC)
+                #print lastNC, self.getLastDateNC(lastNC)
                 ###locLastRecordedTime = getLastDateNC(lastNC) 
     
                 # Truncate data to only that which is after last recorded time 
@@ -652,33 +657,31 @@ class SASS(SCCOOS):
 
     #Append only latest data into nc files
     def text2nc_append(self):
-        looplimit = 1125
+        looplimit = 100
         loopCount = 1
-        start = time.time()
-        #print "Begin:", start
-        LRstr = sass.readLastRecorded().rstrip()
-        if (LRstr):
-            LRdt = dt(LRstr) #Last Recorded datetime
-            while LRdt.timetuple()[0:3] <= time.gmtime()[0:3]:
-                # Get filename to process from last recorded datetime
-                name = LRdt.strftime("%Y-%m/data-%Y%m%d.dat")
-                processFile = os.path.join(sass.logsdir, name)
+        latestDict = {}
+        for loc in self.staMeta:
+            lastNC = self.getLastNC(loc + '-')
+            locLastest = self.getLastDateNC(lastNC)
+            latestDict[s] = locLastest
+        LRdt = datetime.datetime.utcfromtimestamp(max(latestDict.values()))
+        print 'MAX, last recorded', LRdt
+        while LRdt.timetuple()[0:3] <= time.gmtime()[0:3]:
+            # Get filename to process from last recorded datetime
+            name = LRdt.strftime("%Y-%m/data-%Y%m%d.dat")
+            print name
+            processFile = os.path.join(self.logsdir, name)
+            if os.path.isfile(processFile):
+                # Add latest data to NetCDF file discarding data < LRstr
+                self.text2nc(processFile)
                 
-                if os.path.isfile(processFile):
-                    # Get Last Recorded String to NetCDF file
-                    LRstr = sass.readLastRecorded().rstrip()
-                    # Add latest data to NetCDF file discarding data < LRstr
-                    text2nc(processFile, LRstr)
-                    
-                # Increment day file and count
-                LRdt = LRdt + datetime.timedelta(days=1)          
-                # Increment loop count so does not keep going
-                loopCount += 1
-                # Check if while loop has exceeded looplimit
-                if loopCount > looplimit:
-                    return time.time()-start
-        else:
-            print "ERROR: Latest Recorded file does NOT exist!"
+            # Increment day file and count
+            LRdt = LRdt + datetime.timedelta(days=1)          
+            # Increment loop count so does not keep going
+            loopCount += 1
+            # Check if while loop has exceeded looplimit
+            if loopCount > looplimit:
+                return time.time()-start
 
 
 class CAF(SCCOOS):
@@ -686,8 +689,8 @@ class CAF(SCCOOS):
         super(CAF, self).__init__()
         #print "init caf"
         #use this directory for text2nc_append()
-#        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_Latest/'
-        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted/2016'
+        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_Latest/'
+#        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted/2016'
         #use this directory for text2nc_all()
 #        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted' 
 #        self.ncpath = '/data/InSitu/SASS/Burkolator/netcdf'
@@ -844,7 +847,7 @@ class CAF(SCCOOS):
 
 #    def text2nc(self, filename,lastRecorded=None):
     def text2nc(self, filename):
-        print 'IN text2nc, filename:', filename #for testing!!! 
+        #print 'IN text2nc, filename:', filename #for testing!!! 
 
         # Read file line by line into a pnadas dataframe
         df = pd.read_csv(filename, sep="\s+", header=2, dtype={'Date':object, 'Time':object})
@@ -901,9 +904,13 @@ data to netcdfs. Data files are set by size. """
         print "LRnc:", LRnc
         for fn in allFilesArr:
             #print fn
-            if self.txtFnPre in fn:
+            if '.' in fn:
+                print 'ignore', fn
+                pass # ignore weird files
+            elif self.txtFnPre in fn:
                 dtStr = fn.split('_')[-1]
                 #dtEp = time.mktime(time.strptime(dtStr, self.txtFnDatePattern)) #WRONG, tz
+                print dtStr
                 dtEp = pd.to_datetime(dtStr, format=self.txtFnDatePattern, utc=None).value/1e9 
                 #print fn, dtStr, dtEp, dtEp > LRnc
                 if dtEp > LRnc: 
@@ -921,20 +928,16 @@ data to netcdfs. Data files are set by size. """
         for p in postFilesArr:
             self.text2nc(os.path.join(self.logsdir, self.txtFnPre+p))
 
-s = SASS()
-print s.ncpath
-s.text2nc_all()
-#s.text2nc(testTxt)
+#s = SASS()
+#print s.ncpath
+#s.text2nc_all()
+#s.text2nc_append()
 
-
-#c = CAF()
-#print c.text2nc_append
-#testTxt = os.path.join(c.logsdir, 'CAF_RTproc_201605240042')
-#print testTxt
-#print "if file", os.path.isfile(testTxt)
-##c.text2nc(testTxt)
+c = CAF()
+print c.ncpath
+print c.logsdir
 #c.text2nc_all()
-#c.text2nc_append()
+c.text2nc_append()
 
 #print c.ncpath
 #c.updateNCattrs_all()
