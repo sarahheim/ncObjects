@@ -59,6 +59,7 @@ class SCCOOS(nc.NC):
         #return lastNC
 
     def getLastDateNC(self, ncFilename):
+        """read a netCDF file and return the lastest time value in epoch/seconds"""
         if ncFilename is not None and os.path.isfile(ncFilename):
 	# open netCDF file for reading.
             ncfile = Dataset(ncFilename,'r')
@@ -296,16 +297,16 @@ class SASS(SCCOOS):
         ncfile.variables['station'][:len(self.staMeta[sta]['loc'])] = list(self.staMeta[sta]['loc'])
 
         crs = ncfile.createVariable('crs', 'd')
-        crs.grid_mapping_name = "latitude_longitude"; 
+        crs.grid_mapping_name = "latitude_longitude";
         crs.epsg_code = "EPSG:4326" ;
         crs.semi_major_axis = 6378137.0 ;
         crs.inverse_flattening = 298.257223563 ;
-    
+
         instrument1 = ncfile.createVariable('instrument1', 'i')
         instrument1.make = "Seabird"
         instrument1.model = "SBE 16plus SEACAT"
         instrument1.comment = "Seabird SBE 16plus SEACAT Conductivity, Temperature, and Pressure recorder. Derived output Salinity."
-    
+
         instrument2 = ncfile.createVariable('instrument2', 'i')
         instrument2.make = "Seapoint"
         instrument2.model = "Chlorophyll Fluorometer"
@@ -313,10 +314,8 @@ class SASS(SCCOOS):
 
         return ncfile
 
-    #previously dataframe2nc
-    #read SASS texts in specific format and write dataframes to nc files
-    #def text2nc(self, filename,lastRecorded=None):
     def text2nc(self, filename):
+        """#previously dataframe2nc"""
         columns = ['server_date', 'ip', 'temperature', 'conductivity', 'pressure', 'aux1',
                    'aux3', 'chlorophyll', 'aux4', 'salinity', 'date',
                    'time', 'sigmat', 'diagnosticVoltage', 'currentDraw']
@@ -324,10 +323,10 @@ class SASS(SCCOOS):
         print 'filename', filename #for testing!!!
         # Create pandas dataframe from file
         #print time.strftime("%c"),
-    
+
         # Read file line by line into a pnadas dataframe
         df = pd.read_csv(filename, sep='^', header=None, prefix='X',error_bad_lines=False)
-          
+
         # Prepare a regex statement to parse the data out of each line
         re_Y = r'[1-2]\d{3}' # Year
         re_d = r'[0-3]\d' # Days in Month
@@ -337,11 +336,11 @@ class SASS(SCCOOS):
         re_serverdate = r'^('+re_Y+r'-[0-1]\d-'+re_d+'T'+re_time+'Z)' # server date
         re_ip = r'(\d{2,3}\.\d{2,3}\.\d{2,3}\.\d{2,3})' # ip address ending in ',# '
         re_attr = r'(\d+\.?\d*)' # attribute number with optional decimal
-        re_date = '('+re_d+re_s+re_b+re_s+re_Y+')' # date with Mon spelled/abbreviated 
+        re_date = '('+re_d+re_s+re_b+re_s+re_Y+')' # date with Mon spelled/abbreviated
         re_attr8 = re_s.join([re_attr]*8) # 8 consecutive attribute, separated by delimiter
         re_attr3 = re_s.join([re_attr]*3) # 3 consecutive attribute, separated by delimiter
-        regex = re_serverdate+re_s+re_ip+re_s+re_attr8+re_s+re_date+re_s+'('+re_time+')'+re_s+re_attr3+r'$' 
-    
+        regex = re_serverdate+re_s+re_ip+re_s+re_attr8+re_s+re_date+re_s+'('+re_time+')'+re_s+re_attr3+r'$'
+
         # Split data into proper columns
         df = df.X0.str.extract(regex)
         # Drop any rows with NaN
@@ -357,12 +356,12 @@ class SASS(SCCOOS):
         # Drop columna that were merged
         df.drop('date', axis=1, inplace=True)
         df.drop('time', axis=1, inplace=True)
-            
+
         # Make sure data are type float
         # (For some unknown reason we had to do this in 2 statements)
         df.loc[:,'temperature'] = df.loc[:,'temperature'].astype(float)
         df.iloc[:,3:13] = df.iloc[:,3:13].astype(float)
-        
+
         # Force index to be a datetime. For some reason this needs to be done
         # Ex. data-20140610.dat only works when this is done.
         df.index = pd.to_datetime(df.index)
@@ -382,7 +381,7 @@ class SASS(SCCOOS):
 
 #        ##NOT working, from Darren's dat2nc.py
 #        for ip in self.ips.keys():
-#            #print ip 
+#            #print ip
 #            #print df.ip
 #            #tmp = df.where(df.ip == ip)
 #            #print tmp.shape
@@ -390,13 +389,13 @@ class SASS(SCCOOS):
 #                df2 = df.where(df.ip == ip).dropna() # Remove all possible lines with NaN
 
                 df2.index = df2.index.tz_localize('UTC') #timezone, why?
-                
+
                 # Get proper column names for this station's dataframe.
                 archive_file_name = 'sass_'+self.ips[ip]['loc']+'_archive.csv'
                 #archive_file = os.path.join(codedir, archive_file_name)
                 archive_file = archive_file_name
                 df2_col = pd.read_csv(archive_file, header=None, error_bad_lines=False,
-                                     parse_dates=[0], infer_datetime_format=True, skipinitialspace=True, 
+                                     parse_dates=[0], infer_datetime_format=True, skipinitialspace=True,
                                      index_col=0)
                 #print df2_col.describe()
                 #print df2.shape
@@ -408,33 +407,33 @@ class SASS(SCCOOS):
                 col_names.remove('time')
                 # Set correct columns names for current dataframe
                 df2.columns = col_names
-    
+
                 # Scale chlorophyll
                 #df2['chlorophyll'] = df2['chlorophyll'] * 10.0 #SettingWithCopyWarning
                 #df2.loc[:,'chlorophyll'] = df2.loc[:,'chlorophyll'] * 10.0
                 df2['chlorophyll'].apply(lambda x: x*10)
-    
+
                 # Apply QC tests
                 df3 = sassqc.qc_tests(df2)
-                
+
                 # Get location name from ip
                 loc = self.ips[ip]['loc']
-    
-                ## Get last recorded date 
+
+                ## Get last recorded date
                 #LRpd = pd.to_datetime(lastRecorded, utc=None)
                 #print LRpd
                 ## Get the last time stamp recored in this location's NetCDF file.
                 #lastNC = os.path.join(self.ncpath, loc + '-' + str(LRpd.year) + '.nc')
                 lastNC = self.getLastNC(loc + '-')
                 #print lastNC, self.getLastDateNC(lastNC)
-                ###locLastRecordedTime = getLastDateNC(lastNC) 
-    
-                # Truncate data to only that which is after last recorded time 
+                ###locLastRecordedTime = getLastDateNC(lastNC)
+
+                # Truncate data to only that which is after last recorded time
                 pd_getLastDateNC = pd.to_datetime(self.getLastDateNC(lastNC), unit='s', utc=None)
                 df3 = df3[pd.to_datetime(df3.index,utc=None) > pd_getLastDateNC ]
-    
+
                 #print str(len(df3.index)), loc,
-    
+
                 if len(df3.index) > 0:
                     # Group by Year and iterate making/appending to NetCDF files
                     # Do this IF its possible there could be previous year in the file
@@ -445,8 +444,7 @@ class SASS(SCCOOS):
                         filepath = os.path.join(self.ncpath, ncfilename)
                         self.dataToNC(filepath, df3, loc)
                         self.fileSizeChecker(filepath)
-    
-    #Loop through all text files and have them put into nc files
+
     def text2nc_all(self):
         mnArr = os.listdir(self.logsdir)
         mnArr.sort()
@@ -462,8 +460,9 @@ class SASS(SCCOOS):
                     ##print "\n" + fn,
                     self.text2nc(filename)
 
-    #Append only latest data into nc files
+
     def text2nc_append(self):
+        """SASS log files are organized by server date (when recorded)"""
         looplimit = 100
         loopCount = 1
         latestDict = {}
@@ -481,9 +480,9 @@ class SASS(SCCOOS):
             if os.path.isfile(processFile):
                 # Add latest data to NetCDF file discarding data < LRstr
                 self.text2nc(processFile)
-                
+
             # Increment day file and count
-            LRdt = LRdt + datetime.timedelta(days=1)          
+            LRdt = LRdt + datetime.timedelta(days=1)
             # Increment loop count so does not keep going
             loopCount += 1
             # Check if while loop has exceeded looplimit
@@ -499,7 +498,7 @@ class CAF(SCCOOS):
         self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_Latest/'
 #        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted/2016'
         #use this directory for text2nc_all()
-#        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted' 
+#        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted'
 #        self.ncpath = '/data/InSitu/SASS/Burkolator/netcdf'
         self.ncpath = '/home/scheim/NCobj/CAF'
 #        self.fnformat = "CAF_RTproc_%Y%m%d.dat" #!!!
@@ -516,7 +515,7 @@ class CAF(SCCOOS):
             'processing_level':'QA/QC has not been performed', ##!!!
             'ip':"132.239.92.62",
             'metadata_link':'www.sccoos.org.progress/data-products/',
-            'summary': 'With funding from NOAA and IOOS, and in support of the West Coast shellfish industry; AOOS, NANOOS, CeNCOOS, and SCCOOS have added Ocean Acidification monitoring to its ongoing observations of the coastal ocean. This project funds a CO2 analyzer (Burkolator) that has been developed by scientists at Oregon State University. The SCCOOS Burkolator is located at the Carlsbad Aquafarm (carlsbadaquafarm.com) in San Diego and is operated by the Martz Lab at the Scripps Institution of Oceanography.', 
+            'summary': 'With funding from NOAA and IOOS, and in support of the West Coast shellfish industry; AOOS, NANOOS, CeNCOOS, and SCCOOS have added Ocean Acidification monitoring to its ongoing observations of the coastal ocean. This project funds a CO2 analyzer (Burkolator) that has been developed by scientists at Oregon State University. The SCCOOS Burkolator is located at the Carlsbad Aquafarm (carlsbadaquafarm.com) in San Diego and is operated by the Martz Lab at the Scripps Institution of Oceanography.',
             'project':'Carlsbad Auqafarm',
             'processing_level':'QA/QC has not been performed',
             'cdm_data_type':'Station'
@@ -528,7 +527,7 @@ class CAF(SCCOOS):
             })
 
     def createNCshell(self, ncfile, ignore):
-        self.addNCshell_SCCOOS(ncfile)	
+        self.addNCshell_SCCOOS(ncfile)
         #NOT using: 'pH_aux', 'O2', 'O2sat'
         print "CAF createNCshell"
         #ncfile.ip = "132.239.92.62"
@@ -652,9 +651,8 @@ class CAF(SCCOOS):
 
         return ncfile
 
-#    def text2nc(self, filename,lastRecorded=None):
     def text2nc(self, filename):
-        #print 'IN text2nc, filename:', filename #for testing!!! 
+        #print 'IN text2nc, filename:', filename #for testing!!!
 
         # Read file line by line into a pnadas dataframe
         df = pd.read_csv(filename, sep="\s+", header=2, dtype={'Date':object, 'Time':object})
@@ -697,11 +695,10 @@ class CAF(SCCOOS):
                     print fn
                     if fn.startswith(self.txtFnPre):
                         filepath = os.path.join(yrpath, fn)
-                        CAF().text2nc(filepath)                
+                        CAF().text2nc(filepath)
 
     def text2nc_append(self):
-        """This looks at the lastest datetime recorded in a netcdf. Then appends any recent 
-data to netcdfs. Data files are set by size. """
+        """CAF data files are set by size. """
         allFilesArr = os.listdir(self.logsdir) #use Latest!!!
         preFilesArr = []
         postFilesArr = []
@@ -714,9 +711,9 @@ data to netcdfs. Data files are set by size. """
             if '.' not in fn and self.txtFnPre in fn:
                 dtStr = fn.split('_')[-1]
                 #dtEp = time.mktime(time.strptime(dtStr, self.txtFnDatePattern)) #WRONG, tz
-                dtEp = pd.to_datetime(dtStr, format=self.txtFnDatePattern, utc=None).value/1e9 
+                dtEp = pd.to_datetime(dtStr, format=self.txtFnDatePattern, utc=None).value/1e9
                 #print fn, dtStr, dtEp, dtEp > LRnc
-                if dtEp > LRnc: 
+                if dtEp > LRnc:
                     postFilesArr.append(dtStr)
                     #print fn, dtStr, dtEp
                 else: preFilesArr.append(dtStr)

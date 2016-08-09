@@ -9,15 +9,15 @@ from abc import ABCMeta, abstractmethod
 
 class NC(object):
     """
-Class documentation: This root 'nc' class is an abstract class. 
-It will be the base to make a netcdf file. 
+Class documentation: This root 'nc' class is an abstract class.
+It will be the base to make a netcdf file.
 Its children are 'cdip' and 'sccoos' (grandchildren 'sass' & 'caf')
 
 Assume: nc files end in YYYY.nc
 'time' variable in data/ncfile
     """
     __metaclass__ = ABCMeta
-    
+
     #set some initial metadata
     @abstractmethod
     def __init__(self):
@@ -44,24 +44,28 @@ Assume: nc files end in YYYY.nc
 
     @abstractmethod
     def createNCshell(self, ncfile):
+        """Create a shell of netCDF file (variables, attributes), without data"""
         pass
 
     @abstractmethod
     def text2nc(self, filename):
+        """read texts in specific format and put in panda's dataframe, to be put in nc files"""
         pass
 
     @abstractmethod
-    # Loop through ALL log files and put in NC files
     def text2nc_all(self):
+        """Loop through ALL log/text files and put in NC files"""
         pass
 
-    # Append only the latest data since last writing to NC files
     @abstractmethod
     def text2nc_append(self):
+        """Append only the latest data to NC files.
+        This looks at the lastest datetime recorded in a netcdf,
+        then appends any recent data to netcdfs."""
         pass
 
-    # When creating new nc file, at some standard metadata
     def addNCshell_NC(self, ncfile):
+        """When creating new nc file, at some standard metadata"""
         lat = ncfile.createVariable('lat', 'f4')
         lat.standard_name = 'latitude'
         lat.long_name = 'latitude'
@@ -81,11 +85,11 @@ Assume: nc files end in YYYY.nc
         dep.axis = 'Z'
         dep.positive = 'down'
 #        ncfile.variables['depth'][0] = ips[ip]['depth']
-    
+
         return ncfile
 
-    # on a single file: run when only metadata needs updating, NOT any data
     def updateNCattrs_single(self, ncName):
+        """on a single file: run when ONLY nc METADATA needs updating, NOT any data"""
         print ncName
         ncfile = Dataset(ncName, 'a', format='NETCDF4')
         #print ncfile.variables.keys()
@@ -100,13 +104,13 @@ Assume: nc files end in YYYY.nc
             if k not in c.metaDict:
                 print 'DELETED', k
                 ncfile.delncattr(k)
-        
+
         print "DONE"
         print ncfile.__dict__#.keys()
         ncfile.close()
 
-    # loop through nc files and apply updates to metadata
     def updateNCattrs_all(self):
+        """loop through all nc files and apply updates to metadata"""
         filesArr = os.listdir(self.ncpath)
         filesArr.sort()
         ##print "\n" + time.strftime("%c")
@@ -116,13 +120,12 @@ Assume: nc files end in YYYY.nc
             self.updateNCattrs_single(filename)
 
     def tupToISO(self, timeTup):
+        """Only return Day, Hour, Min, Sec in ISO 8601 duration format"""
         return time.strftime('%Y-%m-%dT%H:%M:%SZ', timeTup)
-    
-    # Only return Day, Hour, Min, Sec in ISO 8601 duration format
     # Designed, testing NSDate int, may work with epoch (subsec???)
-    
-    
+
     def ISOduration(self, minTimeS, maxTimeS):
+        """returns ISO duration (days, hrs, mins, secs)"""
         secDif = maxTimeS - minTimeS
         days = secDif / (3600 * 24)
         dayRem = secDif % (3600 * 24)
@@ -135,10 +138,9 @@ Assume: nc files end in YYYY.nc
     #     print secDif, days, dayRem, hrs, hrRem, mins, secs, durStr
         return durStr
 
-    # Update time metadata values
     def NCtimeMeta(self, ncfile):
-        # SPECIFIC to file
-        # Calculate. ISO 8601 Time duration
+        """Update time metadata values: Calculate, SPECIFIC to file.
+        ISO 8601 Time duration"""
         times = ncfile.variables['time'][:]
         minTimeS = min(times)
         maxTimeS = max(times)
@@ -149,8 +151,9 @@ Assume: nc files end in YYYY.nc
         ncfile.time_coverage_duration = ISOduration(minTimeS, maxTimeS)
         ncfile.date_modified = time.ctime(time.time())
 
-    #filesize checker/resizer as a NC method
     def fileSizeChecker(self, ncfilepath):
+        """filesize checker/resizer as a NC method.
+        Set as 1e6, could be make default and pass as arg"""
         nameOnly = ncfilepath.split('/')[-1]
         if os.path.isfile(ncfilepath):
             fileMb = int(os.path.getsize(ncfilepath) / 1000000)
@@ -164,14 +167,10 @@ Assume: nc files end in YYYY.nc
                 subprocess.call(['mv', tmpfilepath, ncfilepath])
                 print 'RESIZED FILE: prev:', origSz, os.path.getsize(ncfilepath)
 
-    
-    #assumes there's a 'time' variable in data/ncfile
+
     def dataToNC(self, ncName, subset, lookup):
-    #def dataToNC(yr, ip, subset): ##prev
-    #    yr = str(yr)
-    #    loc = ips[ip]['loc']
-    #    ncName = os.path.join(ncpath, loc, loc + '-' + yr + '.nc')
-    
+        """Take dataframe and put in netCDF (new file or append).
+        Assumes there's a 'time' variable in data/ncfile"""
         if not os.path.isfile(ncName):
             ncfile = Dataset(ncName, 'w', format='NETCDF4')
             ncfile = self.createNCshell(ncfile, lookup)
@@ -179,7 +178,7 @@ Assume: nc files end in YYYY.nc
             for attr in self.attrArr:
                 #             ncfile.variables['temperature'][:] = subset['temperature'].values
                 ncfile.variables[attr][:] = subset[attr].values
-    
+
         else:
             ncfile = Dataset(ncName, 'a', format='NETCDF4')
             timeLen = len(ncfile.variables['time'][:])
@@ -201,4 +200,3 @@ Assume: nc files end in YYYY.nc
 #
 #    def createNCshell(self, ncfile, sta):
 #        ncfile.naming_authority = 'CDIP'
-
