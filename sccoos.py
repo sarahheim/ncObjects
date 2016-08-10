@@ -13,6 +13,7 @@ import nc
 
 
 class SCCOOS(nc.NC):
+    """Class to be used for SCCOOS related netCDFs"""
     __metaclass__ = ABCMeta
     #add general SCCOOS metadata
     @abstractmethod
@@ -59,7 +60,13 @@ class SCCOOS(nc.NC):
         #return lastNC
 
     def getLastDateNC(self, ncFilename):
-        """read a netCDF file and return the lastest time value in epoch/seconds"""
+        """Read a netCDF file and return the lastest time value in epoch/seconds
+
+        :param str `ncFilename`: path of netCDF file
+        :returns: latest time value in epoch/seconds
+        :rtype: number (``float``), change to ``int``?
+
+        """
         if ncFilename is not None and os.path.isfile(ncFilename):
 	# open netCDF file for reading.
             ncfile = Dataset(ncFilename,'r')
@@ -74,8 +81,13 @@ class SCCOOS(nc.NC):
         return unixtime
 
 class SASS(SCCOOS):
+    """Class for SCCOOS's Automated Shore Stations. Currently, log files and netCDFs"""
     #set SASS metadata
     def __init__(self):
+        """Setting up SASS variables 
+
+        .. todo:: change ncpath (currently local for testing)
+        """
         super(SASS, self).__init__()
         #print "init sass"
         self.logsdir = r'/data/InSitu/SASS/data/'
@@ -151,6 +163,10 @@ class SASS(SCCOOS):
             }
 
     def createNCshell(self, ncfile, sta):
+        """
+
+        .. todo:: move createVariables to external text file??
+        """
         self.addNCshell_SCCOOS(ncfile)
         print "SASS createNCshell"
         ncfile.setncatts(self.metaDict)
@@ -315,7 +331,10 @@ class SASS(SCCOOS):
         return ncfile
 
     def text2nc(self, filename):
-        """#previously dataframe2nc"""
+        """#previously dataframe2nc
+
+        .. warning: sassqc getting ``SettingWithCopyWarning``?
+        """
         columns = ['server_date', 'ip', 'temperature', 'conductivity', 'pressure', 'aux1',
                    'aux3', 'chlorophyll', 'aux4', 'salinity', 'date',
                    'time', 'sigmat', 'diagnosticVoltage', 'currentDraw']
@@ -491,7 +510,12 @@ class SASS(SCCOOS):
 
 
 class CAF(SCCOOS):
+    """Class for SCCOOS's Carlsbad Aqua Farm's burkolator. Currently, log files and netCDFs"""
     def __init__(self):
+        """Setting up CAFF variables
+
+        .. todo:: change ncpath (currently local for testing)
+        """
         super(CAF, self).__init__()
         #print "init caf"
         #use this directory for text2nc_append()
