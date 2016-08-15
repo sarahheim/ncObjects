@@ -16,23 +16,30 @@ Notes
   - change ncpath(s) in __init__ to /data (currently using local home)
   - put *createVariable* in text
 
-.. graphviz::
+  .. rubric:: Class Inheritance
 
-   digraph {
-      "From" -> "To";
-   }
+  .. inheritance-diagram:: sccoos
+
+  .. rubric:: Graphviz Workflow
+
+  .. graphviz:: workflow.dot
+
+  .. rubric:: Ex PlantUML
+
+.. uml::
+
+    @startuml
+
+    (*) --> "First mod"
+    "First mod" --> (*)
+
+    @enduml
 
 Contents
 ^^^^^^^^
 
 .. toctree::
     :maxdepth: 3
-
-.. autosummary::
-    :toctree: _autosummary
-
-    sccoos.SASS
-    sccoos.CAF
 
 .. autoclass:: nc.NC
     :members:

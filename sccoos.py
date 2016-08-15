@@ -62,7 +62,7 @@ class SCCOOS(nc.NC):
     def getLastDateNC(self, ncFilename):
         """Read a netCDF file and return the lastest time value in epoch/seconds
 
-        :param str `ncFilename`: path of netCDF file
+        :param str ncFilename: path of netCDF file
         :returns: latest time value in epoch/seconds
         :rtype: number (``float``), change to ``int``?
 
@@ -86,7 +86,9 @@ class SASS(SCCOOS):
     def __init__(self):
         """Setting up SASS variables 
 
-        .. todo:: change ncpath (currently local for testing)
+        .. todo:: 
+        - change ncpath (currently local for testing)
+        - move metadata to external text file(s)?
         """
         super(SASS, self).__init__()
         #print "init sass"
@@ -332,6 +334,9 @@ class SASS(SCCOOS):
 
     def text2nc(self, filename):
         """#previously dataframe2nc
+        - Uses Panda's ``read_csv``
+        - Does a series of regular expressions (a.k.a. regex)
+        - Uses QC methods from **sassqc**
 
         .. warning: sassqc getting ``SettingWithCopyWarning``?
         """

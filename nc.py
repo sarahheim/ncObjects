@@ -9,12 +9,13 @@ from abc import ABCMeta, abstractmethod
 
 class NC(object):
     """
-Class documentation: This root 'nc' class is an abstract class.
-It will be the base to make a netcdf file.
-Its children are 'cdip' and 'sccoos' (grandchildren 'sass' & 'caf')
-
-Assume: nc files end in YYYY.nc
-'time' variable in data/ncfile
+    Class documentation: This root 'nc' class is an abstract class.
+    It will be the base to make a netcdf file.
+    Its children are 'cdip' and 'sccoos' (grandchildren 'sass' & 'caf')
+    
+    .. note::
+    Assume: nc files end in YYYY.nc
+    'time' variable in data/ncfile
     """
     __metaclass__ = ABCMeta
 
@@ -44,17 +45,23 @@ Assume: nc files end in YYYY.nc
 
     @abstractmethod
     def createNCshell(self, ncfile):
-        """Create a shell of netCDF file (variables, attributes), without data"""
+        """Create a shell of netCDF file (variables, attributes), without data
+
+        :param str ncfile: file name of netCDF to be made, sans-path (uses **ncpath**)
+        """
         pass
 
     @abstractmethod
     def text2nc(self, filename):
-        """read texts in specific format and put in panda's dataframe, to be put in nc files"""
+        """read texts in specific format and put in panda's dataframe, to be put in nc files
+
+        :param str filename: path+filename of text file to be read (already joined with **logsdir**) 
+        """
         pass
 
     @abstractmethod
     def text2nc_all(self):
-        """Loop through ALL log/text files and put in NC files"""
+        """Loop through ALL log/text files in **logsdir**'s subdirectories and put in NC files"""
         pass
 
     @abstractmethod
@@ -65,7 +72,10 @@ Assume: nc files end in YYYY.nc
         pass
 
     def addNCshell_NC(self, ncfile):
-        """When creating new nc file, at some standard metadata"""
+        """When creating new nc file, at some standard metadata
+
+        :param str ncfile: file name of netCDF to be made, sans-path (uses **ncpath**)
+        """
         lat = ncfile.createVariable('lat', 'f4')
         lat.standard_name = 'latitude'
         lat.long_name = 'latitude'
@@ -89,7 +99,10 @@ Assume: nc files end in YYYY.nc
         return ncfile
 
     def updateNCattrs_single(self, ncName):
-        """on a single file: run when ONLY nc METADATA needs updating, NOT any data"""
+        """on a single file: run when ONLY nc METADATA needs updating, NOT any data
+
+        :param str ncName: file name of netCDF to be made, with path
+        """
         print ncName
         ncfile = Dataset(ncName, 'a', format='NETCDF4')
         #print ncfile.variables.keys()
