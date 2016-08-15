@@ -56,6 +56,10 @@ class NC(object):
         """read texts in specific format and put in panda's dataframe, to be put in nc files
 
         :param str filename: path+filename of text file to be read (already joined with **logsdir**) 
+
+        .. warning: when reading file, before adding to NC. Data prior to :ref:`getLastDateNC` is
+        truncated so previously added data is not duplicated... Should new data contain older
+        data (i.e. filling a gap), this will be truncated as well.
         """
         pass
 
