@@ -42,6 +42,7 @@ extensions = [
 ]
 
 autosummary_generate = True
+autoclass_content='both'
 plantuml = 'java -jar ~/NCobj/docs/plantuml.jar'
 
 # Add any paths that contain templates here, relative to this directory.

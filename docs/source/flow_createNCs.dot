@@ -1,27 +1,18 @@
 digraph Workflow {
   labelloc="t";
-  label="create NetCDFs"
+  label="create NetCDFs from texts"
   compound=true;
   start -> text2nc_all[lhead=cluster__text2nc_all];
   start -> text2nc_append[lhead=cluster__text2nc_append];
-  start -> updateNCattrs_all[lhead=cluster__updateNCattrs_all];
-  start -> updateNCattrs_single;
-  updateNCattrs_single [shape=box,style=filled, color=green];
-
-  subgraph cluster__updateNCattrs_all {
-    label="updateNCattrs_all", shape=box, color=green
-    updateNCattrs_all [style="invis"];
-    updateAll [shape=diamond, label="for each nc file"];
-  }
 
   subgraph cluster__text2nc_all {
-    label="text2nc_all", shape=box, color=yellow, href="#sccoos.SCCOOS.text2nc_all"
+    label="text2nc_all" shape=box color=yellow href="#sccoos.SCCOOS.text2nc_all"
     text2nc_all [style="invis"];
     forall [shape=diamond, label="for each log file"];
   }
 
   subgraph cluster__text2nc_append {
-    label="text2nc_append", shape=box, color=yellow, href="#sccoos.SCCOOS.text2nc_append"
+    label="text2nc_append" shape=box color=yellow href="#sccoos.SCCOOS.text2nc_append"
     text2nc_append [style="invis"];
     getLastNC [shape=box,style=filled, color=green];
     getLastDateNC [ shape=box,style=filled, color=green];
@@ -30,11 +21,10 @@ digraph Workflow {
     getLastDateNC -> foreach;
   }
 
-  updateAll -> updateNCattrs_single;
   forall -> text2nc [lhead=cluster__text2nc];
   foreach -> "pandas.read_csv"[lhead=cluster__text2nc];
   subgraph cluster__text2nc {
-    label="text2nc", color=yellow, shape=box
+    label="text2nc" color=yellow shape=box
     text2nc [style="invis"];
     "pandas.read_csv";
     getLastNC2 [label="getLastNC", shape=box,style=filled, color=green];
@@ -44,7 +34,7 @@ digraph Workflow {
     fileSizeChecker [shape=box, color=green];
 
     subgraph cluster__dataToNC {
-      label="dataToNC", color=green, shape=box
+      label="dataToNC" color=green shape=box
       dataToNC [style="invis"];
       isfile [shape=diamond, label="file exists"];
       isfile -> newNC [label="No"];

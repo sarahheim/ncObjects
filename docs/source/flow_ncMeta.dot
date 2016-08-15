@@ -1,0 +1,18 @@
+digraph Workflow {
+  labelloc="t";
+  label="Update existing NetCDF(s)' metadata"
+  compound=true;
+
+
+  start -> updateAll[lhead=cluster__updateNCattrs_all];
+  start -> updateNCattrs_single;
+  updateNCattrs_single [shape=box,style=filled, color=green];
+
+  subgraph cluster__updateNCattrs_all {
+    label="updateNCattrs_all" shape=box color=green
+    updateNCattrs_all [style="invis"];
+    updateAll [shape=diamond, label="for each nc file"];
+  }
+
+  updateAll -> updateNCattrs_single;
+}

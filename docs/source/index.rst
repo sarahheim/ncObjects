@@ -22,7 +22,9 @@ Notes
 
   .. rubric:: Graphviz Workflow
 
-  .. graphviz:: workflow.dot
+  .. graphviz:: flow_createNCs.dot
+
+  .. graphviz:: flow_ncMeta.dot
 
   .. rubric:: Ex PlantUML
 

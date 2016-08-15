@@ -3,6 +3,7 @@
 # Date create: 2016
 # Description: adjusting to class/objects, parts taken from sass.py
 #
+
 import os, time, subprocess
 from netCDF4 import Dataset
 from abc import ABCMeta, abstractmethod
@@ -14,8 +15,8 @@ class NC(object):
     Its children are 'cdip' and 'sccoos' (grandchildren 'sass' & 'caf')
     
     .. note::
-    Assume: nc files end in YYYY.nc
-    'time' variable in data/ncfile
+        | Assume: nc files end in YYYY.nc
+        | 'time' variable in data/ncfile
     """
     __metaclass__ = ABCMeta
 
@@ -57,9 +58,10 @@ class NC(object):
 
         :param str filename: path+filename of text file to be read (already joined with **logsdir**) 
 
-        .. warning: when reading file, before adding to NC. Data prior to :ref:`getLastDateNC` is
-        truncated so previously added data is not duplicated... Should new data contain older
-        data (i.e. filling a gap), this will be truncated as well.
+        .. warning::
+            When reading file, before adding to NC. Data prior to :func:`nc.NC.getLastDateNC` is
+            truncated so previously added data is not duplicated... Should new data contain older
+            data (i.e. filling a gap), this will be truncated as well.
         """
         pass
 

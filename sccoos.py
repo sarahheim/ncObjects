@@ -3,6 +3,7 @@
 # Date create: 2016
 # Description: adjusting to class/objects, parts taken from sass.py
 #
+
 import os, time, datetime
 import sassqc
 import pandas as pd
@@ -87,8 +88,8 @@ class SASS(SCCOOS):
         """Setting up SASS variables 
 
         .. todo:: 
-        - change ncpath (currently local for testing)
-        - move metadata to external text file(s)?
+            - change ncpath (currently local for testing)
+            - move metadata to external text file(s)?
         """
         super(SASS, self).__init__()
         #print "init sass"
@@ -167,7 +168,7 @@ class SASS(SCCOOS):
     def createNCshell(self, ncfile, sta):
         """
 
-        .. todo:: move createVariables to external text file??
+        .. todo: move createVariables to external text file??
         """
         self.addNCshell_SCCOOS(ncfile)
         print "SASS createNCshell"
@@ -517,19 +518,24 @@ class SASS(SCCOOS):
 class CAF(SCCOOS):
     """Class for SCCOOS's Carlsbad Aqua Farm's burkolator. Currently, log files and netCDFs"""
     def __init__(self):
-        """Setting up CAFF variables
+        """Setting up CAF variables
 
-        .. todo:: change ncpath (currently local for testing)
+        .. todo: change ncpath (currently local for testing)
+
+        .. warning:: 
+            - for text2nc_append: use **CAF_Latest** folder
+            - for text2nc_all: use **CAF_sorted**'s folder/subfolders (i.e.2016)
+              which may need to be syncing/ files copied from CAF_2016 and CAF_Latest
         """
         super(CAF, self).__init__()
         #print "init caf"
         #use this directory for text2nc_append()
-        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_Latest/'
+#        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_Latest/'
 #        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted/2016'
         #use this directory for text2nc_all()
-#        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted'
-#        self.ncpath = '/data/InSitu/SASS/Burkolator/netcdf'
-        self.ncpath = '/home/scheim/NCobj/CAF'
+        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted'
+        self.ncpath = '/data/InSitu/Burkolator/netcdf'
+#        self.ncpath = '/home/scheim/NCobj/CAF'
 #        self.fnformat = "CAF_RTproc_%Y%m%d.dat" #!!!
         self.txtFnPre = 'CAF_RTproc_'
         self.txtFnDatePattern = '%Y%m%d%H%M'
