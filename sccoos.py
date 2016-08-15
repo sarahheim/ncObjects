@@ -530,10 +530,10 @@ class CAF(SCCOOS):
         super(CAF, self).__init__()
         #print "init caf"
         #use this directory for text2nc_append()
-#        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_Latest/'
+        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_Latest/'
 #        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted/2016'
         #use this directory for text2nc_all()
-        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted'
+#        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted'
         self.ncpath = '/data/InSitu/Burkolator/netcdf'
 #        self.ncpath = '/home/scheim/NCobj/CAF'
 #        self.fnformat = "CAF_RTproc_%Y%m%d.dat" #!!!
