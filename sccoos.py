@@ -697,7 +697,11 @@ class CAF(SCCOOS):
         df.columns = map(lambda x: x.replace('\xb5', ''), df.columns)
         #self.attrArr = df.columns
 
-        #!!!Add removal of previously added data
+        ## Get the last time stamp recored in this location's NetCDF file.
+        lastNC = self.getLastNC("CAF-")
+        # Truncate data to only that which is after last recorded time
+        pd_getLastDateNC = pd.to_datetime(self.getLastDateNC(lastNC), unit='s', utc=None)
+        df = df[pd.to_datetime(df.index,utc=None) > pd_getLastDateNC ]
 
         #print df.head()
         #print df.dtypes
