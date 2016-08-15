@@ -6,10 +6,10 @@ digraph Workflow {
 
   start -> updateAll[lhead=cluster__updateNCattrs_all];
   start -> updateNCattrs_single;
-  updateNCattrs_single [shape=box,style=filled, color=green];
+  updateNCattrs_single [shape=box,style=filled, color=yellow, href="#nc.NC.updateNCattrs_single"];
 
   subgraph cluster__updateNCattrs_all {
-    label="updateNCattrs_all" shape=box color=green
+    label="updateNCattrs_all" shape=box color=yellow href="#nc.NC.updateNCattrs_all"
     updateNCattrs_all [style="invis"];
     updateAll [shape=diamond, label="for each nc file"];
   }
