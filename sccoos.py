@@ -747,6 +747,7 @@ class CAF(SCCOOS):
         print "LRnc:", LRnc
         for fn in allFilesArr:
             #print fn
+            # directory contains some other files to ignore
             if '.' not in fn and self.txtFnPre in fn:
                 dtStr = fn.split('_')[-1]
                 #dtEp = time.mktime(time.strptime(dtStr, self.txtFnDatePattern)) #WRONG, tz
@@ -759,7 +760,7 @@ class CAF(SCCOOS):
         preFilesArr.sort()
         postFilesArr.sort()
         print "USE files:"
-        if len(preFilesArr) > 1:
+        if len(preFilesArr) > 0:
             print 'appending from (pre): ', preFilesArr[-1]
             self.text2nc(os.path.join(self.logsdir, self.txtFnPre+preFilesArr[-1]))
         #print postFilesArr
