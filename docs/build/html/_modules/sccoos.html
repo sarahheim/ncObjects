@@ -1,0 +1,971 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sccoos &mdash; Text2NC 2.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Text2NC 2.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="Module code" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Text2NC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <!-- Local TOC -->
+                <div class="local-toc"></div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Text2NC</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Module code</a> &raquo;</li>
+      
+    <li>sccoos</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for sccoos</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Author Sarah Heim</span>
+<span class="c1"># Date create: 2016</span>
+<span class="c1"># Description: adjusting to class/objects, parts taken from sass.py</span>
+<span class="c1">#</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">sassqc</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">netCDF4</span> <span class="k">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">nc</span>
+
+
+<div class="viewcode-block" id="SCCOOS"><a class="viewcode-back" href="../index.html#sccoos.SCCOOS">[docs]</a><span class="k">class</span> <span class="nc">SCCOOS</span><span class="p">(</span><span class="n">nc</span><span class="o">.</span><span class="n">NC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class to be used for SCCOOS related netCDFs&quot;&quot;&quot;</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
+    <span class="c1">#add general SCCOOS metadata</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SCCOOS</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="c1">#print &quot;init sccoos&quot;</span>
+        <span class="c1">##Meta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metaDict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s1">&#39;naming_authority&#39;</span><span class="p">:</span><span class="s1">&#39;sccoos.org&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;acknowledgment&#39;</span><span class="p">:</span><span class="s1">&#39;The Southern California Coastal Ocean Observing System (SCCOOS)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;publisher_name&#39;</span><span class="p">:</span><span class="s1">&#39;Southern California Coastal Ocean Observing System&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;publisher_url&#39;</span><span class="p">:</span><span class="s1">&#39;http://sccoos.org&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;publisher_email&#39;</span><span class="p">:</span><span class="s1">&#39;info@sccoos.org&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;source&#39;</span><span class="p">:</span><span class="s1">&#39;insitu observations&#39;</span>
+            <span class="p">})</span>
+
+<div class="viewcode-block" id="SCCOOS.addNCshell_SCCOOS"><a class="viewcode-back" href="../index.html#sccoos.SCCOOS.addNCshell_SCCOOS">[docs]</a>    <span class="k">def</span> <span class="nf">addNCshell_SCCOOS</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ncfile</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addNCshell_NC</span><span class="p">(</span><span class="n">ncfile</span><span class="p">)</span></div>
+       <span class="c1"># print &quot;addNCshell_SCCOOS&quot;</span>
+
+<div class="viewcode-block" id="SCCOOS.getLastNC"><a class="viewcode-back" href="../index.html#sccoos.SCCOOS.getLastNC">[docs]</a>    <span class="k">def</span> <span class="nf">getLastNC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;look at all nc file names and get last year&quot;&quot;&quot;</span>
+        <span class="n">ncFilesArr</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ncpath</span><span class="p">)</span>
+        <span class="n">ncYrsArr</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">nc</span> <span class="ow">in</span> <span class="n">ncFilesArr</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">):</span>
+                <span class="n">ncYr</span> <span class="o">=</span> <span class="n">nc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">ncYrsArr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ncYr</span><span class="p">)</span>
+        <span class="n">ncYrsArr</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ncYrsArr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ncpath</span><span class="p">,</span><span class="n">prefix</span><span class="o">+</span><span class="n">ncYrsArr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;.nc&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+        <span class="c1">##First assume lastest netCDF file is this year</span>
+        <span class="c1">#thisYr = time.strftime(&#39;%Y&#39;)</span>
+        <span class="c1">#lastNC = os.path.join(self.ncpath,prefix+thisYr+&#39;.nc&#39;)</span>
+        <span class="c1">##If this year&#39;s nc file doesn&#39;t exist, get last year</span>
+        <span class="c1">#if not os.path.isfile(lastNC):</span>
+        <span class="c1">#    prevYr = str(int(thisYr)-1)</span>
+        <span class="c1">#    lastNC = os.path.join(self.ncpath,prefix+prevYr+&#39;.nc&#39;)</span>
+        <span class="c1">#    ###Error if current or last year&#39;s nc&#39;s don&#39;t exist</span>
+        <span class="c1">#    #if not os.path.isfile(lastNC):</span>
+        <span class="c1">#return lastNC</span>
+
+<div class="viewcode-block" id="SCCOOS.getLastDateNC"><a class="viewcode-back" href="../index.html#sccoos.SCCOOS.getLastDateNC">[docs]</a>    <span class="k">def</span> <span class="nf">getLastDateNC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ncFilename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read a netCDF file and return the lastest time value in epoch/seconds</span>
+
+<span class="sd">        :param str ncFilename: path of netCDF file</span>
+<span class="sd">        :returns: latest time value in epoch/seconds</span>
+<span class="sd">        :rtype: number (``float``), change to ``int``?</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ncFilename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ncFilename</span><span class="p">):</span>
+	<span class="c1"># open netCDF file for reading.</span>
+            <span class="n">ncfile</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">ncFilename</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            <span class="c1"># read the last unix timestamp in variable named &#39;time&#39;.</span>
+            <span class="n">unixtime</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">:][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># close the NetCDF file</span>
+            <span class="n">ncfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#unixtime = [1356998400] # 2013-01-01 00:00:00 UTC</span>
+            <span class="n">unixtime</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1">#return pd.to_datetime(unixtime, unit=&#39;s&#39;, utc=None)[0].isoformat()</span>
+        <span class="k">return</span> <span class="n">unixtime</span></div></div>
+
+<div class="viewcode-block" id="SASS"><a class="viewcode-back" href="../index.html#sccoos.SASS">[docs]</a><span class="k">class</span> <span class="nc">SASS</span><span class="p">(</span><span class="n">SCCOOS</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for SCCOOS&#39;s Automated Shore Stations. Currently, log files and netCDFs&quot;&quot;&quot;</span>
+    <span class="c1">#set SASS metadata</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Setting up SASS variables </span>
+
+<span class="sd">        .. todo:: </span>
+<span class="sd">            - change ncpath (currently local for testing)</span>
+<span class="sd">            - move metadata to external text file(s)?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SASS</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="c1">#print &quot;init sass&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logsdir</span> <span class="o">=</span> <span class="s1">r&#39;/data/InSitu/SASS/data/&#39;</span>
+<span class="c1">#        self.ncpath = &#39;/data/InSitu/SASS/netcdfs/&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ncpath</span> <span class="o">=</span> <span class="s1">&#39;/home/scheim/NCobj/SASS&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">txtFnformat</span> <span class="o">=</span> <span class="s2">&quot;%Y-%m/data-%Y%m</span><span class="si">%d</span><span class="s2">.dat&quot;</span> <span class="c1">#!!! Where is this used?</span>
+
+<span class="c1">#        self.columns = [&#39;server_date&#39;, &#39;ip&#39;, &#39;temperature&#39;, &#39;conductivity&#39;, &#39;pressure&#39;, &#39;aux1&#39;,</span>
+<span class="c1">#                   &#39;aux3&#39;, &#39;chlorophyll&#39;, &#39;aux4&#39;, &#39;salinity&#39;, &#39;date&#39;,</span>
+<span class="c1">#                   &#39;time&#39;, &#39;sigmat&#39;, &#39;diagnosticVoltage&#39;, &#39;currentDraw&#39;]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">staMeta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;stearns_wharf&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;loc&#39;</span><span class="p">:</span> <span class="s1">&#39;stearns_wharf&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;loc_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Stearns Wharf&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;lat&#39;</span><span class="p">:</span> <span class="mf">34.408</span><span class="p">,</span>
+                    <span class="s1">&#39;lon&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">119.685</span><span class="p">,</span>
+                    <span class="s1">&#39;depth&#39;</span><span class="p">:</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;http://msi.ucsb.edu/&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;inst&#39;</span><span class="p">:</span> <span class="s1">&#39;Marine Science Institute at University of California, Santa Barbara&#39;</span><span class="p">},</span>
+           <span class="s1">&#39;newport_pier&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;loc&#39;</span><span class="p">:</span> <span class="s1">&#39;newport_pier&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;loc_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Newport Pier&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;lat&#39;</span><span class="p">:</span> <span class="mf">33.6061</span><span class="p">,</span>
+                   <span class="s1">&#39;lon&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">117.9311</span><span class="p">,</span>
+                   <span class="s1">&#39;depth&#39;</span><span class="p">:</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;http://uci.edu/&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;inst&#39;</span><span class="p">:</span> <span class="s1">&#39;University of California, Irvine&#39;</span><span class="p">},</span>
+           <span class="s1">&#39;santa_monica_pier&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;loc&#39;</span><span class="p">:</span> <span class="s1">&#39;santa_monica_pier&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;loc_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Santa Monica Pier&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;lat&#39;</span><span class="p">:</span> <span class="mf">34.008</span><span class="p">,</span>
+                    <span class="s1">&#39;lon&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">118.499</span><span class="p">,</span>
+                    <span class="s1">&#39;depth&#39;</span><span class="p">:</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;http://environment.ucla.edu/&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;inst&#39;</span><span class="p">:</span> <span class="s1">&#39;Institute of the Environment at the University of California, Los Angeles&#39;</span><span class="p">},</span>
+           <span class="s1">&#39;scripps_pier&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;loc&#39;</span><span class="p">:</span> <span class="s1">&#39;scripps_pier&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;loc_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Scripps Pier&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;lat&#39;</span><span class="p">:</span> <span class="mf">32.867</span><span class="p">,</span>
+                    <span class="s1">&#39;lon&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">117.257</span><span class="p">,</span>
+                    <span class="s1">&#39;depth&#39;</span><span class="p">:</span> <span class="s1">&#39;5&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;https://sccoos.org/&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;inst&#39;</span><span class="p">:</span> <span class="s1">&#39;Southern California Coastal Ocean Observing System (SCCOOS) at Scripps Institution of Oceanography (SIO)&#39;</span><span class="p">}}</span>
+
+        <span class="c1"># IP Address of Shorestations, connecting to appropriate self.staMeta dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ips</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;166.148.81.45&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">staMeta</span><span class="p">[</span><span class="s1">&#39;stearns_wharf&#39;</span><span class="p">],</span>
+       <span class="s1">&#39;166.241.139.252&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">staMeta</span><span class="p">[</span><span class="s1">&#39;newport_pier&#39;</span><span class="p">],</span>
+       <span class="s1">&#39;166.241.175.135&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">staMeta</span><span class="p">[</span><span class="s1">&#39;santa_monica_pier&#39;</span><span class="p">],</span>
+       <span class="s1">&#39;132.239.117.226&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">staMeta</span><span class="p">[</span><span class="s1">&#39;scripps_pier&#39;</span><span class="p">],</span>
+       <span class="s1">&#39;172.16.117.233&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">staMeta</span><span class="p">[</span><span class="s1">&#39;scripps_pier&#39;</span><span class="p">]}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">attrArr</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;temperature&#39;</span><span class="p">,</span> <span class="s1">&#39;conductivity&#39;</span><span class="p">,</span> <span class="s1">&#39;pressure&#39;</span><span class="p">,</span> <span class="s1">&#39;aux1&#39;</span><span class="p">,</span> <span class="s1">&#39;aux3&#39;</span><span class="p">,</span> <span class="s1">&#39;chlorophyll&#39;</span><span class="p">,</span>  <span class="c1"># NOT INCLUDING &#39;time&#39;</span>
+           <span class="s1">&#39;conductivity_flagPrimary&#39;</span><span class="p">,</span> <span class="s1">&#39;conductivity_flagSecondary&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;pressure_flagPrimary&#39;</span><span class="p">,</span> <span class="s1">&#39;pressure_flagSecondary&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;salinity_flagPrimary&#39;</span><span class="p">,</span> <span class="s1">&#39;salinity_flagSecondary&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;chlorophyll_flagPrimary&#39;</span><span class="p">,</span> <span class="s1">&#39;chlorophyll_flagSecondary&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metaDict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="c1">##Meta</span>
+            <span class="s1">&#39;metadata_link&#39;</span><span class="p">:</span><span class="s1">&#39;www.sccoos.org.progress/data-products/automateed-shore-stations/&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;summary&#39;</span><span class="p">:</span><span class="s1">&#39;Automated shore station with a suite of sensors that are &#39;</span> <span class="o">+</span>\
+            <span class="s1">&#39;attached to piers along the nearshore California coast. &#39;</span> <span class="o">+</span> \
+            <span class="s1">&#39;These automated sensors measure temperature, salinity, chlorophyll, turbidity &#39;</span> <span class="o">+</span> \
+            <span class="s1">&#39;and water level at frequent intervals in the nearshore coastal ocean.&#39;</span> <span class="o">+</span>\
+            <span class="s1">&#39;This data can provide local and regional information on mixing and upwelling, &#39;</span> <span class="o">+</span>\
+            <span class="s1">&#39;land run-off, and algal blooms.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;keywords&#39;</span><span class="p">:</span><span class="s1">&#39;EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY,  OCEAN CHEMISTRY,&#39;</span> <span class="o">+</span>\
+            <span class="s1">&#39; CHLOROPHYLL, OCEAN TEMPERATURE, WATER TEMPERATURE, OCEAN PRESSURE, WATER PRESSURE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;project&#39;</span><span class="p">:</span><span class="s1">&#39;Automated Shore Stations&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;processing_level&#39;</span><span class="p">:</span><span class="s1">&#39;QA/QC have been performed&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;cdm_data_type&#39;</span><span class="p">:</span><span class="s1">&#39;Station&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;geospatial_lat_resolution&#39;</span><span class="p">:</span><span class="s1">&#39;2.77E-4&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;geospatial_lon_resolution&#39;</span><span class="p">:</span><span class="s1">&#39;2.77E-4&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;geospatial_vertical_units&#39;</span><span class="p">:</span><span class="s1">&#39;m&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;geospatial_vertical_resolution&#39;</span><span class="p">:</span><span class="s1">&#39;1&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;geospatial_vertical_positive&#39;</span><span class="p">:</span><span class="s1">&#39;down&#39;</span>
+            <span class="p">}</span>
+
+<div class="viewcode-block" id="SASS.createNCshell"><a class="viewcode-back" href="../index.html#sccoos.SASS.createNCshell">[docs]</a>    <span class="k">def</span> <span class="nf">createNCshell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ncfile</span><span class="p">,</span> <span class="n">sta</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        .. todo: move createVariables to external text file??</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addNCshell_SCCOOS</span><span class="p">(</span><span class="n">ncfile</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;SASS createNCshell&quot;</span>
+        <span class="n">ncfile</span><span class="o">.</span><span class="n">setncatts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaDict</span><span class="p">)</span>
+        <span class="c1">#Move to NC/SCCOOS class???</span>
+        <span class="n">flagPrim_flag_values</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span> <span class="c1"># 1UB, 2UB, 3UB, 4UB, 9UB ;</span>
+        <span class="n">flagPrim_flag_meanings</span> <span class="o">=</span> <span class="s1">&#39;GOOD_DATA UNKNOWN SUSPECT BAD_DATA MISSING&#39;</span>
+        <span class="n">flagSec_flag_values</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span> <span class="c1"># 1UB, 2UB, 3UB, 4UB, 9UB ;</span>
+        <span class="n">flagSec_flag_meanings</span> <span class="o">=</span> <span class="s1">&#39;UNSPECIFIED RANGE FLAT_LINE SPIKE&#39;</span>
+
+        <span class="c1"># Create Dimensions</span>
+        <span class="c1"># unlimited axis (can be appended to).</span>
+        <span class="n">time_dim</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createDimension</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">name_dim</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createDimension</span><span class="p">(</span><span class="s1">&#39;name_strlen&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+
+        <span class="c1">#Create Variables</span>
+        <span class="n">time_var</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span>
+            <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># int64? Gives error</span>
+        <span class="c1"># time_var.setncattr({&#39;standard_name&#39;:&#39;time&#39;, &#39;long_name&#39;: &#39;time&#39;, &#39;units&#39;:&#39;seconds since 1970-01-01 00:00:00 UTC&#39;})</span>
+        <span class="n">time_var</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;time&#39;</span>
+        <span class="n">time_var</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;seconds since 1970-01-01 00:00:00 UTC&#39;</span>
+        <span class="n">time_var</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;time&#39;</span>
+        <span class="n">time_var</span><span class="o">.</span><span class="n">calendar</span> <span class="o">=</span> <span class="s1">&#39;julian&#39;</span>
+        <span class="n">time_var</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="s2">&quot;T&quot;</span>
+        <span class="n">temperature</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;temperature&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">temperature</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;sea_water_temperature&#39;</span>
+        <span class="n">temperature</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water temperature&#39;</span>
+        <span class="n">temperature</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;celsius&#39;</span>
+        <span class="n">temperature</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;time lat lon depth&#39;</span>
+        <span class="n">temperature</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s2">&quot;instrument1&quot;</span>
+        <span class="n">temperature_flagPrim</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span>
+            <span class="s1">&#39;temperature_flagPrimary&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">temperature_flagPrim</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water temperature, qc primary flag&#39;</span>
+        <span class="n">temperature_flagPrim</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s2">&quot;sea_water_temperature status_flag&quot;</span>
+        <span class="n">temperature_flagPrim</span><span class="o">.</span><span class="n">flag_values</span> <span class="o">=</span> <span class="n">flagPrim_flag_values</span>
+        <span class="n">temperature_flagPrim</span><span class="o">.</span><span class="n">flag_meanings</span> <span class="o">=</span> <span class="n">flagPrim_flag_meanings</span>
+        <span class="n">temperature_flagSec</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span>
+            <span class="s1">&#39;temperature_flagSecondary&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">temperature_flagSec</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water temperature, qc secondary flag&#39;</span>
+        <span class="n">temperature_flagSec</span><span class="o">.</span><span class="n">flag_values</span> <span class="o">=</span> <span class="n">flagSec_flag_values</span>
+        <span class="n">temperature_flagSec</span><span class="o">.</span><span class="n">flag_meanings</span> <span class="o">=</span> <span class="n">flagSec_flag_meanings</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;conductivity&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">con</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;sea_water_electrical_conductivity&#39;</span>
+        <span class="n">con</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water electrical conductivity&#39;</span>
+        <span class="n">con</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;S/m&#39;</span>
+        <span class="n">con</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;time lat lon depth&#39;</span>
+        <span class="n">con</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s2">&quot;instrument1&quot;</span>
+        <span class="n">con_flagPrim</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span>
+            <span class="s1">&#39;conductivity_flagPrimary&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">con_flagPrim</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water electrical conductivity, qc primary flag&#39;</span>
+        <span class="n">con_flagPrim</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s2">&quot;sea_water_electrical_conductivity status_flag&quot;</span>
+        <span class="n">con_flagPrim</span><span class="o">.</span><span class="n">flag_values</span> <span class="o">=</span> <span class="n">flagPrim_flag_values</span>
+        <span class="n">con_flagPrim</span><span class="o">.</span><span class="n">flag_meanings</span> <span class="o">=</span> <span class="n">flagPrim_flag_meanings</span>
+        <span class="n">con_flagSec</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span>
+            <span class="s1">&#39;conductivity_flagSecondary&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">con_flagSec</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water electrical conductivity, qc secondary flag&#39;</span>
+        <span class="n">con_flagSec</span><span class="o">.</span><span class="n">flag_values</span> <span class="o">=</span> <span class="n">flagSec_flag_values</span>
+        <span class="n">con_flagSec</span><span class="o">.</span><span class="n">flag_meanings</span> <span class="o">=</span> <span class="n">flagSec_flag_meanings</span>
+        <span class="n">pres</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;pressure&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">pres</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;sea_water_pressure&#39;</span>
+        <span class="n">pres</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water pressure&#39;</span>
+        <span class="n">pres</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;dbar&#39;</span>
+        <span class="n">pres</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;time lat lon depth&#39;</span>
+        <span class="n">pres</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s2">&quot;instrument1&quot;</span>
+        <span class="n">pres_flagPrim</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span>
+            <span class="s1">&#39;pressure_flagPrimary&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">pres_flagPrim</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water pressure, qc primary flag&#39;</span>
+        <span class="n">pres_flagPrim</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s2">&quot;sea_water_pressure status_flag&quot;</span>
+        <span class="n">pres_flagPrim</span><span class="o">.</span><span class="n">flag_values</span> <span class="o">=</span> <span class="n">flagPrim_flag_values</span>
+        <span class="n">pres_flagPrim</span><span class="o">.</span><span class="n">flag_meanings</span> <span class="o">=</span> <span class="n">flagPrim_flag_meanings</span>
+        <span class="n">pres_flagSec</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span>
+            <span class="s1">&#39;pressure_flagSecondary&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">pres_flagSec</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water pressure, qc secondary flag&#39;</span>
+        <span class="n">pres_flagSec</span><span class="o">.</span><span class="n">flag_values</span> <span class="o">=</span> <span class="n">flagSec_flag_values</span>
+        <span class="n">pres_flagSec</span><span class="o">.</span><span class="n">flag_meanings</span> <span class="o">=</span> <span class="n">flagSec_flag_meanings</span>
+        <span class="n">a1</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;aux1&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">a1</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;Auxiliary 1&#39;</span>  <span class="c1"># Use Standard name for 1,3,4???</span>
+        <span class="n">a1</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;V&#39;</span>
+        <span class="n">a1</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;time lat lon depth&#39;</span>
+        <span class="n">a3</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;aux3&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">a3</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;Auxiliary 3&#39;</span>
+        <span class="n">a3</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;V&#39;</span>
+        <span class="n">a3</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;time lat lon depth&#39;</span>
+        <span class="n">chl</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;chlorophyll&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">chl</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;mass_concentration_of_chlorophyll_a_in_sea_water&#39;</span>
+        <span class="n">chl</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water chlorophyll&#39;</span>
+        <span class="n">chl</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;ug/L&#39;</span>  <span class="c1"># which CF name??</span>
+        <span class="n">chl</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;time lat lon depth&#39;</span>
+        <span class="n">chl</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s2">&quot;instrument1&quot;</span>
+        <span class="n">chl_flagPrim</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span>
+            <span class="s1">&#39;chlorophyll_flagPrimary&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">chl_flagPrim</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water chlorophyll, qc primary flag&#39;</span>
+        <span class="n">chl_flagPrim</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s2">&quot;mass_concentration_of_chlorophyll_a_in_sea_water status_flag&quot;</span>
+        <span class="n">chl_flagPrim</span><span class="o">.</span><span class="n">flag_values</span> <span class="o">=</span> <span class="n">flagPrim_flag_values</span>
+        <span class="n">chl_flagPrim</span><span class="o">.</span><span class="n">flag_meanings</span> <span class="o">=</span> <span class="n">flagPrim_flag_meanings</span>
+        <span class="n">chl_flagSec</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span>
+            <span class="s1">&#39;chlorophyll_flagSecondary&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">chl_flagSec</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water chlorophyll, qc secondary flag&#39;</span>
+        <span class="n">chl_flagSec</span><span class="o">.</span><span class="n">flag_values</span> <span class="o">=</span> <span class="n">flagSec_flag_values</span>
+        <span class="n">chl_flagSec</span><span class="o">.</span><span class="n">flag_meanings</span> <span class="o">=</span> <span class="n">flagSec_flag_meanings</span>
+        <span class="n">a4</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;aux4&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">a4</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;Auxiliary 4&#39;</span>
+        <span class="n">a4</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;V&#39;</span>
+        <span class="n">a4</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;time lat lon depth&#39;</span>
+        <span class="n">sal</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;salinity&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">sal</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;sea_water_salinity&#39;</span>
+        <span class="n">sal</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water salinity&#39;</span>
+        <span class="n">sal</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;1e-3&#39;</span> <span class="c1">#not psu??</span>
+        <span class="n">sal</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;time lat lon depth&#39;</span>
+        <span class="n">sal</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s2">&quot;instrument1&quot;</span>
+        <span class="n">sal_flagPrim</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span>
+            <span class="s1">&#39;salinity_flagPrimary&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">sal_flagPrim</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water salinity, qc primary flag&#39;</span>
+        <span class="n">sal_flagPrim</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s2">&quot;sea_water_practical_salinity status_flag&quot;</span>
+        <span class="n">sal_flagPrim</span><span class="o">.</span><span class="n">flag_values</span> <span class="o">=</span> <span class="n">flagPrim_flag_values</span>
+        <span class="n">sal_flagPrim</span><span class="o">.</span><span class="n">flag_meanings</span> <span class="o">=</span> <span class="n">flagPrim_flag_meanings</span>
+        <span class="n">sal_flagSec</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span>
+            <span class="s1">&#39;salinity_flagSecondary&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">sal_flagSec</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water salinity, qc secondary flag&#39;</span>
+        <span class="n">sal_flagSec</span><span class="o">.</span><span class="n">flag_values</span> <span class="o">=</span> <span class="n">flagSec_flag_values</span>
+        <span class="n">sal_flagSec</span><span class="o">.</span><span class="n">flag_meanings</span> <span class="o">=</span> <span class="n">flagSec_flag_meanings</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;sigmat&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">sig</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;sea_water_density&#39;</span>
+        <span class="n">sig</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water density&#39;</span>
+        <span class="n">sig</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;kg/m^3&#39;</span>
+        <span class="n">sig</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;time lat lon depth&#39;</span>
+        <span class="n">dV</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;diagnosticVoltage&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">dV</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;diagnostic voltage&#39;</span>  <span class="c1"># NO standard name???</span>
+        <span class="n">dV</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;V&#39;</span>
+        <span class="n">dV</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;time lat lon depth&#39;</span>
+        <span class="n">cDr</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;currentDraw&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">cDr</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;current draw&#39;</span>  <span class="c1"># NO standard name???</span>
+        <span class="n">cDr</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;mA&#39;</span>
+        <span class="n">cDr</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;time lat lon depth&#39;</span>
+
+        <span class="n">ncfile</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">staMeta</span><span class="p">[</span><span class="n">sta</span><span class="p">][</span><span class="s1">&#39;lat&#39;</span><span class="p">]</span>
+        <span class="n">ncfile</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">staMeta</span><span class="p">[</span><span class="n">sta</span><span class="p">][</span><span class="s1">&#39;lon&#39;</span><span class="p">]</span>
+        <span class="n">ncfile</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">staMeta</span><span class="p">[</span><span class="n">sta</span><span class="p">][</span><span class="s1">&#39;depth&#39;</span><span class="p">]</span>
+
+        <span class="c1">#What is this for???</span>
+        <span class="n">nm</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;station&#39;</span><span class="p">,</span> <span class="s1">&#39;S1&#39;</span><span class="p">,</span> <span class="s1">&#39;name_strlen&#39;</span><span class="p">)</span>
+        <span class="n">nm</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;station_name&#39;</span>
+        <span class="n">nm</span><span class="o">.</span><span class="n">cf_role</span> <span class="o">=</span> <span class="s1">&#39;timeseries_id&#39;</span>
+<span class="c1">#        ncfile.variables[&#39;station&#39;][:len(ips[ip][&#39;loc&#39;])] = list(ips[ip][&#39;loc&#39;])</span>
+        <span class="n">ncfile</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;station&#39;</span><span class="p">][:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">staMeta</span><span class="p">[</span><span class="n">sta</span><span class="p">][</span><span class="s1">&#39;loc&#39;</span><span class="p">])]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">staMeta</span><span class="p">[</span><span class="n">sta</span><span class="p">][</span><span class="s1">&#39;loc&#39;</span><span class="p">])</span>
+
+        <span class="n">crs</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;crs&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="n">crs</span><span class="o">.</span><span class="n">grid_mapping_name</span> <span class="o">=</span> <span class="s2">&quot;latitude_longitude&quot;</span><span class="p">;</span>
+        <span class="n">crs</span><span class="o">.</span><span class="n">epsg_code</span> <span class="o">=</span> <span class="s2">&quot;EPSG:4326&quot;</span> <span class="p">;</span>
+        <span class="n">crs</span><span class="o">.</span><span class="n">semi_major_axis</span> <span class="o">=</span> <span class="mf">6378137.0</span> <span class="p">;</span>
+        <span class="n">crs</span><span class="o">.</span><span class="n">inverse_flattening</span> <span class="o">=</span> <span class="mf">298.257223563</span> <span class="p">;</span>
+
+        <span class="n">instrument1</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;instrument1&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">)</span>
+        <span class="n">instrument1</span><span class="o">.</span><span class="n">make</span> <span class="o">=</span> <span class="s2">&quot;Seabird&quot;</span>
+        <span class="n">instrument1</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="s2">&quot;SBE 16plus SEACAT&quot;</span>
+        <span class="n">instrument1</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s2">&quot;Seabird SBE 16plus SEACAT Conductivity, Temperature, and Pressure recorder. Derived output Salinity.&quot;</span>
+
+        <span class="n">instrument2</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;instrument2&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">)</span>
+        <span class="n">instrument2</span><span class="o">.</span><span class="n">make</span> <span class="o">=</span> <span class="s2">&quot;Seapoint&quot;</span>
+        <span class="n">instrument2</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="s2">&quot;Chlorophyll Fluorometer&quot;</span>
+        <span class="n">instrument2</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s2">&quot;Seapoint Chlorophyll Fluorometer with a 0-50 ug/L gain setting.&quot;</span>
+
+        <span class="k">return</span> <span class="n">ncfile</span></div>
+
+<div class="viewcode-block" id="SASS.text2nc"><a class="viewcode-back" href="../index.html#sccoos.SASS.text2nc">[docs]</a>    <span class="k">def</span> <span class="nf">text2nc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;#previously dataframe2nc</span>
+<span class="sd">        - Uses Panda&#39;s ``read_csv``</span>
+<span class="sd">        - Does a series of regular expressions (a.k.a. regex)</span>
+<span class="sd">        - Uses QC methods from **sassqc**</span>
+
+<span class="sd">        .. warning: sassqc getting ``SettingWithCopyWarning``?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;server_date&#39;</span><span class="p">,</span> <span class="s1">&#39;ip&#39;</span><span class="p">,</span> <span class="s1">&#39;temperature&#39;</span><span class="p">,</span> <span class="s1">&#39;conductivity&#39;</span><span class="p">,</span> <span class="s1">&#39;pressure&#39;</span><span class="p">,</span> <span class="s1">&#39;aux1&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;aux3&#39;</span><span class="p">,</span> <span class="s1">&#39;chlorophyll&#39;</span><span class="p">,</span> <span class="s1">&#39;aux4&#39;</span><span class="p">,</span> <span class="s1">&#39;salinity&#39;</span><span class="p">,</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;sigmat&#39;</span><span class="p">,</span> <span class="s1">&#39;diagnosticVoltage&#39;</span><span class="p">,</span> <span class="s1">&#39;currentDraw&#39;</span><span class="p">]</span>
+
+        <span class="nb">print</span> <span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="n">filename</span> <span class="c1">#for testing!!!</span>
+        <span class="c1"># Create pandas dataframe from file</span>
+        <span class="c1">#print time.strftime(&quot;%c&quot;),</span>
+
+        <span class="c1"># Read file line by line into a pnadas dataframe</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;^&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">,</span><span class="n">error_bad_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Prepare a regex statement to parse the data out of each line</span>
+        <span class="n">re_Y</span> <span class="o">=</span> <span class="s1">r&#39;[1-2]\d</span><span class="si">{3}</span><span class="s1">&#39;</span> <span class="c1"># Year</span>
+        <span class="n">re_d</span> <span class="o">=</span> <span class="s1">r&#39;[0-3]\d&#39;</span> <span class="c1"># Days in Month</span>
+        <span class="n">re_b</span> <span class="o">=</span> <span class="s1">r&#39;[A-S][a-u][b-y]&#39;</span> <span class="c1"># Month as abbreviated name</span>
+        <span class="n">re_time</span> <span class="o">=</span> <span class="s1">r&#39;[0-2]\d:[0-5]\d:[0-5]\d&#39;</span>
+        <span class="n">re_s</span> <span class="o">=</span> <span class="s1">r&#39;(?:,?#?\s+|,)&#39;</span> <span class="c1"># delimiter: space with optional comma, optional pound; or comma alone</span>
+        <span class="n">re_serverdate</span> <span class="o">=</span> <span class="s1">r&#39;^(&#39;</span><span class="o">+</span><span class="n">re_Y</span><span class="o">+</span><span class="s1">r&#39;-[0-1]\d-&#39;</span><span class="o">+</span><span class="n">re_d</span><span class="o">+</span><span class="s1">&#39;T&#39;</span><span class="o">+</span><span class="n">re_time</span><span class="o">+</span><span class="s1">&#39;Z)&#39;</span> <span class="c1"># server date</span>
+        <span class="n">re_ip</span> <span class="o">=</span> <span class="s1">r&#39;(\d{2,3}\.\d{2,3}\.\d{2,3}\.\d{2,3})&#39;</span> <span class="c1"># ip address ending in &#39;,# &#39;</span>
+        <span class="n">re_attr</span> <span class="o">=</span> <span class="s1">r&#39;(\d+\.?\d*)&#39;</span> <span class="c1"># attribute number with optional decimal</span>
+        <span class="n">re_date</span> <span class="o">=</span> <span class="s1">&#39;(&#39;</span><span class="o">+</span><span class="n">re_d</span><span class="o">+</span><span class="n">re_s</span><span class="o">+</span><span class="n">re_b</span><span class="o">+</span><span class="n">re_s</span><span class="o">+</span><span class="n">re_Y</span><span class="o">+</span><span class="s1">&#39;)&#39;</span> <span class="c1"># date with Mon spelled/abbreviated</span>
+        <span class="n">re_attr8</span> <span class="o">=</span> <span class="n">re_s</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">re_attr</span><span class="p">]</span><span class="o">*</span><span class="mi">8</span><span class="p">)</span> <span class="c1"># 8 consecutive attribute, separated by delimiter</span>
+        <span class="n">re_attr3</span> <span class="o">=</span> <span class="n">re_s</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">re_attr</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># 3 consecutive attribute, separated by delimiter</span>
+        <span class="n">regex</span> <span class="o">=</span> <span class="n">re_serverdate</span><span class="o">+</span><span class="n">re_s</span><span class="o">+</span><span class="n">re_ip</span><span class="o">+</span><span class="n">re_s</span><span class="o">+</span><span class="n">re_attr8</span><span class="o">+</span><span class="n">re_s</span><span class="o">+</span><span class="n">re_date</span><span class="o">+</span><span class="n">re_s</span><span class="o">+</span><span class="s1">&#39;(&#39;</span><span class="o">+</span><span class="n">re_time</span><span class="o">+</span><span class="s1">&#39;)&#39;</span><span class="o">+</span><span class="n">re_s</span><span class="o">+</span><span class="n">re_attr3</span><span class="o">+</span><span class="s1">r&#39;$&#39;</span>
+
+        <span class="c1"># Split data into proper columns</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">X0</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">regex</span><span class="p">)</span>
+        <span class="c1"># Drop any rows with NaN</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+        <span class="c1"># Set column names</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span>
+        <span class="c1"># Set date_time to pandas datetime format</span>
+        <span class="n">dateformat</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> %b %Y %H:%M:%S&quot;</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;date_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">date</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="n">df</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">dateformat</span><span class="p">,</span> <span class="n">utc</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># Make date_time an index</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;date_time&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Drop columna that were merged</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Make sure data are type float</span>
+        <span class="c1"># (For some unknown reason we had to do this in 2 statements)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="s1">&#39;temperature&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="s1">&#39;temperature&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">3</span><span class="p">:</span><span class="mi">13</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">3</span><span class="p">:</span><span class="mi">13</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="c1"># Force index to be a datetime. For some reason this needs to be done</span>
+        <span class="c1"># Ex. data-20140610.dat only works when this is done.</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+<span class="c1">#        print df.head()</span>
+<span class="c1">#        print df.shape</span>
+<span class="c1">#        print df.describe()</span>
+
+        <span class="n">grouped</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;ip&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ip</span> <span class="ow">in</span> <span class="n">grouped</span><span class="o">.</span><span class="n">indices</span><span class="p">:</span>
+ <span class="c1">#           print ip</span>
+            <span class="n">df2</span> <span class="o">=</span> <span class="n">grouped</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ips</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">loc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ips</span><span class="p">[</span><span class="n">ip</span><span class="p">][</span><span class="s1">&#39;loc&#39;</span><span class="p">]</span>
+ <span class="c1">#               print ip, loc</span>
+ <span class="c1">#               print df2.shape</span>
+
+<span class="c1">#        ##NOT working, from Darren&#39;s dat2nc.py</span>
+<span class="c1">#        for ip in self.ips.keys():</span>
+<span class="c1">#            #print ip</span>
+<span class="c1">#            #print df.ip</span>
+<span class="c1">#            #tmp = df.where(df.ip == ip)</span>
+<span class="c1">#            #print tmp.shape</span>
+<span class="c1">#            if ip in df.ip.values:</span>
+<span class="c1">#                df2 = df.where(df.ip == ip).dropna() # Remove all possible lines with NaN</span>
+
+                <span class="n">df2</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df2</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tz_localize</span><span class="p">(</span><span class="s1">&#39;UTC&#39;</span><span class="p">)</span> <span class="c1">#timezone, why?</span>
+
+                <span class="c1"># Get proper column names for this station&#39;s dataframe.</span>
+                <span class="n">archive_file_name</span> <span class="o">=</span> <span class="s1">&#39;sass_&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">ips</span><span class="p">[</span><span class="n">ip</span><span class="p">][</span><span class="s1">&#39;loc&#39;</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;_archive.csv&#39;</span>
+                <span class="c1">#archive_file = os.path.join(codedir, archive_file_name)</span>
+                <span class="n">archive_file</span> <span class="o">=</span> <span class="n">archive_file_name</span>
+                <span class="n">df2_col</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">archive_file</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">error_bad_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                     <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">infer_datetime_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">skipinitialspace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                     <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="c1">#print df2_col.describe()</span>
+                <span class="c1">#print df2.shape</span>
+                <span class="c1">#print df2.index[0]</span>
+                <span class="c1"># Find column names to use in archive based on current dataframe&#39;s date_time index</span>
+                <span class="n">col_names</span> <span class="o">=</span> <span class="n">df2_col</span><span class="p">[:</span><span class="n">df2</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="c1"># Remove date and time columns</span>
+                <span class="n">col_names</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;date&#39;</span><span class="p">)</span>
+                <span class="n">col_names</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">)</span>
+                <span class="c1"># Set correct columns names for current dataframe</span>
+                <span class="n">df2</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">col_names</span>
+
+                <span class="c1"># Scale chlorophyll</span>
+                <span class="c1">#df2[&#39;chlorophyll&#39;] = df2[&#39;chlorophyll&#39;] * 10.0 #SettingWithCopyWarning</span>
+                <span class="c1">#df2.loc[:,&#39;chlorophyll&#39;] = df2.loc[:,&#39;chlorophyll&#39;] * 10.0</span>
+                <span class="n">df2</span><span class="p">[</span><span class="s1">&#39;chlorophyll&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">*</span><span class="mi">10</span><span class="p">)</span>
+
+                <span class="c1"># Apply QC tests</span>
+                <span class="n">df3</span> <span class="o">=</span> <span class="n">sassqc</span><span class="o">.</span><span class="n">qc_tests</span><span class="p">(</span><span class="n">df2</span><span class="p">)</span>
+
+                <span class="c1"># Get location name from ip</span>
+                <span class="n">loc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ips</span><span class="p">[</span><span class="n">ip</span><span class="p">][</span><span class="s1">&#39;loc&#39;</span><span class="p">]</span>
+
+                <span class="c1">## Get last recorded date</span>
+                <span class="c1">#LRpd = pd.to_datetime(lastRecorded, utc=None)</span>
+                <span class="c1">#print LRpd</span>
+                <span class="c1">## Get the last time stamp recored in this location&#39;s NetCDF file.</span>
+                <span class="c1">#lastNC = os.path.join(self.ncpath, loc + &#39;-&#39; + str(LRpd.year) + &#39;.nc&#39;)</span>
+                <span class="n">lastNC</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLastNC</span><span class="p">(</span><span class="n">loc</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+                <span class="c1">#print lastNC, self.getLastDateNC(lastNC)</span>
+                <span class="c1">###locLastRecordedTime = getLastDateNC(lastNC)</span>
+
+                <span class="c1"># Truncate data to only that which is after last recorded time</span>
+                <span class="n">pd_getLastDateNC</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLastDateNC</span><span class="p">(</span><span class="n">lastNC</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">utc</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+                <span class="n">df3</span> <span class="o">=</span> <span class="n">df3</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df3</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">utc</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">pd_getLastDateNC</span> <span class="p">]</span>
+
+                <span class="c1">#print str(len(df3.index)), loc,</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df3</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># Group by Year and iterate making/appending to NetCDF files</span>
+                    <span class="c1"># Do this IF its possible there could be previous year in the file</span>
+                    <span class="n">groupedYr</span> <span class="o">=</span> <span class="n">df3</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">df3</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">year</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">grpYr</span> <span class="ow">in</span> <span class="n">groupedYr</span><span class="o">.</span><span class="n">indices</span><span class="p">:</span>
+                        <span class="c1"># Check file size, nccopy to bring size down, replace original file</span>
+                        <span class="n">ncfilename</span> <span class="o">=</span> <span class="n">loc</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">grpYr</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.nc&#39;</span>
+                        <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ncpath</span><span class="p">,</span> <span class="n">ncfilename</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">dataToNC</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">df3</span><span class="p">,</span> <span class="n">loc</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">fileSizeChecker</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SASS.text2nc_all"><a class="viewcode-back" href="../index.html#sccoos.SASS.text2nc_all">[docs]</a>    <span class="k">def</span> <span class="nf">text2nc_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">mnArr</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logsdir</span><span class="p">)</span>
+        <span class="n">mnArr</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">mn</span> <span class="ow">in</span> <span class="n">mnArr</span><span class="p">:</span>
+            <span class="n">mnpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logsdir</span><span class="p">,</span> <span class="n">mn</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">mnpath</span><span class="p">):</span>
+                <span class="n">filesArr</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">mnpath</span><span class="p">)</span>
+                <span class="n">filesArr</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+                <span class="c1">##print &quot;\n&quot; + time.strftime(&quot;%c&quot;)</span>
+                <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">filesArr</span><span class="p">:</span>
+                    <span class="n">startfld</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="c1"># time each folder</span>
+                    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mnpath</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+                    <span class="c1">##print &quot;\n&quot; + fn,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">text2nc</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SASS.text2nc_append"><a class="viewcode-back" href="../index.html#sccoos.SASS.text2nc_append">[docs]</a>    <span class="k">def</span> <span class="nf">text2nc_append</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;SASS log files are organized by server date (when recorded)&quot;&quot;&quot;</span>
+        <span class="n">looplimit</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="n">loopCount</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">latestDict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">staMeta</span><span class="p">:</span>
+            <span class="n">lastNC</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLastNC</span><span class="p">(</span><span class="n">loc</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+            <span class="n">locLastest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLastDateNC</span><span class="p">(</span><span class="n">lastNC</span><span class="p">)</span>
+            <span class="n">latestDict</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span> <span class="o">=</span> <span class="n">locLastest</span>
+        <span class="n">LRdt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">latestDict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="nb">print</span> <span class="s1">&#39;MAX, last recorded&#39;</span><span class="p">,</span> <span class="n">LRdt</span>
+        <span class="k">while</span> <span class="n">LRdt</span><span class="o">.</span><span class="n">timetuple</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">time</span><span class="o">.</span><span class="n">gmtime</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]:</span>
+            <span class="c1"># Get filename to process from last recorded datetime</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">LRdt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m/data-%Y%m</span><span class="si">%d</span><span class="s2">.dat&quot;</span><span class="p">)</span>
+            <span class="nb">print</span> <span class="n">name</span>
+            <span class="n">processFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logsdir</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">processFile</span><span class="p">):</span>
+                <span class="c1"># Add latest data to NetCDF file discarding data &lt; LRstr</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">text2nc</span><span class="p">(</span><span class="n">processFile</span><span class="p">)</span>
+
+            <span class="c1"># Increment day file and count</span>
+            <span class="n">LRdt</span> <span class="o">=</span> <span class="n">LRdt</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># Increment loop count so does not keep going</span>
+            <span class="n">loopCount</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># Check if while loop has exceeded looplimit</span>
+            <span class="k">if</span> <span class="n">loopCount</span> <span class="o">&gt;</span> <span class="n">looplimit</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">start</span></div></div>
+
+
+<div class="viewcode-block" id="CAF"><a class="viewcode-back" href="../index.html#sccoos.CAF">[docs]</a><span class="k">class</span> <span class="nc">CAF</span><span class="p">(</span><span class="n">SCCOOS</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for SCCOOS&#39;s Carlsbad Aqua Farm&#39;s burkolator. Currently, log files and netCDFs&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Setting up CAF variables</span>
+
+<span class="sd">        .. todo: change ncpath (currently local for testing)</span>
+
+<span class="sd">        .. warning:: </span>
+<span class="sd">            - for text2nc_append: use **CAF_Latest** folder</span>
+<span class="sd">            - for text2nc_all: use **CAF_sorted**&#39;s folder/subfolders (i.e.2016)</span>
+<span class="sd">              which may need to be syncing/ files copied from CAF_2016 and CAF_Latest</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CAF</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="c1">#print &quot;init caf&quot;</span>
+        <span class="c1">#use this directory for text2nc_append()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logsdir</span> <span class="o">=</span> <span class="s1">r&#39;/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_Latest/&#39;</span>
+<span class="c1">#        self.logsdir = r&#39;/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted/2016&#39;</span>
+        <span class="c1">#use this directory for text2nc_all()</span>
+<span class="c1">#        self.logsdir = r&#39;/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ncpath</span> <span class="o">=</span> <span class="s1">&#39;/data/InSitu/Burkolator/netcdf&#39;</span>
+<span class="c1">#        self.ncpath = &#39;/home/scheim/NCobj/CAF&#39;</span>
+<span class="c1">#        self.fnformat = &quot;CAF_RTproc_%Y%m%d.dat&quot; #!!!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">txtFnPre</span> <span class="o">=</span> <span class="s1">&#39;CAF_RTproc_&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">txtFnDatePattern</span> <span class="o">=</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">attrArr</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TSG_T&#39;</span><span class="p">,</span> <span class="s1">&#39;TSG_S&#39;</span><span class="p">,</span> <span class="s1">&#39;pCO2_atm&#39;</span><span class="p">,</span> <span class="s1">&#39;TCO2_mol_kg&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;Alk_pTCO2&#39;</span><span class="p">,</span> <span class="s1">&#39;AlkS&#39;</span><span class="p">,</span> <span class="s1">&#39;calcAlk&#39;</span><span class="p">,</span> <span class="s1">&#39;calcTCO2&#39;</span><span class="p">,</span> <span class="s1">&#39;calcpCO2&#39;</span><span class="p">,</span> <span class="s1">&#39;calcCO2aq&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;calcHCO3&#39;</span><span class="p">,</span> <span class="s1">&#39;calcCO3&#39;</span><span class="p">,</span> <span class="s1">&#39;calcOmega&#39;</span><span class="p">,</span> <span class="s1">&#39;calcpH&#39;</span><span class="p">]</span>
+
+        <span class="c1">##Meta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metaDict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s1">&#39;keywords&#39;</span><span class="p">:</span><span class="s1">&#39;EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY, OCEAN CHEMISTRY,&#39;</span><span class="p">,</span><span class="c1">##!!!</span>
+            <span class="s1">&#39;processing_level&#39;</span><span class="p">:</span><span class="s1">&#39;QA/QC has not been performed&#39;</span><span class="p">,</span> <span class="c1">##!!!</span>
+            <span class="s1">&#39;ip&#39;</span><span class="p">:</span><span class="s2">&quot;132.239.92.62&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;metadata_link&#39;</span><span class="p">:</span><span class="s1">&#39;www.sccoos.org.progress/data-products/&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;summary&#39;</span><span class="p">:</span> <span class="s1">&#39;With funding from NOAA and IOOS, and in support of the West Coast shellfish industry; AOOS, NANOOS, CeNCOOS, and SCCOOS have added Ocean Acidification monitoring to its ongoing observations of the coastal ocean. This project funds a CO2 analyzer (Burkolator) that has been developed by scientists at Oregon State University. The SCCOOS Burkolator is located at the Carlsbad Aquafarm (carlsbadaquafarm.com) in San Diego and is operated by the Martz Lab at the Scripps Institution of Oceanography.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;project&#39;</span><span class="p">:</span><span class="s1">&#39;Carlsbad Auqafarm&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;processing_level&#39;</span><span class="p">:</span><span class="s1">&#39;QA/QC has not been performed&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;cdm_data_type&#39;</span><span class="p">:</span><span class="s1">&#39;Station&#39;</span>
+<span class="c1">#            &#39;geospatial_lat_resolution&#39;:&#39;&#39;,  # ?</span>
+<span class="c1">#            &#39;geospatial_lon_resolution&#39;:&#39;&#39;,  # ?</span>
+<span class="c1">#            &#39;geospatial_vertical_units&#39;:&#39;&#39;,  # ???</span>
+<span class="c1">#            &#39;geospatial_vertical_resolution&#39;:&#39;&#39;,  # ???</span>
+<span class="c1">#            &#39;geospatial_vertical_positive&#39;:&#39;&#39;  # ???</span>
+            <span class="p">})</span>
+
+<div class="viewcode-block" id="CAF.createNCshell"><a class="viewcode-back" href="../index.html#sccoos.CAF.createNCshell">[docs]</a>    <span class="k">def</span> <span class="nf">createNCshell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ncfile</span><span class="p">,</span> <span class="n">ignore</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addNCshell_SCCOOS</span><span class="p">(</span><span class="n">ncfile</span><span class="p">)</span>
+        <span class="c1">#NOT using: &#39;pH_aux&#39;, &#39;O2&#39;, &#39;O2sat&#39;</span>
+        <span class="nb">print</span> <span class="s2">&quot;CAF createNCshell&quot;</span>
+        <span class="c1">#ncfile.ip = &quot;132.239.92.62&quot;</span>
+        <span class="n">ncfile</span><span class="o">.</span><span class="n">setncatts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaDict</span><span class="p">)</span>
+
+        <span class="c1"># Create Dimensions</span>
+        <span class="c1"># unlimited axis (can be appended to).</span>
+        <span class="n">time_dim</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createDimension</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="c1">#        name_dim = ncfile.createDimension(&#39;name_strlen&#39;, size=25)</span>
+
+        <span class="c1">#Create Variables</span>
+        <span class="n">time_var</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span>
+            <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># int64? Gives error</span>
+        <span class="c1"># time_var.setncattr({&#39;standard_name&#39;:&#39;time&#39;, &#39;long_name&#39;: &#39;time&#39;, &#39;units&#39;:&#39;seconds since 1970-01-01 00:00:00 UTC&#39;})</span>
+        <span class="n">time_var</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;time&#39;</span>
+        <span class="n">time_var</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;seconds since 1970-01-01 00:00:00 UTC&#39;</span>
+        <span class="n">time_var</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;time&#39;</span>
+        <span class="n">time_var</span><span class="o">.</span><span class="n">calendar</span> <span class="o">=</span> <span class="s1">&#39;julian&#39;</span> <span class="c1">#use??</span>
+        <span class="n">time_var</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="s2">&quot;T&quot;</span>
+
+        <span class="n">temperature</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;TSG_T&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">temperature</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;sea_water_temperature&#39;</span>
+        <span class="n">temperature</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water temperature&#39;</span>
+        <span class="n">temperature</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;celsius&#39;</span>
+        <span class="n">temperature</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">temperature</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s1">&#39;instrument1&#39;</span>
+        <span class="n">salinity</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;TSG_S&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">salinity</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;sea_water_salinity&#39;</span>
+        <span class="n">salinity</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;sea water salinity&#39;</span>
+        <span class="n">salinity</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;psu&#39;</span> <span class="c1">#?</span>
+        <span class="n">salinity</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">salinity</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s1">&#39;instrument1&#39;</span>
+        <span class="n">pCO2_atm</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;pCO2_atm&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">pCO2_atm</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;surface_partial_pressure_of_carbon_dioxide_in_sea_water&#39;</span> <span class="c1">#surface?</span>
+        <span class="n">pCO2_atm</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;Partial pressure of carbon dioxide&#39;</span>
+        <span class="n">pCO2_atm</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;uatm&#39;</span>
+        <span class="n">pCO2_atm</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">pCO2_atm</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s1">&#39;instrument1&#39;</span>
+        <span class="n">TCO2m</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;TCO2_mol_kg&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">TCO2m</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;mole_concentration_of_dissolved_inorganic_carbon_in_sea_water&#39;</span>
+        <span class="n">TCO2m</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;Total Inorganic Carbon&#39;</span>
+        <span class="n">TCO2m</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;umol/kg&#39;</span>
+        <span class="n">TCO2m</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">TCO2m</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s1">&#39;instrument1&#39;</span>
+        <span class="n">alkpTCO2</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;Alk_pTCO2&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#alkpTCO2.standard_name = &#39;&#39;</span>
+        <span class="n">alkpTCO2</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;total alkalinity estimated via pCO2/TCO2 measurements&#39;</span>
+        <span class="n">alkpTCO2</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;umol/kg&#39;</span>
+        <span class="c1">#alkpTCO2.coordinates = &#39;&#39;</span>
+        <span class="n">alkpTCO2</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s1">&#39;instrument1&#39;</span>
+        <span class="n">alkS</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;AlkS&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#alkS.standard_name = &#39;&#39; #sea_water_alkalinity_expressed_as_mole_equivalent</span>
+        <span class="n">alkS</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;total alkalinity estimated via salinity measurements&#39;</span>
+        <span class="n">alkS</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;umol/kg&#39;</span>
+        <span class="c1">#alkS.coordinates = &#39;&#39;</span>
+        <span class="n">alkS</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s1">&#39;instrument1&#39;</span>
+        <span class="n">calcAlk</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;calcAlk&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#calcAlk.standard_name = &#39;&#39;</span>
+        <span class="n">calcAlk</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;calculated total alkalinity&#39;</span>
+        <span class="n">calcAlk</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;umol/kg&#39;</span>
+        <span class="c1">#calcAlk.coordinates = &#39;&#39;</span>
+        <span class="n">calcAlk</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s1">&#39;instrument1&#39;</span>
+        <span class="n">calcTCO2</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;calcTCO2&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#calcTCO2.standard_name = &#39;&#39;</span>
+        <span class="n">calcTCO2</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;calculated total dissolved inorganic carbon&#39;</span>
+        <span class="n">calcTCO2</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;umol/kg&#39;</span>
+        <span class="c1">#calcTCO2.coordinates = &#39;&#39;</span>
+        <span class="n">calcTCO2</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s1">&#39;instrument1&#39;</span>
+        <span class="n">calcpCO2</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;calcpCO2&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#calcpCO2.standard_name = &#39;&#39;</span>
+        <span class="c1">#calcpCO2.long_name = &#39;calculated partial pressure of CO2&#39;</span>
+        <span class="n">calcpCO2</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;uatm&#39;</span>
+        <span class="c1">#calcpCO2.coordinates = &#39;&#39;</span>
+        <span class="n">calcpCO2</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s1">&#39;instrument1&#39;</span>
+        <span class="n">calcCO2aq</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;calcCO2aq&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#calcCO2aq.standard_name = &#39;&#39;</span>
+        <span class="c1">#calcCO2aq.long_name = &#39;&#39;</span>
+        <span class="c1">#calcCO2aq.units = &#39;&#39;</span>
+        <span class="c1">#calcCO2aq.coordinates = &#39;&#39;</span>
+        <span class="c1">#calcCO2aq.instrument = &#39;instrument1&#39;</span>
+        <span class="n">calcHCO3</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;calcHCO3&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#calcHCO3.standard_name = &#39;&#39;</span>
+        <span class="n">calcHCO3</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;calculated concentration of bicarbonate ion&#39;</span>
+        <span class="n">calcHCO3</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;umol/kg&#39;</span>
+        <span class="c1">#calcHCO3.coordinates = &#39;&#39;</span>
+        <span class="n">calcHCO3</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s1">&#39;instrument1&#39;</span>
+        <span class="n">calcCO3</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;calcCO3&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#calcCO3.standard_name = &#39;&#39;</span>
+        <span class="n">calcCO3</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;calculated concentration of carbonate ion&#39;</span>
+        <span class="n">calcCO3</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;umol/kg&#39;</span>
+        <span class="c1">#calcCO3.coordinates = &#39;&#39;</span>
+        <span class="n">calcCO3</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s1">&#39;instrument1&#39;</span>
+        <span class="n">calcOmega</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;calcOmega&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#calcOmega.standard_name = &#39;&#39;</span>
+        <span class="n">calcOmega</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;calculated aragonite saturation state&#39;</span>
+        <span class="c1">#calcOmega.units = &#39;&#39;</span>
+        <span class="c1">#calcOmega.coordinates = &#39;&#39;</span>
+        <span class="n">calcOmega</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s1">&#39;instrument1&#39;</span>
+        <span class="n">calcpH</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;calcpH&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">),</span> <span class="n">zlib</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#calcpH.standard_name = &#39;&#39;</span>
+        <span class="n">calcpH</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;calculated pH&#39;</span>
+        <span class="c1">#calcpH.units = &#39;&#39;</span>
+        <span class="c1">#calcpH.coordinates = &#39;&#39;</span>
+        <span class="n">calcpH</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s1">&#39;instrument1&#39;</span>
+
+        <span class="c1"># = ncfile.createVariable(&#39;&#39;, &#39;f4&#39;, (&#39;time&#39;), zlib=True)</span>
+        <span class="c1">#.standard_name = &#39;&#39;</span>
+        <span class="c1">#.long_name = &#39;&#39;</span>
+        <span class="c1">#.units = &#39;&#39;</span>
+        <span class="c1">#.coordinates = &#39;&#39;</span>
+        <span class="c1">#.instrument = &#39;instrument1&#39;</span>
+
+        <span class="c1">#for c in cols:</span>
+        <span class="c1">#    cVar = ncfile.createVariable(c, &#39;f4&#39;, (&#39;time&#39;), zlib=True)</span>
+        <span class="c1">#    cVar.long_name = c</span>
+
+        <span class="n">instrument1</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;instrument1&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">)</span> <span class="c1">#Licor??</span>
+        <span class="n">instrument1</span><span class="o">.</span><span class="n">make</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">instrument1</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">instrument1</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s2">&quot;beta Burkelator&quot;</span> <span class="c1">#?</span>
+
+        <span class="k">return</span> <span class="n">ncfile</span></div>
+
+<div class="viewcode-block" id="CAF.text2nc"><a class="viewcode-back" href="../index.html#sccoos.CAF.text2nc">[docs]</a>    <span class="k">def</span> <span class="nf">text2nc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="c1">#print &#39;IN text2nc, filename:&#39;, filename #for testing!!!</span>
+
+        <span class="c1"># Read file line by line into a pnadas dataframe</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Date&#39;</span><span class="p">:</span><span class="nb">object</span><span class="p">,</span> <span class="s1">&#39;Time&#39;</span><span class="p">:</span><span class="nb">object</span><span class="p">})</span>
+
+        <span class="c1"># Set date_time to pandas datetime format</span>
+        <span class="n">dateformat</span> <span class="o">=</span> <span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2"> %H%M%S&quot;</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;date_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="n">dateformat</span><span class="p">,</span> <span class="n">utc</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># Make date_time an index</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;date_time&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Drop columna that were merged</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;Date&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\xb5</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="c1">#self.attrArr = df.columns</span>
+
+        <span class="c1">## Get the last time stamp recored in this location&#39;s NetCDF file.</span>
+        <span class="n">lastNC</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLastNC</span><span class="p">(</span><span class="s2">&quot;CAF-&quot;</span><span class="p">)</span>
+        <span class="c1"># Truncate data to only that which is after last recorded time</span>
+        <span class="n">pd_getLastDateNC</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLastDateNC</span><span class="p">(</span><span class="n">lastNC</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">utc</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">utc</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">pd_getLastDateNC</span> <span class="p">]</span>
+
+        <span class="c1">#print df.head()</span>
+        <span class="c1">#print df.dtypes</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Group by Year and iterate making/appending to NetCDF files</span>
+            <span class="c1"># Do this IF its possible there could be previous year in the file</span>
+            <span class="n">groupedYr</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">year</span><span class="p">)</span> <span class="c1"># is this necessary or can we just grab the year?</span>
+            <span class="k">for</span> <span class="n">grpYr</span> <span class="ow">in</span> <span class="n">groupedYr</span><span class="o">.</span><span class="n">indices</span><span class="p">:</span>
+                <span class="c1"># Check file size, nccopy to bring size down, replace original file</span>
+                <span class="n">ncfilename</span> <span class="o">=</span> <span class="s2">&quot;CAF-&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">grpYr</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.nc&#39;</span>
+                <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ncpath</span><span class="p">,</span> <span class="n">ncfilename</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dataToNC</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fileSizeChecker</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CAF.text2nc_all"><a class="viewcode-back" href="../index.html#sccoos.CAF.text2nc_all">[docs]</a>    <span class="k">def</span> <span class="nf">text2nc_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">yrArr</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logsdir</span><span class="p">)</span>
+        <span class="n">yrArr</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">yr</span> <span class="ow">in</span> <span class="n">yrArr</span><span class="p">:</span>
+            <span class="n">yrpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logsdir</span><span class="p">,</span> <span class="n">yr</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">yrpath</span><span class="p">):</span>
+                <span class="n">filesArr</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">yrpath</span><span class="p">)</span>
+                <span class="n">filesArr</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">filesArr</span><span class="p">:</span>
+                    <span class="nb">print</span> <span class="n">fn</span>
+                    <span class="k">if</span> <span class="n">fn</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">txtFnPre</span><span class="p">):</span>
+                        <span class="n">filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">yrpath</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+                        <span class="n">CAF</span><span class="p">()</span><span class="o">.</span><span class="n">text2nc</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CAF.text2nc_append"><a class="viewcode-back" href="../index.html#sccoos.CAF.text2nc_append">[docs]</a>    <span class="k">def</span> <span class="nf">text2nc_append</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;CAF data files are set by size. &quot;&quot;&quot;</span>
+        <span class="n">allFilesArr</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logsdir</span><span class="p">)</span> <span class="c1">#use Latest!!!</span>
+        <span class="n">preFilesArr</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">postFilesArr</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">lastNC</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLastNC</span><span class="p">(</span><span class="s1">&#39;CAF-&#39;</span><span class="p">)</span>
+        <span class="n">LRnc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLastDateNC</span><span class="p">(</span><span class="n">lastNC</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">LRnc</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">utc</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+        <span class="nb">print</span> <span class="s2">&quot;LRnc:&quot;</span><span class="p">,</span> <span class="n">LRnc</span>
+        <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">allFilesArr</span><span class="p">:</span>
+            <span class="c1">#print fn</span>
+            <span class="c1"># directory contains some other files to ignore</span>
+            <span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fn</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">txtFnPre</span> <span class="ow">in</span> <span class="n">fn</span><span class="p">:</span>
+                <span class="n">dtStr</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="c1">#dtEp = time.mktime(time.strptime(dtStr, self.txtFnDatePattern)) #WRONG, tz</span>
+                <span class="n">dtEp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">dtStr</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">txtFnDatePattern</span><span class="p">,</span> <span class="n">utc</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="o">/</span><span class="mi">1</span><span class="n">e9</span>
+                <span class="c1">#print fn, dtStr, dtEp, dtEp &gt; LRnc</span>
+                <span class="k">if</span> <span class="n">dtEp</span> <span class="o">&gt;</span> <span class="n">LRnc</span><span class="p">:</span>
+                    <span class="n">postFilesArr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dtStr</span><span class="p">)</span>
+                    <span class="c1">#print fn, dtStr, dtEp</span>
+                <span class="k">else</span><span class="p">:</span> <span class="n">preFilesArr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dtStr</span><span class="p">)</span>
+        <span class="n">preFilesArr</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">postFilesArr</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="nb">print</span> <span class="s2">&quot;USE files:&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">preFilesArr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s1">&#39;appending from (pre): &#39;</span><span class="p">,</span> <span class="n">preFilesArr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">text2nc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logsdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">txtFnPre</span><span class="o">+</span><span class="n">preFilesArr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="c1">#print postFilesArr</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">postFilesArr</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s1">&#39;appending from: (post)&#39;</span><span class="p">,</span> <span class="n">p</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">text2nc</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logsdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">txtFnPre</span><span class="o">+</span><span class="n">p</span><span class="p">))</span></div></div>
+
+<span class="c1">#s = SASS()</span>
+<span class="c1">#print s.ncpath</span>
+<span class="c1">#s.text2nc_all()</span>
+<span class="c1">#s.text2nc_append()</span>
+
+<span class="c1">#c = CAF()</span>
+<span class="c1">#print c.ncpath</span>
+<span class="c1">#print c.logsdir</span>
+<span class="c1">#c.text2nc_all()</span>
+<span class="c1">#c.text2nc_append()</span>
+
+<span class="c1">#print c.ncpath</span>
+<span class="c1">#c.updateNCattrs_all()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Sarah Heim.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'2.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

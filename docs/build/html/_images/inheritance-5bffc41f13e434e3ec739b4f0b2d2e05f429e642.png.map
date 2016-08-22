@@ -1,0 +1,6 @@
+<map id="inheritance45b1cfac9c" name="inheritance45b1cfac9c">
+<area shape="rect" id="node1" href="#nc.NC" target="_top" title="Class documentation: This root &#39;nc&#39; class is an abstract class." alt="" coords="5,31,77,56"/>
+<area shape="rect" id="node3" href="#sccoos.SCCOOS" target="_top" title="Class to be used for SCCOOS related netCDFs" alt="" coords="125,31,252,56"/>
+<area shape="rect" id="node2" href="#sccoos.CAF" target="_top" title="Class for SCCOOS&#39;s Carlsbad Aqua Farm&#39;s burkolator. Currently, log files and netCDFs" alt="" coords="306,5,401,31"/>
+<area shape="rect" id="node4" href="#sccoos.SASS" target="_top" title="Class for SCCOOS&#39;s Automated Shore Stations. Currently, log files and netCDFs" alt="" coords="300,55,407,80"/>
+</map>
