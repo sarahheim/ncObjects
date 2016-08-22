@@ -1,6 +1,8 @@
 Text2NC's documentation
 =======================
 
+.. include:: ../../README.rst
+
 Guide
 ^^^^^
 
