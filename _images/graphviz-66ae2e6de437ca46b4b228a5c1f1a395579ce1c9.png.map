@@ -1,0 +1,4 @@
+<map id="Workflow" name="Workflow">
+<area shape="rect" id="node3" href="#nc.NC.updateNCattrs_single" title="updateNCattrs_single" alt="" coords="361,232,540,280"/>
+<area shape="rect" id="clust1" href="#nc.NC.updateNCattrs_all" title="updateNCattrs_all" alt="" coords="16,95,504,195"/>
+</map>
