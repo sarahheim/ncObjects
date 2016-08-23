@@ -1,0 +1,409 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>nc &mdash; Text2NC 2.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Text2NC 2.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="Module code" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Text2NC
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <!-- Local TOC -->
+                <div class="local-toc"></div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Text2NC</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Module code</a> &raquo;</li>
+      
+    <li>nc</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for nc</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1"># Author Sarah Heim</span>
+<span class="c1"># Date create: 2016</span>
+<span class="c1"># Description: adjusting to class/objects, parts taken from sass.py</span>
+<span class="c1">#</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">netCDF4</span> <span class="k">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<div class="viewcode-block" id="NC"><a class="viewcode-back" href="../index.html#nc.NC">[docs]</a><span class="k">class</span> <span class="nc">NC</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class documentation: This root &#39;nc&#39; class is an abstract class.</span>
+<span class="sd">    It will be the base to make a netcdf file.</span>
+<span class="sd">    Its children are &#39;cdip&#39; and &#39;sccoos&#39; (grandchildren &#39;sass&#39; &amp; &#39;caf&#39;)</span>
+<span class="sd">    </span>
+<span class="sd">    .. note::</span>
+<span class="sd">        | Assume: nc files end in YYYY.nc</span>
+<span class="sd">        | &#39;time&#39; variable in data/ncfile</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
+
+    <span class="c1">#set some initial metadata</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">#super(NC, self).__init__()</span>
+        <span class="c1">#print &quot;init nc&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dateformat</span> <span class="o">=</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">T%H:%M:%SZ&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metaDict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="c1">##base metadata, can be overwritten</span>
+            <span class="c1">##Meta</span>
+            <span class="s1">&#39;ncei_template_version&#39;</span><span class="p">:</span><span class="s2">&quot;NCEI_NetCDF_TimeSeries_Orthogonal_Template_v2.0&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;featureType&#39;</span><span class="p">:</span><span class="s2">&quot;timeSeries&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;Metadata_Conventions&#39;</span><span class="p">:</span><span class="s1">&#39;Unidata Dataset Discovery v1.0&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;Conventions&#39;</span><span class="p">:</span><span class="s1">&#39;CF-1.6&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;keywords&#39;</span><span class="p">:</span><span class="s1">&#39;EARTH SCIENCE, OCEANS&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;keywords_vocabulary&#39;</span><span class="p">:</span><span class="s1">&#39;Global Change Master Directory (GCMD) Earth Science Keywords&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;standard_name_vocabulary&#39;</span><span class="p">:</span><span class="s1">&#39;CF Standard Name Table (v28, 07 January 2015)&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;institution&#39;</span><span class="p">:</span><span class="s1">&#39;Scripps Institution of Oceanography, University of California San Diego&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;license&#39;</span><span class="p">:</span><span class="s1">&#39;Data is preliminary and should not be used by anyone.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;geospatial_lon_units&#39;</span><span class="p">:</span><span class="s1">&#39;degrees_east&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;geospatial_lat_units&#39;</span><span class="p">:</span><span class="s1">&#39;degrees_north&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;time_coverage_units&#39;</span><span class="p">:</span><span class="s1">&#39;seconds since 1970-01-01 00:00:00 UTC&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;time_coverage_resolution&#39;</span><span class="p">:</span><span class="s1">&#39;1&#39;</span>
+            <span class="p">}</span>
+
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="NC.createNCshell"><a class="viewcode-back" href="../index.html#nc.NC.createNCshell">[docs]</a>    <span class="k">def</span> <span class="nf">createNCshell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ncfile</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a shell of netCDF file (variables, attributes), without data</span>
+
+<span class="sd">        :param str ncfile: file name of netCDF to be made, sans-path (uses **ncpath**)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="NC.text2nc"><a class="viewcode-back" href="../index.html#nc.NC.text2nc">[docs]</a>    <span class="k">def</span> <span class="nf">text2nc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;read texts in specific format and put in panda&#39;s dataframe, to be put in nc files</span>
+
+<span class="sd">        :param str filename: path+filename of text file to be read (already joined with **logsdir**) </span>
+
+<span class="sd">        .. warning::</span>
+<span class="sd">            When reading file, before adding to NC. Data prior to :func:`nc.NC.getLastDateNC` is</span>
+<span class="sd">            truncated so previously added data is not duplicated... Should new data contain older</span>
+<span class="sd">            data (i.e. filling a gap), this will be truncated as well.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="NC.text2nc_all"><a class="viewcode-back" href="../index.html#nc.NC.text2nc_all">[docs]</a>    <span class="k">def</span> <span class="nf">text2nc_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loop through ALL log/text files in **logsdir**&#39;s subdirectories and put in NC files&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="NC.text2nc_append"><a class="viewcode-back" href="../index.html#nc.NC.text2nc_append">[docs]</a>    <span class="k">def</span> <span class="nf">text2nc_append</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Append only the latest data to NC files.</span>
+<span class="sd">        This looks at the lastest datetime recorded in a netcdf,</span>
+<span class="sd">        then appends any recent data to netcdfs.&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="NC.addNCshell_NC"><a class="viewcode-back" href="../index.html#nc.NC.addNCshell_NC">[docs]</a>    <span class="k">def</span> <span class="nf">addNCshell_NC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ncfile</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;When creating new nc file, at some standard metadata</span>
+
+<span class="sd">        :param str ncfile: file name of netCDF to be made, sans-path (uses **ncpath**)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">)</span>
+        <span class="n">lat</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;latitude&#39;</span>
+        <span class="n">lat</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;latitude&#39;</span>
+        <span class="n">lat</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;degrees_north&#39;</span>
+        <span class="n">lat</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="s1">&#39;Y&#39;</span>
+<span class="c1">#        ncfile.variables[&#39;lat&#39;][0] = ips[ip][&#39;lat&#39;]</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;lon&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">)</span>
+        <span class="n">lon</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;longitude&#39;</span>
+        <span class="n">lon</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;longitude&#39;</span>
+        <span class="n">lon</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;degrees_east&#39;</span>
+        <span class="n">lon</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="s1">&#39;X&#39;</span>
+<span class="c1">#        ncfile.variables[&#39;lon&#39;][0] = ips[ip][&#39;lon&#39;]</span>
+        <span class="n">dep</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s1">&#39;depth&#39;</span><span class="p">,</span> <span class="s1">&#39;f4&#39;</span><span class="p">)</span>
+        <span class="n">dep</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s1">&#39;depth&#39;</span>
+        <span class="n">dep</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s1">&#39;depth&#39;</span>
+        <span class="n">dep</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;m&#39;</span>
+        <span class="n">dep</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="s1">&#39;Z&#39;</span>
+        <span class="n">dep</span><span class="o">.</span><span class="n">positive</span> <span class="o">=</span> <span class="s1">&#39;down&#39;</span>
+<span class="c1">#        ncfile.variables[&#39;depth&#39;][0] = ips[ip][&#39;depth&#39;]</span>
+
+        <span class="k">return</span> <span class="n">ncfile</span></div>
+
+<div class="viewcode-block" id="NC.updateNCattrs_single"><a class="viewcode-back" href="../index.html#nc.NC.updateNCattrs_single">[docs]</a>    <span class="k">def</span> <span class="nf">updateNCattrs_single</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ncName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;on a single file: run when ONLY nc METADATA needs updating, NOT any data</span>
+
+<span class="sd">        :param str ncName: file name of netCDF to be made, with path</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span> <span class="n">ncName</span>
+        <span class="n">ncfile</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">ncName</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;NETCDF4&#39;</span><span class="p">)</span>
+        <span class="c1">#print ncfile.variables.keys()</span>
+        <span class="c1">#print ncfile.ncattrs()</span>
+        <span class="nb">print</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">__dict__</span>
+        <span class="n">ncfile</span><span class="o">.</span><span class="n">setncatts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaDict</span><span class="p">)</span>
+        <span class="n">ncfile</span><span class="o">.</span><span class="n">date_modified</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="nb">print</span> <span class="s2">&quot;EDITED&quot;</span>
+        <span class="c1">#print ncfile.__dict__.keys()</span>
+        <span class="c1">#take out attributes that are no longer in the meta dictionary</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">metaDict</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="s1">&#39;DELETED&#39;</span><span class="p">,</span> <span class="n">k</span>
+                <span class="n">ncfile</span><span class="o">.</span><span class="n">delncattr</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+        <span class="nb">print</span> <span class="s2">&quot;DONE&quot;</span>
+        <span class="nb">print</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">__dict__</span><span class="c1">#.keys()</span>
+        <span class="n">ncfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="NC.updateNCattrs_all"><a class="viewcode-back" href="../index.html#nc.NC.updateNCattrs_all">[docs]</a>    <span class="k">def</span> <span class="nf">updateNCattrs_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;loop through all nc files and apply updates to metadata&quot;&quot;&quot;</span>
+        <span class="n">filesArr</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ncpath</span><span class="p">)</span>
+        <span class="n">filesArr</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="c1">##print &quot;\n&quot; + time.strftime(&quot;%c&quot;)</span>
+        <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">filesArr</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ncpath</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+            <span class="c1">##print &quot;\n&quot; + fn,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateNCattrs_single</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NC.tupToISO"><a class="viewcode-back" href="../index.html#nc.NC.tupToISO">[docs]</a>    <span class="k">def</span> <span class="nf">tupToISO</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeTup</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Only return Day, Hour, Min, Sec in ISO 8601 duration format&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%SZ&#39;</span><span class="p">,</span> <span class="n">timeTup</span><span class="p">)</span></div>
+    <span class="c1"># Designed, testing NSDate int, may work with epoch (subsec???)</span>
+
+<div class="viewcode-block" id="NC.ISOduration"><a class="viewcode-back" href="../index.html#nc.NC.ISOduration">[docs]</a>    <span class="k">def</span> <span class="nf">ISOduration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minTimeS</span><span class="p">,</span> <span class="n">maxTimeS</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;returns ISO duration (days, hrs, mins, secs)&quot;&quot;&quot;</span>
+        <span class="n">secDif</span> <span class="o">=</span> <span class="n">maxTimeS</span> <span class="o">-</span> <span class="n">minTimeS</span>
+        <span class="n">days</span> <span class="o">=</span> <span class="n">secDif</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3600</span> <span class="o">*</span> <span class="mi">24</span><span class="p">)</span>
+        <span class="n">dayRem</span> <span class="o">=</span> <span class="n">secDif</span> <span class="o">%</span> <span class="p">(</span><span class="mi">3600</span> <span class="o">*</span> <span class="mi">24</span><span class="p">)</span>
+        <span class="n">hrs</span> <span class="o">=</span> <span class="n">dayRem</span> <span class="o">/</span> <span class="mi">3600</span>
+        <span class="n">hrRem</span> <span class="o">=</span> <span class="n">dayRem</span> <span class="o">%</span> <span class="mi">3600</span>
+        <span class="n">mins</span> <span class="o">=</span> <span class="n">hrRem</span> <span class="o">/</span> <span class="mi">60</span>
+        <span class="n">secs</span> <span class="o">=</span> <span class="n">hrRem</span> <span class="o">%</span> <span class="mi">60</span>
+        <span class="n">durStr</span> <span class="o">=</span> <span class="s2">&quot;P&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">days</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;DT&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">hrs</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;H&quot;</span> <span class="o">+</span> \
+            <span class="nb">str</span><span class="p">(</span><span class="n">mins</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;M&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">secs</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;S&quot;</span>
+    <span class="c1">#     print secDif, days, dayRem, hrs, hrRem, mins, secs, durStr</span>
+        <span class="k">return</span> <span class="n">durStr</span></div>
+
+<div class="viewcode-block" id="NC.NCtimeMeta"><a class="viewcode-back" href="../index.html#nc.NC.NCtimeMeta">[docs]</a>    <span class="k">def</span> <span class="nf">NCtimeMeta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ncfile</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update time metadata values: Calculate, SPECIFIC to file.</span>
+<span class="sd">        ISO 8601 Time duration&quot;&quot;&quot;</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">ncfile</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][:]</span>
+        <span class="n">minTimeS</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+        <span class="n">maxTimeS</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+        <span class="n">minTimeT</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">gmtime</span><span class="p">(</span><span class="n">minTimeS</span><span class="p">)</span>
+        <span class="n">maxTimeT</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">gmtime</span><span class="p">(</span><span class="n">maxTimeS</span><span class="p">)</span>
+        <span class="n">ncfile</span><span class="o">.</span><span class="n">time_coverage_start</span> <span class="o">=</span> <span class="n">tupToISO</span><span class="p">(</span><span class="n">minTimeT</span><span class="p">)</span>
+        <span class="n">ncfile</span><span class="o">.</span><span class="n">time_coverage_end</span> <span class="o">=</span> <span class="n">tupToISO</span><span class="p">(</span><span class="n">maxTimeT</span><span class="p">)</span>
+        <span class="n">ncfile</span><span class="o">.</span><span class="n">time_coverage_duration</span> <span class="o">=</span> <span class="n">ISOduration</span><span class="p">(</span><span class="n">minTimeS</span><span class="p">,</span> <span class="n">maxTimeS</span><span class="p">)</span>
+        <span class="n">ncfile</span><span class="o">.</span><span class="n">date_modified</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="NC.fileSizeChecker"><a class="viewcode-back" href="../index.html#nc.NC.fileSizeChecker">[docs]</a>    <span class="k">def</span> <span class="nf">fileSizeChecker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ncfilepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;filesize checker/resizer as a NC method.</span>
+<span class="sd">        Set as 1e6, could be make default and pass as arg&quot;&quot;&quot;</span>
+        <span class="n">nameOnly</span> <span class="o">=</span> <span class="n">ncfilepath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ncfilepath</span><span class="p">):</span>
+            <span class="n">fileMb</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">ncfilepath</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000000</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fileMb</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+<span class="c1">#                tmpfilepath = &#39;/tmp/&#39; + ncfilename</span>
+<span class="c1">#                temp = &#39;/usr/local/bin/nccopy&#39;</span>
+                <span class="n">temp</span> <span class="o">=</span> <span class="s1">&#39;/home/scheim/NCobj/nccopy&#39;</span>
+                <span class="n">tmpfilepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">nameOnly</span><span class="p">)</span>
+                <span class="n">origSz</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">ncfilepath</span><span class="p">)</span>
+                <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s1">&#39;nccopy&#39;</span><span class="p">,</span> <span class="n">ncfilepath</span><span class="p">,</span> <span class="n">tmpfilepath</span><span class="p">])</span>
+                <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s1">&#39;mv&#39;</span><span class="p">,</span> <span class="n">tmpfilepath</span><span class="p">,</span> <span class="n">ncfilepath</span><span class="p">])</span>
+                <span class="nb">print</span> <span class="s1">&#39;RESIZED FILE: prev:&#39;</span><span class="p">,</span> <span class="n">origSz</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">ncfilepath</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NC.dataToNC"><a class="viewcode-back" href="../index.html#nc.NC.dataToNC">[docs]</a>    <span class="k">def</span> <span class="nf">dataToNC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ncName</span><span class="p">,</span> <span class="n">subset</span><span class="p">,</span> <span class="n">lookup</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Take dataframe and put in netCDF (new file or append).</span>
+<span class="sd">        Assumes there&#39;s a &#39;time&#39; variable in data/ncfile&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ncName</span><span class="p">):</span>
+            <span class="n">ncfile</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">ncName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;NETCDF4&#39;</span><span class="p">)</span>
+            <span class="n">ncfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createNCshell</span><span class="p">(</span><span class="n">ncfile</span><span class="p">,</span> <span class="n">lookup</span><span class="p">)</span>
+            <span class="n">ncfile</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">subset</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int64&#39;</span><span class="p">)</span> <span class="o">//</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span>
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attrArr</span><span class="p">:</span>
+                <span class="c1">#             ncfile.variables[&#39;temperature&#39;][:] = subset[&#39;temperature&#39;].values</span>
+                <span class="n">ncfile</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">attr</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">subset</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ncfile</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">ncName</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;NETCDF4&#39;</span><span class="p">)</span>
+            <span class="n">timeLen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ncfile</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][:])</span>
+            <span class="c1"># length should be the same for time &amp; all attributes</span>
+            <span class="n">ncfile</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">][</span>
+                <span class="n">timeLen</span><span class="p">:]</span> <span class="o">=</span> <span class="n">subset</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int64&#39;</span><span class="p">)</span> <span class="o">//</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span>
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attrArr</span><span class="p">:</span>
+                <span class="c1">#atLen = len(ncfile.variables[attr][:])</span>
+                <span class="n">ncfile</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">attr</span><span class="p">][</span><span class="n">timeLen</span><span class="p">:]</span> <span class="o">=</span> <span class="n">subset</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="c1">#        NCtimeMeta(ncfile) #commented out only for testing!!!</span>
+        <span class="n">ncfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+
+<span class="c1">#class CDIP(NC):</span>
+<span class="c1">#    __metaclass__ = ABCMeta</span>
+<span class="c1">#    @abstractmethod</span>
+<span class="c1">#    def __init__(self):</span>
+<span class="c1">#        super(CDIP, self).__init__()</span>
+<span class="c1">#        #print &quot;init cdip&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#    def createNCshell(self, ncfile, sta):</span>
+<span class="c1">#        ncfile.naming_authority = &#39;CDIP&#39;</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Sarah Heim.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'2.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
