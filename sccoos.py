@@ -5,12 +5,15 @@
 #
 
 import os, time, datetime
-import sassqc
+
 import pandas as pd
 import numpy as np
 from netCDF4 import Dataset
 from abc import ABCMeta, abstractmethod
+
+import sassqc
 import nc
+import qc
 
 
 class SCCOOS(nc.NC):
@@ -85,9 +88,9 @@ class SASS(SCCOOS):
     """Class for SCCOOS's Automated Shore Stations. Currently, log files and netCDFs"""
     #set SASS metadata
     def __init__(self):
-        """Setting up SASS variables 
+        """Setting up SASS variables
 
-        .. todo:: 
+        .. todo::
             - change ncpath (currently local for testing)
             - move metadata to external text file(s)?
         """
@@ -522,7 +525,7 @@ class CAF(SCCOOS):
 
         .. todo: change ncpath (currently local for testing)
 
-        .. warning:: 
+        .. warning::
             - for text2nc_append: use **CAF_Latest** folder
             - for text2nc_all: use **CAF_sorted**'s folder/subfolders (i.e.2016)
               which may need to be syncing/ files copied from CAF_2016 and CAF_Latest
@@ -540,9 +543,10 @@ class CAF(SCCOOS):
         self.txtFnPre = 'CAF_RTproc_'
         self.txtFnDatePattern = '%Y%m%d%H%M'
 
-        self.attrArr = ['TSG_T', 'TSG_S', 'pCO2_atm', 'TCO2_mol_kg',
-       'Alk_pTCO2', 'AlkS', 'calcAlk', 'calcTCO2', 'calcpCO2', 'calcCO2aq',
-       'calcHCO3', 'calcCO3', 'calcOmega', 'calcpH']
+        self.attrArr = ['TSG_T', 'TSG_S', 'pCO2_atm', 'TCO2_mol_kg']
+    #     self.attrArr = ['TSG_T', 'TSG_S', 'pCO2_atm', 'TCO2_mol_kg',
+    #    'Alk_pTCO2', 'AlkS', 'calcAlk', 'calcTCO2', 'calcpCO2', 'calcCO2aq',
+    #    'calcHCO3', 'calcCO3', 'calcOmega', 'calcpH']
 
         ##Meta
         self.metaDict.update({
@@ -561,12 +565,67 @@ class CAF(SCCOOS):
 #            'geospatial_vertical_positive':''  # ???
             })
 
+    def qc_tests(df, attr, sensor_span=None, user_span=None,
+    low_reps=None, high_reps=None, eps=None, low_thresh=None, high_thresh=None):
+        """Run qc
+
+        .. todo::
+            - add tests done to 'processing_level' metaDict
+            - add qc input into metadata
+
+        :param df: dataframe
+        :param attr: attribute, qa is being applied to
+        :param sensor_span: for Range Test; tuple of low and high of good values (sensor)
+        :param user_span: for Range Test; tuple of low and high of good values (expected/location appropriate)
+        :param low_reps: for Flat Line check;
+        :param high_reps: for Flat Line check; number of repeating to be considered suspect
+        :param eps: for Flat Line check; number of repeating to be considered bad
+        :param low_thresh: for Spike Test; see qc.spike_check
+        :param high_thresh: for Spike Test; see qc.spike_check
+        :returns: dataframe with primary and secondary flags added
+
+        Expected kwargs: sensor_span, user_span"""
+        data = df[attr].values
+
+        # Range Check
+        # sensor_span = (-5,30)
+        # user_span = (8,30)
+        if sensor_span is not None:
+            qcflagsRange = qc.range_check(data,sensor_span,user_span)
+            qc2flags = np.zeros_like(qcflagsRange, dtype='uint8')
+            qc2flags[(qcflagsRange > 2)] = 1 # Range
+
+        # Flat Line Check
+        # low_reps = 2
+        # high_reps = 5
+        # eps = 0.0001
+        if low_reps and high_reps and eps:
+            qcflagsFlat = qc.flat_line_check(data,low_reps,high_reps,eps)
+            qc2flags[(qcflagsFlat > 2)] = 2 # Flat line
+
+        # Spike Test
+        # low_thresh = 2
+        # high_thresh = 3
+        if low_thresh and high_thresh:
+            qcflagsSpike = qc.spike_check(data,low_thresh,high_thresh)
+            qc2flags[(qcflagsSpike > 2)] = 3 # Spike
+        # Find maximum qc flag
+        qcflags = np.maximum.reduce([qcflagsRange, qcflagsFlat, qcflagsSpike])
+        # Output flags
+        df[attr+'_flagPrimary'] = qcflags
+        df[attr+'_flagSecondary'] = qc2flags
+
     def createNCshell(self, ncfile, ignore):
         self.addNCshell_SCCOOS(ncfile)
         #NOT using: 'pH_aux', 'O2', 'O2sat'
         print "CAF createNCshell"
         #ncfile.ip = "132.239.92.62"
         ncfile.setncatts(self.metaDict)
+        #Move to NC/SCCOOS class???
+        flagPrim_flag_values = bytearray([1, 2, 3, 4, 9]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
+        flagPrim_flag_meanings = 'GOOD_DATA UNKNOWN SUSPECT BAD_DATA MISSING'
+        flagSec_flag_values = bytearray([0, 1, 2, 3]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
+        flagSec_flag_meanings = 'UNSPECIFIED RANGE FLAT_LINE SPIKE'
 
         # Create Dimensions
         # unlimited axis (can be appended to).
@@ -589,84 +648,71 @@ class CAF(SCCOOS):
         temperature.units = 'celsius'
         temperature.coordinates = ''
         temperature.instrument = 'instrument1'
+        temperature_flagPrim = ncfile.createVariable(
+            'temperature_flagPrimary', 'B', ('time'), zlib=True)
+        temperature_flagPrim.long_name = 'sea water temperature, qc primary flag'
+        temperature_flagPrim.standard_name = "sea_water_temperature status_flag"
+        temperature_flagPrim.flag_values = flagPrim_flag_values
+        temperature_flagPrim.flag_meanings = flagPrim_flag_meanings
+        temperature_flagSec = ncfile.createVariable(
+            'temperature_flagSecondary', 'B', ('time'), zlib=True)
+        temperature_flagSec.long_name = 'sea water temperature, qc secondary flag'
+        temperature_flagSec.flag_values = flagSec_flag_values
+        temperature_flagSec.flag_meanings = flagSec_flag_meanings
+
         salinity = ncfile.createVariable('TSG_S', 'f4', ('time'), zlib=True)
         salinity.standard_name = 'sea_water_salinity'
         salinity.long_name = 'sea water salinity'
         salinity.units = 'psu' #?
         salinity.coordinates = ''
         salinity.instrument = 'instrument1'
+        salinity_flagPrim = ncfile.createVariable(
+            'salinity_flagPrimary', 'B', ('time'), zlib=True)
+        salinity_flagPrim.long_name = 'sea water salinity, qc primary flag'
+        salinity_flagPrim.standard_name = "sea_water_practical_salinity status_flag"
+        salinity_flagPrim.flag_values = flagPrim_flag_values
+        salinity_flagPrim.flag_meanings = flagPrim_flag_meanings
+        salinity_flagSec = ncfile.createVariable(
+            'salinity_flagSecondary', 'B', ('time'), zlib=True)
+        salinity_flagSec.long_name = 'sea water salinity, qc secondary flag'
+        salinity_flagSec.flag_values = flagSec_flag_values
+        salinity_flagSec.flag_meanings = flagSec_flag_meanings
+
         pCO2_atm = ncfile.createVariable('pCO2_atm', 'f4', ('time'), zlib=True)
-        pCO2_atm.standard_name = 'surface_partial_pressure_of_carbon_dioxide_in_sea_water' #surface?
+        pCO2_atm.standard_name = 'subsurface_partial_pressure_of_carbon_dioxide_in_sea_water' #surface?
         pCO2_atm.long_name = 'Partial pressure of carbon dioxide'
         pCO2_atm.units = 'uatm'
         pCO2_atm.coordinates = ''
         pCO2_atm.instrument = 'instrument1'
+        pCO2_atm_flagPrim = ncfile.createVariable(
+            '!_flagPrimary', 'B', ('time'), zlib=True)
+        pCO2_atm_flagPrim.long_name = '!, qc primary flag'
+        pCO2_atm_flagPrim.standard_name = "! status_flag"
+        pCO2_atm_flagPrim.flag_values = flagPrim_flag_values
+        pCO2_atm_flagPrim.flag_meanings = flagPrim_flag_meanings
+        pCO2_atm_flagSec = ncfile.createVariable(
+            '!_flagSecondary', 'B', ('time'), zlib=True)
+        pCO2_atm_flagSec.long_name = '!, qc secondary flag'
+        pCO2_atm_flagSec.flag_values = flagSec_flag_values
+        pCO2_atm_flagSec.flag_meanings = flagSec_flag_meanings
+
         TCO2m = ncfile.createVariable('TCO2_mol_kg', 'f4', ('time'), zlib=True)
         TCO2m.standard_name = 'mole_concentration_of_dissolved_inorganic_carbon_in_sea_water'
-        TCO2m.long_name = 'Total Inorganic Carbon'
+        TCO2m.long_name = 'Seawater total dissolved inorganic carbon concentration'
         TCO2m.units = 'umol/kg'
         TCO2m.coordinates = ''
         TCO2m.instrument = 'instrument1'
-        alkpTCO2 = ncfile.createVariable('Alk_pTCO2', 'f4', ('time'), zlib=True)
-        #alkpTCO2.standard_name = ''
-        alkpTCO2.long_name = 'total alkalinity estimated via pCO2/TCO2 measurements'
-        alkpTCO2.units = 'umol/kg'
-        #alkpTCO2.coordinates = ''
-        alkpTCO2.instrument = 'instrument1'
-        alkS = ncfile.createVariable('AlkS', 'f4', ('time'), zlib=True)
-        #alkS.standard_name = '' #sea_water_alkalinity_expressed_as_mole_equivalent
-        alkS.long_name = 'total alkalinity estimated via salinity measurements'
-        alkS.units = 'umol/kg'
-        #alkS.coordinates = ''
-        alkS.instrument = 'instrument1'
-        calcAlk = ncfile.createVariable('calcAlk', 'f4', ('time'), zlib=True)
-        #calcAlk.standard_name = ''
-        calcAlk.long_name = 'calculated total alkalinity'
-        calcAlk.units = 'umol/kg'
-        #calcAlk.coordinates = ''
-        calcAlk.instrument = 'instrument1'
-        calcTCO2 = ncfile.createVariable('calcTCO2', 'f4', ('time'), zlib=True)
-        #calcTCO2.standard_name = ''
-        calcTCO2.long_name = 'calculated total dissolved inorganic carbon'
-        calcTCO2.units = 'umol/kg'
-        #calcTCO2.coordinates = ''
-        calcTCO2.instrument = 'instrument1'
-        calcpCO2 = ncfile.createVariable('calcpCO2', 'f4', ('time'), zlib=True)
-        #calcpCO2.standard_name = ''
-        #calcpCO2.long_name = 'calculated partial pressure of CO2'
-        calcpCO2.units = 'uatm'
-        #calcpCO2.coordinates = ''
-        calcpCO2.instrument = 'instrument1'
-        calcCO2aq = ncfile.createVariable('calcCO2aq', 'f4', ('time'), zlib=True)
-        #calcCO2aq.standard_name = ''
-        #calcCO2aq.long_name = ''
-        #calcCO2aq.units = ''
-        #calcCO2aq.coordinates = ''
-        #calcCO2aq.instrument = 'instrument1'
-        calcHCO3 = ncfile.createVariable('calcHCO3', 'f4', ('time'), zlib=True)
-        #calcHCO3.standard_name = ''
-        calcHCO3.long_name = 'calculated concentration of bicarbonate ion'
-        calcHCO3.units = 'umol/kg'
-        #calcHCO3.coordinates = ''
-        calcHCO3.instrument = 'instrument1'
-        calcCO3 = ncfile.createVariable('calcCO3', 'f4', ('time'), zlib=True)
-        #calcCO3.standard_name = ''
-        calcCO3.long_name = 'calculated concentration of carbonate ion'
-        calcCO3.units = 'umol/kg'
-        #calcCO3.coordinates = ''
-        calcCO3.instrument = 'instrument1'
-        calcOmega = ncfile.createVariable('calcOmega', 'f4', ('time'), zlib=True)
-        #calcOmega.standard_name = ''
-        calcOmega.long_name = 'calculated aragonite saturation state'
-        #calcOmega.units = ''
-        #calcOmega.coordinates = ''
-        calcOmega.instrument = 'instrument1'
-        calcpH = ncfile.createVariable('calcpH', 'f4', ('time'), zlib=True)
-        #calcpH.standard_name = ''
-        calcpH.long_name = 'calculated pH'
-        #calcpH.units = ''
-        #calcpH.coordinates = ''
-        calcpH.instrument = 'instrument1'
+        TCO2m_flagPrim = ncfile.createVariable(
+            '!_flagPrimary', 'B', ('time'), zlib=True)
+        TCO2m_flagPrim.long_name = '!, qc primary flag'
+        TCO2m_flagPrim.standard_name = "! status_flag"
+        TCO2m_flagPrim.flag_values = flagPrim_flag_values
+        TCO2m_flagPrim.flag_meanings = flagPrim_flag_meanings
+        TCO2m_flagSec = ncfile.createVariable(
+            '!_flagSecondary', 'B', ('time'), zlib=True)
+        TCO2m_flagSec.long_name = '!, qc secondary flag'
+        TCO2m_flagSec.flag_values = flagSec_flag_values
+        TCO2m_flagSec.flag_meanings = flagSec_flag_meanings
 
         # = ncfile.createVariable('', 'f4', ('time'), zlib=True)
         #.standard_name = ''
@@ -687,6 +733,12 @@ class CAF(SCCOOS):
         return ncfile
 
     def text2nc(self, filename):
+        def qc_tests(df, attr, sensor_span=None, user_span=None,
+        low_reps=None, high_reps=None, eps=None, low_thresh=None, high_thresh=None):
+            """Run qc
+
+            .. todo: set Nan's to missing or unknown?
+            """
         #print 'IN text2nc, filename:', filename #for testing!!!
 
         # Read file line by line into a pnadas dataframe
@@ -702,6 +754,16 @@ class CAF(SCCOOS):
         df.drop('Time', axis=1, inplace=True)
         df.columns = map(lambda x: x.replace('\xb5', ''), df.columns)
         #self.attrArr = df.columns
+
+        df = qc_tests(df, 'TSG_T', sensor_span=(0,30), user_span=(0,30),
+        low_reps=1800, high_reps=1800, eps=0.0001, low_thresh=1, high_thresh=1)
+        df = qc_tests(df, 'TSG_S', sensor_span=(10,35), user_span=(10,35),
+        low_reps=1800, high_reps=1800, eps=0.0001, low_thresh=1, high_thresh=1)
+        df = qc_tests(df, 'pCO2_atm', sensor_span=None, user_span=(0,1300),
+        low_reps=120, high_reps=120, eps=0.01, low_thresh=50, high_thresh=50)
+        df = qc_tests(df, 'TCO2_mol_kg', sensor_span=None, user_span=(0,2500),
+        low_reps=3, high_reps=3, eps=0.01, low_thresh=None, high_thresh=None)
+
 
         ## Get the last time stamp recored in this location's NetCDF file.
         lastNC = self.getLastNC("CAF-")
