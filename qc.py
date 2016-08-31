@@ -15,6 +15,11 @@ class QCFlags:
     MISSING = 9
 
 
+def check_nulls(arr):
+    flag_arr = np.ones_like(arr, dtype='uint8')
+    flag_arr[(np.isnan(arr))] = QCFlags.MISSING
+    return flag_arr
+
 # Could also use a class based approach, but believe this to be a little
 # simpler for simple tests which are run once and don't need to maintain
 # state.  This is a bit hardcoded, but if needed, one can always change the id
