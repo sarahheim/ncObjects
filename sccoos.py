@@ -750,6 +750,10 @@ class CAF(SCCOOS):
         #    cVar = ncfile.createVariable(c, 'f4', ('time'), zlib=True)
         #    cVar.long_name = c
 
+        ncfile.variables['lat'][0] = 33.1390
+        ncfile.variables['lon'][0] = -117.3390
+
+
         instrument1 = ncfile.createVariable('instrument1', 'i') #Licor??
         instrument1.make = ""
         instrument1.model = ""
@@ -775,13 +779,13 @@ class CAF(SCCOOS):
         df.rename(columns={'TSG_T':'temperature', 'TSG_S':'salinity'}, inplace=True)
         #self.attrArr = df.columns
 
-        df = self.qc_tests(df, 'temperature', miss_val='Nan', sensor_span=(0,30), user_span=(0,30),
-        low_reps=900, high_reps=1800, eps=0.0001, low_thresh=0.5, high_thresh=1)
-        df = self.qc_tests(df, 'salinity', miss_val='Nan', sensor_span=(10,35), user_span=(10,35),
-        low_reps=900, high_reps=1800, eps=0.0001, low_thresh=0.5, high_thresh=1)
-        df = self.qc_tests(df, 'pCO2_atm', miss_val='Nan', sensor_span=None, user_span=(0,1300),
-        low_reps=60, high_reps=120, eps=0.01, low_thresh=25, high_thresh=50)
-        df = self.qc_tests(df, 'TCO2_mol_kg', miss_val='Nan', sensor_span=None, user_span=(0,2500),
+        df = self.qc_tests(df, 'temperature', miss_val='Nan', sensor_span=(0,120), user_span=(0,30),
+        low_reps=60, high_reps=1800, eps=0.0001, low_thresh=0.5, high_thresh=1)
+        df = self.qc_tests(df, 'salinity', miss_val='Nan', sensor_span=(0,1000), user_span=(10,35),
+        low_reps=60, high_reps=1800, eps=0.0001, low_thresh=0.5, high_thresh=1)
+        df = self.qc_tests(df, 'pCO2_atm', miss_val='Nan', sensor_span=(0, 20000), user_span=(0,1300),
+        low_reps=20, high_reps=120, eps=0.01, low_thresh=25, high_thresh=50)
+        df = self.qc_tests(df, 'TCO2_mol_kg', miss_val='Nan', sensor_span=(0,2500), user_span=(0,2500),
         low_reps=2, high_reps=3, eps=0.01, low_thresh=None, high_thresh=None)
 
         ## Get the last time stamp recored in this location's NetCDF file.
