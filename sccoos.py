@@ -558,7 +558,7 @@ class CAF(SCCOOS):
             'ip':"132.239.92.62",
             'metadata_link':'www.sccoos.org.progress/data-products/',
             'summary': 'With funding from NOAA and IOOS, and in support of the West Coast shellfish industry; AOOS, NANOOS, CeNCOOS, and SCCOOS have added Ocean Acidification monitoring to its ongoing observations of the coastal ocean. This project funds a CO2 analyzer (Burkolator) that has been developed by scientists at Oregon State University. The SCCOOS Burkolator is located at the Carlsbad Aquafarm (carlsbadaquafarm.com) in San Diego and is operated by the Martz Lab at the Scripps Institution of Oceanography.',
-            'project':'Carlsbad Auqafarm',
+            'project':'Carlsbad Aquafarm',
             'processing_level':'QA/QC has not been performed',
             'cdm_data_type':'Station'
 #            'geospatial_lat_resolution':'',  # ?
