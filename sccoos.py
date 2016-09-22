@@ -99,6 +99,7 @@ class SASS(SCCOOS):
         self.logsdir = r'/data/InSitu/SASS/data/'
 #        self.ncpath = '/data/InSitu/SASS/netcdfs/'
         self.ncpath = '/home/scheim/NCobj/SASS'
+        self.codedir = '/data/InSitu/SASS/code/NCobj'
         self.txtFnformat = "%Y-%m/data-%Y%m%d.dat" #!!! Where is this used?
 
 #        self.columns = ['server_date', 'ip', 'temperature', 'conductivity', 'pressure', 'aux1',
@@ -420,8 +421,8 @@ class SASS(SCCOOS):
 
                 # Get proper column names for this station's dataframe.
                 archive_file_name = 'sass_'+self.ips[ip]['loc']+'_archive.csv'
-                #archive_file = os.path.join(codedir, archive_file_name)
-                archive_file = archive_file_name
+                archive_file = os.path.join(self.codedir, archive_file_name)
+                # archive_file = archive_file_name
                 df2_col = pd.read_csv(archive_file, header=None, error_bad_lines=False,
                                      parse_dates=[0], infer_datetime_format=True, skipinitialspace=True,
                                      index_col=0)
@@ -443,6 +444,17 @@ class SASS(SCCOOS):
 
                 # Apply QC tests
                 df3 = sassqc.qc_tests(df2)
+                # ## Replace qc testing lines, add missing value
+                # df = qc_tests(df, 'temperature', sensor_span=(-5,30), user_span=(8,30),
+                # low_reps=2, high_reps=6, eps=0.0001, low_thresh=2, high_thresh=3)
+                # df = qc_tests(df, 'conductivity', sensor_span=(0,9), user_span=None,
+                # low_reps=2, high_reps=5, eps=0.00005, low_thresh=None, high_thresh=None)
+                # df = qc_tests(df, 'pressure', sensor_span=(1,7), user_span=(0,20),
+                # low_reps=2, high_reps=5, eps=0.0005, low_thresh=4, high_thresh=5)
+                # df = qc_tests(df, 'salinity', sensor_span=(2,42), user_span=(30,34.5),
+                # low_reps=3, high_reps=5, eps=0.00004, low_thresh=0.4, high_thresh=0.5)
+                # df = qc_tests(df, 'chlorophyll', sensor_span=(0.02,50), user_span=(0.02,50),
+                # low_reps=2, high_reps=5, eps=0.001, low_thresh=0.8, high_thresh=1.0)
 
                 # Get location name from ip
                 loc = self.ips[ip]['loc']
@@ -519,7 +531,7 @@ class SASS(SCCOOS):
 
 
 class CAF(SCCOOS):
-    """Class for SCCOOS's Carlsbad Aqua Farm's burkolator. Currently, log files and netCDFs"""
+    """Class for SCCOOS's Carlsbad Aquafarm's burkolator. Currently, log files and netCDFs"""
     def __init__(self):
         """Setting up CAF variables
 
