@@ -13,7 +13,7 @@ class NC(object):
     Class documentation: This root 'nc' class is an abstract class.
     It will be the base to make a netcdf file.
     Its children are 'cdip' and 'sccoos' (grandchildren 'sass' & 'caf')
-    
+
     .. note::
         | Assume: nc files end in YYYY.nc
         | 'time' variable in data/ncfile
@@ -56,7 +56,7 @@ class NC(object):
     def text2nc(self, filename):
         """read texts in specific format and put in panda's dataframe, to be put in nc files
 
-        :param str filename: path+filename of text file to be read (already joined with **logsdir**) 
+        :param str filename: path+filename of text file to be read (already joined with **logsdir**)
 
         .. warning::
             When reading file, before adding to NC. Data prior to :func:`nc.NC.getLastDateNC` is
@@ -120,7 +120,7 @@ class NC(object):
         #print ncfile.__dict__.keys()
         #take out attributes that are no longer in the meta dictionary
         for k in ncfile.__dict__.keys():
-            if k not in c.metaDict:
+            if k not in self.metaDict:
                 print 'DELETED', k
                 ncfile.delncattr(k)
 
@@ -165,10 +165,17 @@ class NC(object):
         maxTimeS = max(times)
         minTimeT = time.gmtime(minTimeS)
         maxTimeT = time.gmtime(maxTimeS)
-        ncfile.time_coverage_start = tupToISO(minTimeT)
-        ncfile.time_coverage_end = tupToISO(maxTimeT)
-        ncfile.time_coverage_duration = ISOduration(minTimeS, maxTimeS)
-        ncfile.date_modified = time.ctime(time.time())
+        # ncfile.time_coverage_start = tupToISO(minTimeT)
+        # ncfile.time_coverage_end = tupToISO(maxTimeT)
+        # ncfile.time_coverage_duration = ISOduration(minTimeS, maxTimeS)
+        # ncfile.date_modified = time.ctime(time.time())
+        ncfile.setncatts({
+        "time_coverage_start": self.tupToISO(minTimeT),
+        "time_coverage_end": self.tupToISO(maxTimeT),
+        "time_coverage_duration": self.ISOduration(minTimeS, maxTimeS),
+        "date_modified": time.ctime(time.time()),
+        "date_issued": time.ctime(time.time()),
+        })
 
     def fileSizeChecker(self, ncfilepath):
         """filesize checker/resizer as a NC method.
@@ -207,7 +214,7 @@ class NC(object):
             for attr in self.attrArr:
                 #atLen = len(ncfile.variables[attr][:])
                 ncfile.variables[attr][timeLen:] = subset[attr].values
-#        NCtimeMeta(ncfile) #commented out only for testing!!!
+        self.NCtimeMeta(ncfile) #commented out only for testing!!!
         ncfile.close()
 
 #class CDIP(NC):

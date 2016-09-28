@@ -26,11 +26,18 @@ class SCCOOS(nc.NC):
         #print "init sccoos"
         ##Meta
         self.metaDict.update({
-            'naming_authority':'sccoos.org',
-            'acknowledgment':'The Southern California Coastal Ocean Observing System (SCCOOS)',
+            'creator_url':'https://sccoos.org',
+            'creator_name':'Southern California Coastal Ocean Observing System (SCCOOS)' + \
+            ' at Scripps Institution of Oceanography (SIO)',
+            'contributor_name':'Southern California Coastal Ocean Observing System (SCCOOS)' + \
+            ' at Scripps Institution of Oceanography (SIO), NOAA, SCCOOS, IOOS',
+            'acknowledgment':'The Southern California Coastal Ocean Observing System (SCCOOS)' + \
+            ' is one of eleven regions that contribute to the national ' + \
+            'U.S. Integrated Ocean Observing System (IOOS).',
             'publisher_name':'Southern California Coastal Ocean Observing System',
             'publisher_url':'http://sccoos.org',
             'publisher_email':'info@sccoos.org',
+            'naming_authority':'sccoos.org',
             'source':'insitu observations'
             })
 
@@ -126,7 +133,7 @@ class SASS(SCCOOS):
                     'lon': -118.499,
                     'depth': '2',
                     'url': 'http://environment.ucla.edu/',
-                    'inst': 'Institute of the Environment at the University of California, Los Angeles'},
+                    'inst': 'Institute of the Environment at University of California, Los Angeles'},
            'scripps_pier': {'loc': 'scripps_pier',
                     'loc_name': 'Scripps Pier',
                     'lat': 32.867,
@@ -148,8 +155,9 @@ class SASS(SCCOOS):
            'salinity_flagPrimary', 'salinity_flagSecondary',
            'chlorophyll_flagPrimary', 'chlorophyll_flagSecondary']
 
-        self.metaDict = {
+        self.metaDict.update({
             ##Meta
+            'contributor_role': 'station operation, station funding, data management',
             'metadata_link':'www.sccoos.org.progress/data-products/automateed-shore-stations/',
             'summary':'Automated shore station with a suite of sensors that are ' +\
             'attached to piers along the nearshore California coast. ' + \
@@ -167,16 +175,33 @@ class SASS(SCCOOS):
             'geospatial_vertical_units':'m',
             'geospatial_vertical_resolution':'1',
             'geospatial_vertical_positive':'down'
-            }
+            })
 
     def createNCshell(self, ncfile, sta):
         """
-
         .. todo: move createVariables to external text file??
         """
         self.addNCshell_SCCOOS(ncfile)
-        print "SASS createNCshell"
+        print "SASS createNCshell", ncfile
         ncfile.setncatts(self.metaDict)
+        ncfile.setncatts({
+        "title":self.metaDict["project"]+": "+self.staMeta[sta]['loc_name'],
+        "date_created": time.ctime(time.time()),
+        "history": "Created: "+time.ctime(time.time()),
+        "geospatial_lat_min": self.staMeta[sta]['lat'],
+        "geospatial_lat_max": self.staMeta[sta]['lat'],
+        "geospatial_lon_min": self.staMeta[sta]['lon'],
+        "geospatial_lon_max": self.staMeta[sta]['lon'],
+        "geospatial_vertical_min": self.staMeta[sta]['depth'],
+        "geospatial_vertical_max": self.staMeta[sta]['depth'],
+        'institution': self.staMeta[sta]['inst'],
+        'comment': 'The '+self.staMeta[sta]['loc_name']+' automated shore station operated' + \
+        ' by ' + self.staMeta[sta]['inst'] + \
+        ' is mounted at a nominal depth of '+ self.staMeta[sta]['depth'] +' meters MLLW. The ' + \
+        'instrument package includes a Seabird SBE 16plus SEACAT Conductivity, ' + \
+        'Temperature, and Pressure recorder, and a Seapoint Chlorophyll Fluorometer ' + \
+        'with a 0-50 ug/L gain setting.',
+        })
         #Move to NC/SCCOOS class???
         flagPrim_flag_values = bytearray([1, 2, 3, 4, 9]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
         flagPrim_flag_meanings = 'GOOD_DATA UNKNOWN SUSPECT BAD_DATA MISSING'
@@ -543,7 +568,7 @@ class CAF(SCCOOS):
               which may need to be syncing/ files copied from CAF_2016 and CAF_Latest
         """
         super(CAF, self).__init__()
-        #print "init caf"
+        print "init caf"
         #use this directory for text2nc_append()
         # self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_Latest/'
         self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted/'
@@ -554,6 +579,7 @@ class CAF(SCCOOS):
 #        self.fnformat = "CAF_RTproc_%Y%m%d.dat" #!!!
         self.txtFnPre = 'CAF_RTproc_'
         self.txtFnDatePattern = '%Y%m%d%H%M'
+        print "self.ncpath", self.ncpath
 
         self.attrArr = ['temperature', 'temperature_flagPrimary', 'temperature_flagSecondary',
         'salinity', 'salinity_flagPrimary', 'salinity_flagSecondary',
@@ -569,7 +595,13 @@ class CAF(SCCOOS):
             'processing_level':'QA/QC has not been performed', ##!!!
             'ip':"132.239.92.62",
             'metadata_link':'www.sccoos.org.progress/data-products/',
-            'summary': 'With funding from NOAA and IOOS, and in support of the West Coast shellfish industry; AOOS, NANOOS, CeNCOOS, and SCCOOS have added Ocean Acidification monitoring to its ongoing observations of the coastal ocean. This project funds a CO2 analyzer (Burkolator) that has been developed by scientists at Oregon State University. The SCCOOS Burkolator is located at the Carlsbad Aquafarm (carlsbadaquafarm.com) in San Diego and is operated by the Martz Lab at the Scripps Institution of Oceanography.',
+            'summary': 'With funding from NOAA and IOOS, and in support of the West Coast' + \
+            ' shellfish industry; AOOS, NANOOS, CeNCOOS, and SCCOOS have added Ocean Acidification' + \
+            ' monitoring to its ongoing observations of the coastal ocean. This project funds' + \
+            ' a CO2 analyzer (Burkolator) that has been developed by scientists at Oregon State' + \
+            ' University. The SCCOOS Burkolator is located at the Carlsbad Aquafarm' + \
+            ' (carlsbadaquafarm.com) in San Diego and is operated by the Martz Lab at' + \
+            ' the Scripps Institution of Oceanography.',
             'project':'Carlsbad Aquafarm',
             'processing_level':'QA/QC has not been performed',
             'cdm_data_type':'Station'
@@ -828,10 +860,13 @@ class CAF(SCCOOS):
                 filesArr = os.listdir(yrpath)
                 filesArr.sort()
                 for fn in filesArr:
-                    print fn
+                    # print 'log file:', fn
                     if fn.startswith(self.txtFnPre):
                         filepath = os.path.join(yrpath, fn)
-                        CAF().text2nc(filepath)
+                        print 'use log file:', filepath
+                        self.text2nc(filepath)
+                    else:
+                        print 'not using: ', fn
 
     def text2nc_append(self):
         """CAF data files are set by size. """
