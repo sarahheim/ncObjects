@@ -126,7 +126,6 @@ class NC(object):
         #print ncfile.ncattrs()
         print ncfile.__dict__
         ncfile.setncatts(self.metaDict)
-        ncfile.date_modified = time.ctime(time.time())
         print "EDITED"
         #print ncfile.__dict__.keys()
         #take out attributes that are no longer in the meta dictionary
@@ -134,7 +133,7 @@ class NC(object):
             if k not in self.metaDict:
                 print 'DELETED', k
                 ncfile.delncattr(k)
-
+        self.NCtimeMeta(ncfile)
         print "DONE"
         print ncfile.__dict__#.keys()
         ncfile.close()
@@ -226,7 +225,7 @@ class NC(object):
             for attr in self.attrArr:
                 #atLen = len(ncfile.variables[attr][:])
                 ncfile.variables[attr][timeLen:] = subset[attr].values
-        self.NCtimeMeta(ncfile) #commented out only for testing!!!
+        self.NCtimeMeta(ncfile)
         ncfile.close()
 
 #class CDIP(NC):
