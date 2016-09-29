@@ -179,12 +179,13 @@ class SASS(SCCOOS):
 
     def createNCshell(self, ncfile, sta):
         """
-        .. todo: move createVariables to external text file??
+        .. todo::
+            - add more history for stations
+            - move createVariables to external text file??
         """
         self.addNCshell_SCCOOS(ncfile)
         print "SASS createNCshell", ncfile
-        ncfile.setncatts(self.metaDict)
-        ncfile.setncatts({
+        self.metaDict.update({
         "title":self.metaDict["project"]+": "+self.staMeta[sta]['loc_name'],
         "date_created": time.ctime(time.time()),
         "history": "Created: "+time.ctime(time.time()),
@@ -202,6 +203,7 @@ class SASS(SCCOOS):
         'Temperature, and Pressure recorder, and a Seapoint Chlorophyll Fluorometer ' + \
         'with a 0-50 ug/L gain setting.',
         })
+        ncfile.setncatts(self.metaDict)
         #Move to NC/SCCOOS class???
         flagPrim_flag_values = bytearray([1, 2, 3, 4, 9]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
         flagPrim_flag_meanings = 'GOOD_DATA UNKNOWN SUSPECT BAD_DATA MISSING'
@@ -556,11 +558,12 @@ class SASS(SCCOOS):
 
 
 class CAF(SCCOOS):
-    """Class for SCCOOS's Carlsbad Aquafarm's burkolator. Currently, log files and netCDFs"""
+    """Class for SCCOOS's Carlsbad Aquafarm's burkolator. Currently, log files and netCDFs.
+    Rename to OA/BURK??"""
     def __init__(self):
         """Setting up CAF variables
 
-        .. todo: change ncpath (currently local for testing)
+        .. todo: add more metadata to metaDict
 
         .. warning::
             - for text2nc_append: use **CAF_Latest** folder
@@ -570,8 +573,7 @@ class CAF(SCCOOS):
         super(CAF, self).__init__()
         print "init caf"
         #use this directory for text2nc_append()
-        # self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_Latest/'
-        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted/'
+        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_Latest/'
         #use this directory for text2nc_all()
 #        self.logsdir = r'/data/InSitu/Burkolator/data/CarlsbadAquafarm/CAF_sorted'
         self.ncpath = '/data/InSitu/Burkolator/netcdf'
@@ -590,11 +592,16 @@ class CAF(SCCOOS):
     #    'calcHCO3', 'calcCO3', 'calcOmega', 'calcpH']
 
         ##Meta
+        self.staMeta = {
+            'lat': 33.1390,
+            'lon': -117.3390
+        }
+
         self.metaDict.update({
             'keywords':'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY, OCEAN CHEMISTRY,',##!!!
-            'processing_level':'QA/QC has not been performed', ##!!!
+            'processing_level':'QA/QC has been performed', ##!!!
             'ip':"132.239.92.62",
-            'metadata_link':'www.sccoos.org.progress/data-products/',
+            'metadata_link':'www.sccoos.org/data/oa/',
             'summary': 'With funding from NOAA and IOOS, and in support of the West Coast' + \
             ' shellfish industry; AOOS, NANOOS, CeNCOOS, and SCCOOS have added Ocean Acidification' + \
             ' monitoring to its ongoing observations of the coastal ocean. This project funds' + \
@@ -602,14 +609,28 @@ class CAF(SCCOOS):
             ' University. The SCCOOS Burkolator is located at the Carlsbad Aquafarm' + \
             ' (carlsbadaquafarm.com) in San Diego and is operated by the Martz Lab at' + \
             ' the Scripps Institution of Oceanography.',
-            'project':'Carlsbad Aquafarm',
+            'project':'Burkolator, Carlsbad Aquafarm',
+            'title':'Burkolator: Carlsbad Aquafarm',
             'processing_level':'QA/QC has not been performed',
-            'cdm_data_type':'Station'
-#            'geospatial_lat_resolution':'',  # ?
-#            'geospatial_lon_resolution':'',  # ?
-#            'geospatial_vertical_units':'',  # ???
-#            'geospatial_vertical_resolution':'',  # ???
-#            'geospatial_vertical_positive':''  # ???
+            'cdm_data_type':'Station',
+            'history':"Carlsbad Aquafarm cultivates Mediterranean Blue Mussels,' + \
+            ' Pacific Oysters and Ogo. The company has been in operation since 1990 in Carlsbad.",
+            'institution': 'Southern California Coastal Ocean Observing System (SCCOOS)' + \
+            ' at Scripps Institution of Oceanography (SIO)', #or Carlsbad Aquafarm?
+            "geospatial_lat_min": self.staMeta['lat'],
+            "geospatial_lat_max": self.staMeta['lat'],
+            "geospatial_lon_min": self.staMeta['lon'],
+            "geospatial_lon_max": self.staMeta['lon'],
+            # 'contributor_role': 'station operation, station funding, data management', #??
+            # 'comment':'',
+            # "geospatial_vertical_min": self.staMeta['depth'],
+            # "geospatial_vertical_max": self.staMeta['depth'],
+            # 'contributor_role': 'station operation, station funding, data management',
+            # 'geospatial_lat_resolution':'',  # ?
+            # 'geospatial_lon_resolution':'',  # ?
+            # 'geospatial_vertical_units':'',  # ???
+            # 'geospatial_vertical_resolution':'',  # ???
+            # 'geospatial_vertical_positive':''  # ???
             })
 
     def qc_tests(self, df, attr, miss_val=None, sensor_span=None, user_span=None, low_reps=None,
@@ -689,6 +710,9 @@ class CAF(SCCOOS):
         #NOT using: 'pH_aux', 'O2', 'O2sat'
         print "CAF createNCshell"
         #ncfile.ip = "132.239.92.62"
+        self.metaDict.update({
+        "date_created": time.ctime(time.time())
+        })
         ncfile.setncatts(self.metaDict)
         #Move to NC/SCCOOS class???
         flagPrim_flag_values = bytearray([1, 2, 3, 4, 9]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
@@ -794,8 +818,8 @@ class CAF(SCCOOS):
         #    cVar = ncfile.createVariable(c, 'f4', ('time'), zlib=True)
         #    cVar.long_name = c
 
-        ncfile.variables['lat'][0] = 33.1390
-        ncfile.variables['lon'][0] = -117.3390
+        ncfile.variables['lat'][0] = self.staMeta['lat']
+        ncfile.variables['lon'][0] = self.staMeta['lon']
 
 
         instrument1 = ncfile.createVariable('instrument1', 'i') #Licor??

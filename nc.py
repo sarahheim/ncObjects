@@ -108,6 +108,17 @@ class NC(object):
         """on a single file: run when ONLY nc METADATA needs updating, NOT any data
 
         :param str ncName: file name of netCDF to be made, with path
+
+        .. note::
+            Function uses metaDict variables set in various levels of __init__.
+
+        .. todo::
+            - Shouldn't delete global attributes set in ``NCtimeMeta`` :
+            time_coverage_duration, date_issued, date_modified, time_coverage_start, time_coverage_end
+            - Except SASS object now sets ``metaDict`` in ``createNCshell``. Therefore,
+            these global attributes won't work with this function.
+            These include: title, date_created, history, geospatial_lat/lon/vertical_min/max,
+            institution, comment.
         """
         print ncName
         ncfile = Dataset(ncName, 'a', format='NETCDF4')
@@ -185,8 +196,9 @@ class NC(object):
             fileMb = int(os.path.getsize(ncfilepath) / 1000000)
             if fileMb > 10:
 #                tmpfilepath = '/tmp/' + ncfilename
-#                temp = '/usr/local/bin/nccopy'
-                temp = '/home/scheim/NCobj/nccopy'
+                # temp = '/usr/local/bin/nccopy'
+                # temp = '/home/scheim/NCobj/nccopy'
+                temp = os.path.join(self.ncpath,'../tmp_nc')
                 tmpfilepath = os.path.join(temp, nameOnly)
                 origSz = os.path.getsize(ncfilepath)
                 subprocess.call(['nccopy', ncfilepath, tmpfilepath])
