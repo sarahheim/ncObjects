@@ -200,7 +200,8 @@ class NC(object):
                 temp = os.path.join(self.ncpath,'../tmp_nc')
                 tmpfilepath = os.path.join(temp, nameOnly)
                 origSz = os.path.getsize(ncfilepath)
-                subprocess.call(['nccopy', ncfilepath, tmpfilepath])
+                # subprocess.call(['nccopy', ncfilepath, tmpfilepath])
+                subprocess.call(['cp', ncfilepath, tmpfilepath])
                 subprocess.call(['mv', tmpfilepath, ncfilepath])
                 print 'RESIZED FILE: prev:', origSz, os.path.getsize(ncfilepath)
 
