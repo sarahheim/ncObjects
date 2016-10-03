@@ -193,15 +193,23 @@ class NC(object):
         nameOnly = ncfilepath.split('/')[-1]
         if os.path.isfile(ncfilepath):
             fileMb = int(os.path.getsize(ncfilepath) / 1000000)
+            print "Size: Mb", fileMb, ncfilepath
             if fileMb > 10:
+                print "file is getting large, resize"
 #                tmpfilepath = '/tmp/' + ncfilename
                 # temp = '/usr/local/bin/nccopy'
                 # temp = '/home/scheim/NCobj/nccopy'
                 temp = os.path.join(self.ncpath,'../tmp_nc')
+                envPath = r'/home/uproc/anaconda/envs/log2ncEnv/bin/'
                 tmpfilepath = os.path.join(temp, nameOnly)
                 origSz = os.path.getsize(ncfilepath)
+                # print "tmpfilepath", os.path.isdir(temp), tmpfilepath
+                # print "ncfilepath", os.path.isfile(ncfilepath), ncfilepath
+                # print "envPath", os.path.isdir(envPath), envPath
                 # subprocess.call(['nccopy', ncfilepath, tmpfilepath])
-                subprocess.call(['cp', ncfilepath, tmpfilepath])
+                subprocess.call(['nccopy', ncfilepath, tmpfilepath], #subprocess.Popen
+                env={"PATH":envPath}
+                )
                 subprocess.call(['mv', tmpfilepath, ncfilepath])
                 print 'RESIZED FILE: prev:', origSz, os.path.getsize(ncfilepath)
 
