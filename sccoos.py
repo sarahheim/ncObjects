@@ -145,6 +145,7 @@ class SASS(SCCOOS):
         # IP Address of Shorestations, connecting to appropriate self.staMeta dictionary
         self.ips = {'166.148.81.45': self.staMeta['stearns_wharf'],
        '166.241.139.252': self.staMeta['newport_pier'],
+       '166.140.102.113': self.staMeta['newport_pier'],
        '166.241.175.135': self.staMeta['santa_monica_pier'],
        '132.239.117.226': self.staMeta['scripps_pier'],
        '172.16.117.233': self.staMeta['scripps_pier']}
@@ -428,9 +429,10 @@ class SASS(SCCOOS):
 
         grouped = df.groupby('ip')
         for ip in grouped.indices:
- #           print ip
             df2 = grouped.get_group(ip)
+            # print str(len(df2.index)), ip
             if ip in self.ips.keys():
+                # Get location name from ip
                 loc = self.ips[ip]['loc']
  #               print ip, loc
  #               print df2.shape
@@ -483,9 +485,6 @@ class SASS(SCCOOS):
                 # df = qc_tests(df, 'chlorophyll', sensor_span=(0.02,50), user_span=(0.02,50),
                 # low_reps=2, high_reps=5, eps=0.001, low_thresh=0.8, high_thresh=1.0)
 
-                # Get location name from ip
-                loc = self.ips[ip]['loc']
-
                 ## Get last recorded date
                 #LRpd = pd.to_datetime(lastRecorded, utc=None)
                 #print LRpd
@@ -499,7 +498,7 @@ class SASS(SCCOOS):
                 pd_getLastDateNC = pd.to_datetime(self.getLastDateNC(lastNC), unit='s', utc=None)
                 df3 = df3[pd.to_datetime(df3.index,utc=None) > pd_getLastDateNC ]
 
-                #print str(len(df3.index)), loc,
+                print str(len(df3.index)), loc
 
                 if len(df3.index) > 0:
                     # Group by Year and iterate making/appending to NetCDF files
