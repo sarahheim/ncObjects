@@ -2,14 +2,15 @@
 # Author Sarah Heim
 # Date create: 2016
 # Description: adjusting to class/objects, inheriting NC/SASS classes
+#   This class is created for Outfall
 #
 
 import os, time
 import numpy as np
 import pandas as pd
-from netCDF4 import Dataset
-from abc import ABCMeta, abstractmethod
-import sccoos
+# from netCDF4 import Dataset
+# from abc import ABCMeta, abstractmethod
+import sccoos, qc
 
 class Outfall(sccoos.SCCOOS):
     """Class for SCCOOS's Outfall. Previously CORDC."""

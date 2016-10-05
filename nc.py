@@ -206,10 +206,12 @@ class NC(object):
                 # print "tmpfilepath", os.path.isdir(temp), tmpfilepath
                 # print "ncfilepath", os.path.isfile(ncfilepath), ncfilepath
                 # print "envPath", os.path.isdir(envPath), envPath
-                # subprocess.call(['nccopy', ncfilepath, tmpfilepath])
-                subprocess.call(['nccopy', ncfilepath, tmpfilepath], #subprocess.Popen
-                env={"PATH":envPath}
-                )
+                if self.crontab == True:
+                    subprocess.call(['nccopy', ncfilepath, tmpfilepath], #subprocess.Popen
+                    env={"PATH":envPath}
+                    )
+                else:
+                    subprocess.call(['nccopy', ncfilepath, tmpfilepath])
                 subprocess.call(['mv', tmpfilepath, ncfilepath])
                 print 'RESIZED FILE: prev:', origSz, os.path.getsize(ncfilepath)
 
