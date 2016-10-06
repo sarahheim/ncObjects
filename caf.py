@@ -71,8 +71,8 @@ class CAF(sccoos.SCCOOS):
             'title':'Burkolator: Carlsbad Aquafarm',
             'processing_level':'QA/QC has not been performed',
             'cdm_data_type':'Station',
-            'history':"Carlsbad Aquafarm cultivates Mediterranean Blue Mussels,' + \
-            ' Pacific Oysters and Ogo. The company has been in operation since 1990 in Carlsbad.",
+            'history':'Carlsbad Aquafarm cultivates Mediterranean Blue Mussels,' + \
+            ' Pacific Oysters and Ogo. The company has been in operation since 1990 in Carlsbad.',
             'institution': 'Southern California Coastal Ocean Observing System (SCCOOS)' + \
             ' at Scripps Institution of Oceanography (SIO)', #or Carlsbad Aquafarm?
             "geospatial_lat_min": self.staMeta['lat'],
@@ -164,13 +164,10 @@ class CAF(sccoos.SCCOOS):
         return df
 
     def createNCshell(self, ncfile, ignore):
-        self.addNCshell_SCCOOS(ncfile)
         #NOT using: 'pH_aux', 'O2', 'O2sat'
         print "CAF createNCshell"
         #ncfile.ip = "132.239.92.62"
-        self.metaDict.update({
-        "date_created": time.ctime(time.time())
-        })
+        self.metaDict.update({"date_created": self.tupToISO(time.gmtime())})
         ncfile.setncatts(self.metaDict)
         #Move to NC/SCCOOS class???
         flagPrim_flag_values = bytearray([1, 2, 3, 4, 9]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
@@ -276,14 +273,18 @@ class CAF(sccoos.SCCOOS):
         #    cVar = ncfile.createVariable(c, 'f4', ('time'), zlib=True)
         #    cVar.long_name = c
 
-        ncfile.variables['lat'][0] = self.staMeta['lat']
-        ncfile.variables['lon'][0] = self.staMeta['lon']
-
-
         instrument1 = ncfile.createVariable('instrument1', 'i') #Licor??
         instrument1.make = ""
         instrument1.model = ""
         instrument1.comment = "beta Burkelator" #?
+
+        platform1 = ncfile.createVariable('platform1', 'i')
+        platform1.long_name = self.metaDict['project']
+        platform1.ioos_code = "urn:ioos:sensor:sccoos:carlsbad"
+
+        self.addNCshell_SCCOOS(ncfile)
+        ncfile.variables['lat'][0] = self.staMeta['lat']
+        ncfile.variables['lon'][0] = self.staMeta['lon']
 
         return ncfile
 

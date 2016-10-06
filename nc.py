@@ -80,6 +80,7 @@ class NC(object):
     def addNCshell_NC(self, ncfile):
         """When creating new nc file, at some standard metadata
 
+        .. note: Use at the **end** of ``createNCshell``, at least after createVariable of ``time``
         :param str ncfile: file name of netCDF to be made, sans-path (uses **ncpath**)
         """
         lat = ncfile.createVariable('lat', 'f4')
@@ -99,7 +100,7 @@ class NC(object):
         dep.long_name = 'depth'
         dep.units = 'm'
         dep.axis = 'Z'
-        dep.positive = 'down'
+        dep.positive = 'down' #??
 #        ncfile.variables['depth'][0] = ips[ip]['depth']
 
         return ncfile
@@ -183,8 +184,8 @@ class NC(object):
         "time_coverage_start": self.tupToISO(minTimeT),
         "time_coverage_end": self.tupToISO(maxTimeT),
         "time_coverage_duration": self.ISOduration(minTimeS, maxTimeS),
-        "date_modified": time.ctime(time.time()),
-        "date_issued": time.ctime(time.time()),
+        "date_modified": self.tupToISO(time.gmtime()), #time.ctime(time.time()),
+        "date_issued": self.tupToISO(time.gmtime()), #time.ctime(time.time()),
         })
 
     def fileSizeChecker(self, ncfilepath):

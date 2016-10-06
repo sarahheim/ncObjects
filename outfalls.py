@@ -61,10 +61,10 @@ Storm water run-off''',
             })
 
     def createNCshell(self, ncfile, ignore):
-        self.addNCshell_SCCOOS(ncfile)
         #NOT using: 'pH_aux', 'O2', 'O2sat'
         print "Outfall createNCshell"
         #ncfile.ip = "132.239.92.62"
+        self.metaDict.update({"date_created": self.tupToISO(time.gmtime())})
         ncfile.setncatts(self.metaDict)
 
         # Create Dimensions
@@ -100,6 +100,11 @@ Storm water run-off''',
         instrument1.model = ""
         instrument1.comment = "" #?
 
+        platform1 = ncfile.createVariable('platform1', 'i')
+        platform1.long_name = ""
+        platform1.ioos_code = "urn:ioos:sensor:sccoos"
+
+        self.addNCshell_SCCOOS(ncfile)
         ncfile.variables['lat'][0] = 32.86616
         ncfile.variables['lon'][0] = -117.2542
         # ncfile.variables['depth'][0] =

@@ -108,12 +108,11 @@ class SASS(sccoos.SCCOOS):
             - add more history for stations
             - move createVariables to external text file??
         """
-        self.addNCshell_SCCOOS(ncfile)
         print "SASS createNCshell", ncfile
         self.metaDict.update({
         "title":self.metaDict["project"]+": "+self.staMeta[sta]['loc_name'],
-        "date_created": time.ctime(time.time()),
-        "history": "Created: "+time.ctime(time.time()),
+        "date_created": self.tupToISO(time.gmtime()), #time.ctime(time.time()),
+        "history": "Created: "+ self.tupToISO(time.gmtime()), #time.ctime(time.time()),
         "geospatial_lat_min": self.staMeta[sta]['lat'],
         "geospatial_lat_max": self.staMeta[sta]['lat'],
         "geospatial_lon_min": self.staMeta[sta]['lon'],
@@ -260,10 +259,6 @@ class SASS(sccoos.SCCOOS):
         cDr.units = 'mA'
         cDr.coordinates = 'time lat lon depth'
 
-        ncfile.variables['lat'][0] = self.staMeta[sta]['lat']
-        ncfile.variables['lon'][0] = self.staMeta[sta]['lon']
-        ncfile.variables['depth'][0] = self.staMeta[sta]['depth']
-
         #What is this for???
         nm = ncfile.createVariable('station', 'S1', 'name_strlen')
         nm.long_name = 'station_name'
@@ -280,12 +275,24 @@ class SASS(sccoos.SCCOOS):
         instrument1 = ncfile.createVariable('instrument1', 'i')
         instrument1.make = "Seabird"
         instrument1.model = "SBE 16plus SEACAT"
-        instrument1.comment = "Seabird SBE 16plus SEACAT Conductivity, Temperature, and Pressure recorder. Derived output Salinity."
+        instrument1.comment = "Seabird SBE 16plus SEACAT Conductivity, Temperature," + \
+        " and Pressure recorder. Derived output Salinity."
+        instrument1.ioos_code = "urn:ioos:sensor:sccoos:"+self.staMeta[sta]['loc']+":conductivity_temperature_pressure"
 
         instrument2 = ncfile.createVariable('instrument2', 'i')
         instrument2.make = "Seapoint"
         instrument2.model = "Chlorophyll Fluorometer"
         instrument2.comment = "Seapoint Chlorophyll Fluorometer with a 0-50 ug/L gain setting."
+        instrument2.ioos_code = "urn:ioos:sensor:sccoos:"+self.staMeta[sta]['loc']+":chlorophyll"
+
+        platform1 = ncfile.createVariable('platform1', 'i')
+        platform1.long_name = self.staMeta[sta]['loc_name']
+        platform1.ioos_code = "urn:ioos:sensor:sccoos:"+self.staMeta[sta]['loc']
+
+        self.addNCshell_SCCOOS(ncfile)
+        ncfile.variables['lat'][0] = self.staMeta[sta]['lat']
+        ncfile.variables['lon'][0] = self.staMeta[sta]['lon']
+        ncfile.variables['depth'][0] = self.staMeta[sta]['depth']
 
         return ncfile
 
