@@ -24,14 +24,15 @@ class SCCOOS(nc.NC):
         #print "init sccoos"
         ##Meta
         self.metaDict.update({
-            'creator_url':'https://sccoos.org',
-            'creator_name':'Southern California Coastal Ocean Observing System (SCCOOS)' + \
-            ' at Scripps Institution of Oceanography (SIO)',
-            'contributor_name':'Southern California Coastal Ocean Observing System (SCCOOS)' + \
-            ' at Scripps Institution of Oceanography (SIO), NOAA, SCCOOS, IOOS',
             'acknowledgment':'The Southern California Coastal Ocean Observing System (SCCOOS)' + \
-            ' is one of eleven regions that contribute to the national ' + \
-            'U.S. Integrated Ocean Observing System (IOOS).',
+            ' is one of eleven regions that contribute to the national' + \
+            ' U.S. Integrated Ocean Observing System (IOOS).',
+            # 'contributor_name':'Southern California Coastal Ocean Observing System (SCCOOS)' + \
+            # ' at Scripps Institution of Oceanography (SIO), NOAA, SCCOOS, IOOS',
+            # 'creator_name':'Southern California Coastal Ocean Observing System (SCCOOS)' + \
+            # ' at Scripps Institution of Oceanography (SIO)',
+            # 'creator_url':'https://sccoos.org',
+            'institution': 'Scripps Institution of Oceanography, University of California San Diego',
             'publisher_name':'Southern California Coastal Ocean Observing System',
             'publisher_url':'http://sccoos.org',
             'publisher_email':'info@sccoos.org',

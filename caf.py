@@ -56,10 +56,23 @@ class CAF(sccoos.SCCOOS):
         }
 
         self.metaDict.update({
-            'keywords':'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY, OCEAN CHEMISTRY,',##!!!
-            'processing_level':'QA/QC has been performed', ##!!!
+            'cdm_data_type':'Station',
+            'contributor_name': 'Carlsbad Aquafarm/SCCOOS, SCCOOS/IOOS/NOAA, SCCOOS',
+            'creator_name':'Scripps Institution of Oceanography (SIO)', # Todd Martz/ Martz Lab?
+            'creator_url':'https://sccoos.org', #Martz Lab url?
+            "geospatial_lat_min": self.staMeta['lat'],
+            "geospatial_lat_max": self.staMeta['lat'],
+            "geospatial_lon_min": self.staMeta['lon'],
+            "geospatial_lon_max": self.staMeta['lon'],
+            'history':'Carlsbad Aquafarm cultivates Mediterranean Blue Mussels,' + \
+            ' Pacific Oysters and Ogo. The company has been in operation since 1990 in Carlsbad.',
             'ip':"132.239.92.62",
+            'institution': 'Southern California Coastal Ocean Observing System (SCCOOS)' + \
+            ' at Scripps Institution of Oceanography (SIO)', #or Carlsbad Aquafarm?
+            'keywords':'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY, OCEAN CHEMISTRY,',##!!!
             'metadata_link':'www.sccoos.org/data/oa/',
+            'processing_level':'QA/QC has been performed', ##!!!
+            'project':'Burkolator, Carlsbad Aquafarm',
             'summary': 'With funding from NOAA and IOOS, and in support of the West Coast' + \
             ' shellfish industry; AOOS, NANOOS, CeNCOOS, and SCCOOS have added Ocean Acidification' + \
             ' monitoring to its ongoing observations of the coastal ocean. This project funds' + \
@@ -67,18 +80,10 @@ class CAF(sccoos.SCCOOS):
             ' University. The SCCOOS Burkolator is located at the Carlsbad Aquafarm' + \
             ' (carlsbadaquafarm.com) in San Diego and is operated by the Martz Lab at' + \
             ' the Scripps Institution of Oceanography.',
-            'project':'Burkolator, Carlsbad Aquafarm',
             'title':'Burkolator: Carlsbad Aquafarm',
-            'processing_level':'QA/QC has not been performed',
-            'cdm_data_type':'Station',
-            'history':'Carlsbad Aquafarm cultivates Mediterranean Blue Mussels,' + \
-            ' Pacific Oysters and Ogo. The company has been in operation since 1990 in Carlsbad.',
-            'institution': 'Southern California Coastal Ocean Observing System (SCCOOS)' + \
-            ' at Scripps Institution of Oceanography (SIO)', #or Carlsbad Aquafarm?
-            "geospatial_lat_min": self.staMeta['lat'],
-            "geospatial_lat_max": self.staMeta['lat'],
-            "geospatial_lon_min": self.staMeta['lon'],
-            "geospatial_lon_max": self.staMeta['lon'],
+
+
+
             # 'contributor_role': 'station operation, station funding, data management', #??
             # 'comment':'',
             # "geospatial_vertical_min": self.staMeta['depth'],

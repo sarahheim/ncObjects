@@ -42,6 +42,7 @@ class SASS(sccoos.SCCOOS):
                     'lat': 34.408,
                     'lon': -119.685,
                     'depth': '2',
+                    'abbr':'UCSB',
                     'url': 'http://msi.ucsb.edu/',
                     'inst': 'Marine Science Institute at University of California, Santa Barbara'},
            'newport_pier': {'loc': 'newport_pier',
@@ -49,6 +50,7 @@ class SASS(sccoos.SCCOOS):
                    'lat': 33.6061,
                    'lon': -117.9311,
                    'depth': '2',
+                   'abbr':'UCI',
                    'url': 'http://uci.edu/',
                    'inst': 'University of California, Irvine'},
            'santa_monica_pier': {'loc': 'santa_monica_pier',
@@ -56,6 +58,7 @@ class SASS(sccoos.SCCOOS):
                     'lat': 34.008,
                     'lon': -118.499,
                     'depth': '2',
+                    'abbr':'UCLA',
                     'url': 'http://environment.ucla.edu/',
                     'inst': 'Institute of the Environment at University of California, Los Angeles'},
            'scripps_pier': {'loc': 'scripps_pier',
@@ -63,6 +66,7 @@ class SASS(sccoos.SCCOOS):
                     'lat': 32.867,
                     'lon': -117.257,
                     'depth': '5',
+                    'abbr':'UCSD',
                     'url': 'https://sccoos.org/',
                     'inst': 'Southern California Coastal Ocean Observing System (SCCOOS) at Scripps Institution of Oceanography (SIO)'}}
 
@@ -82,24 +86,24 @@ class SASS(sccoos.SCCOOS):
 
         self.metaDict.update({
             ##Meta
-            'contributor_role': 'station operation, station funding, data management',
-            'metadata_link':'www.sccoos.org.progress/data-products/automateed-shore-stations/',
-            'summary':'Automated shore station with a suite of sensors that are ' +\
-            'attached to piers along the nearshore California coast. ' + \
-            'These automated sensors measure temperature, salinity, chlorophyll, turbidity ' + \
-            'and water level at frequent intervals in the nearshore coastal ocean.' +\
-            'This data can provide local and regional information on mixing and upwelling, ' +\
-            'land run-off, and algal blooms.',
-            'keywords':'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY,  OCEAN CHEMISTRY,' +\
-            ' CHLOROPHYLL, OCEAN TEMPERATURE, WATER TEMPERATURE, OCEAN PRESSURE, WATER PRESSURE',
-            'project':'Automated Shore Stations',
-            'processing_level':'QA/QC have been performed',
             'cdm_data_type':'Station',
+            'contributor_role': 'station operation, station funding, data management',
             'geospatial_lat_resolution':'2.77E-4',
             'geospatial_lon_resolution':'2.77E-4',
             'geospatial_vertical_units':'m',
             'geospatial_vertical_resolution':'1',
-            'geospatial_vertical_positive':'down'
+            'geospatial_vertical_positive':'down',
+            'keywords':'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY,  OCEAN CHEMISTRY,' +\
+            ' CHLOROPHYLL, OCEAN TEMPERATURE, WATER TEMPERATURE, OCEAN PRESSURE, WATER PRESSURE',
+            'metadata_link':'www.sccoos.org.progress/data-products/automateed-shore-stations/',
+            'project':'Automated Shore Stations',
+            'processing_level':'QA/QC have been performed',
+            'summary':'Automated shore station with a suite of sensors that are' +\
+            ' attached to piers along the nearshore California coast.' + \
+            ' These automated sensors measure temperature, salinity, chlorophyll, turbidity' + \
+            ' and water level at frequent intervals in the nearshore coastal ocean.' +\
+            ' This data can provide local and regional information on mixing and upwelling,' +\
+            ' land run-off, and algal blooms.'
             })
 
     def createNCshell(self, ncfile, sta):
@@ -110,22 +114,24 @@ class SASS(sccoos.SCCOOS):
         """
         print "SASS createNCshell", ncfile
         self.metaDict.update({
-        "title":self.metaDict["project"]+": "+self.staMeta[sta]['loc_name'],
+        'comment': 'The '+self.staMeta[sta]['loc_name']+' automated shore station operated' + \
+        ' by ' + self.staMeta[sta]['inst'] + \
+        ' is mounted at a nominal depth of '+ self.staMeta[sta]['depth'] +' meters MLLW. The' + \
+        ' instrument package includes a Seabird SBE 16plus SEACAT Conductivity,' + \
+        ' Temperature, and Pressure recorder, and a Seapoint Chlorophyll Fluorometer' + \
+        ' with a 0-50 ug/L gain setting.',
+        'contributor_name': self.staMeta[sta]['abbr']+'/SCCOOS, SCCOOS/IOOS/NOAA, SCCOOS',
+        'creator_name': self.staMeta[sta]['inst'],
+        'creator_url': self.staMeta[sta]['url'],
         "date_created": self.tupToISO(time.gmtime()), #time.ctime(time.time()),
-        "history": "Created: "+ self.tupToISO(time.gmtime()), #time.ctime(time.time()),
         "geospatial_lat_min": self.staMeta[sta]['lat'],
         "geospatial_lat_max": self.staMeta[sta]['lat'],
         "geospatial_lon_min": self.staMeta[sta]['lon'],
         "geospatial_lon_max": self.staMeta[sta]['lon'],
         "geospatial_vertical_min": self.staMeta[sta]['depth'],
         "geospatial_vertical_max": self.staMeta[sta]['depth'],
-        'institution': self.staMeta[sta]['inst'],
-        'comment': 'The '+self.staMeta[sta]['loc_name']+' automated shore station operated' + \
-        ' by ' + self.staMeta[sta]['inst'] + \
-        ' is mounted at a nominal depth of '+ self.staMeta[sta]['depth'] +' meters MLLW. The ' + \
-        'instrument package includes a Seabird SBE 16plus SEACAT Conductivity, ' + \
-        'Temperature, and Pressure recorder, and a Seapoint Chlorophyll Fluorometer ' + \
-        'with a 0-50 ug/L gain setting.',
+        "history": "Created: "+ self.tupToISO(time.gmtime()), #time.ctime(time.time()),
+        "title":self.metaDict["project"]+": "+self.staMeta[sta]['loc_name'],
         })
         ncfile.setncatts(self.metaDict)
         #Move to NC/SCCOOS class???
