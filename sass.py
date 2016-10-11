@@ -12,7 +12,7 @@ import numpy as np
 # from abc import ABCMeta, abstractmethod
 
 import sccoos
-import sassqc, qc #transition sassqc to qc
+import sassqc #, qc #transition sassqc to qc
 
 class SASS(sccoos.SCCOOS):
     """Class for SCCOOS's Automated Shore Stations. Currently, log files and netCDFs"""
@@ -67,7 +67,7 @@ class SASS(sccoos.SCCOOS):
                     'lon': -117.257,
                     'depth': '5',
                     'abbr':'UCSD',
-                    'url': 'https://sccoos.org/',
+                    'url': 'http://sccoos.org/',
                     'inst': 'Southern California Coastal Ocean Observing System (SCCOOS) at Scripps Institution of Oceanography (SIO)'}}
 
         # IP Address of Shorestations, connecting to appropriate self.staMeta dictionary
@@ -409,18 +409,18 @@ class SASS(sccoos.SCCOOS):
                 df2['chlorophyll'].apply(lambda x: x*10)
 
                 # Apply QC tests
-                df3 = sassqc.qc_tests(df2)
-                # ## Replace qc testing lines, add missing value
-                # df = qc_tests(df, 'temperature', sensor_span=(-5,30), user_span=(8,30),
-                # low_reps=2, high_reps=6, eps=0.0001, low_thresh=2, high_thresh=3)
-                # df = qc_tests(df, 'conductivity', sensor_span=(0,9), user_span=None,
-                # low_reps=2, high_reps=5, eps=0.00005, low_thresh=None, high_thresh=None)
-                # df = qc_tests(df, 'pressure', sensor_span=(1,7), user_span=(0,20),
-                # low_reps=2, high_reps=5, eps=0.0005, low_thresh=4, high_thresh=5)
-                # df = qc_tests(df, 'salinity', sensor_span=(2,42), user_span=(30,34.5),
-                # low_reps=3, high_reps=5, eps=0.00004, low_thresh=0.4, high_thresh=0.5)
-                # df = qc_tests(df, 'chlorophyll', sensor_span=(0.02,50), user_span=(0.02,50),
-                # low_reps=2, high_reps=5, eps=0.001, low_thresh=0.8, high_thresh=1.0)
+                # df3 = sassqc.qc_tests(df2)
+                ## Replace qc testing lines, add missing value
+                df3 = self.qc_tests(df2, 'temperature', sensor_span=(-5,30), user_span=(8,30),
+                low_reps=2, high_reps=6, eps=0.0001, low_thresh=2, high_thresh=3)
+                df3 = self.qc_tests(df2, 'conductivity', sensor_span=(0,9), user_span=None,
+                low_reps=2, high_reps=5, eps=0.00005, low_thresh=None, high_thresh=None)
+                df3 = self.qc_tests(df2, 'pressure', sensor_span=(0,20), user_span=(1,7),
+                low_reps=2, high_reps=5, eps=0.0005, low_thresh=4, high_thresh=5)
+                df3 = self.qc_tests(df2, 'salinity', sensor_span=(2,42), user_span=(30,34.5),
+                low_reps=3, high_reps=5, eps=0.00004, low_thresh=0.4, high_thresh=0.5)
+                df3 = self.qc_tests(df2, 'chlorophyll', sensor_span=(0.02,50), user_span=(0.02,50),
+                low_reps=2, high_reps=5, eps=0.001, low_thresh=0.8, high_thresh=1.0)
 
                 ## Get last recorded date
                 #LRpd = pd.to_datetime(lastRecorded, utc=None)
@@ -435,7 +435,7 @@ class SASS(sccoos.SCCOOS):
                 pd_getLastDateNC = pd.to_datetime(self.getLastDateNC(lastNC), unit='s', utc=None)
                 df3 = df3[pd.to_datetime(df3.index,utc=None) > pd_getLastDateNC ]
 
-                print str(len(df3.index)), loc
+                # print str(len(df3.index)), loc
 
                 if len(df3.index) > 0:
                     # Group by Year and iterate making/appending to NetCDF files

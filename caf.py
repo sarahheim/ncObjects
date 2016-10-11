@@ -12,7 +12,7 @@ import numpy as np
 # from abc import ABCMeta, abstractmethod
 
 import sccoos
-import qc
+# import qc
 
 class CAF(sccoos.SCCOOS):
     """Class for SCCOOS's Carlsbad Aquafarm's burkolator. Currently, log files and netCDFs.
@@ -59,7 +59,7 @@ class CAF(sccoos.SCCOOS):
             'cdm_data_type':'Station',
             'contributor_name': 'Carlsbad Aquafarm/SCCOOS, SCCOOS/IOOS/NOAA, SCCOOS',
             'creator_name':'Scripps Institution of Oceanography (SIO)', # Todd Martz/ Martz Lab?
-            'creator_url':'https://sccoos.org', #Martz Lab url?
+            'creator_url':'http://sccoos.org', #Martz Lab url?
             "geospatial_lat_min": self.staMeta['lat'],
             "geospatial_lat_max": self.staMeta['lat'],
             "geospatial_lon_min": self.staMeta['lon'],
@@ -82,8 +82,6 @@ class CAF(sccoos.SCCOOS):
             ' the Scripps Institution of Oceanography.',
             'title':'Burkolator: Carlsbad Aquafarm',
 
-
-
             # 'contributor_role': 'station operation, station funding, data management', #??
             # 'comment':'',
             # "geospatial_vertical_min": self.staMeta['depth'],
@@ -95,78 +93,6 @@ class CAF(sccoos.SCCOOS):
             # 'geospatial_vertical_resolution':'',  # ???
             # 'geospatial_vertical_positive':''  # ???
             })
-
-    def qc_tests(self, df, attr, miss_val=None, sensor_span=None, user_span=None, low_reps=None,
-    high_reps=None, eps=None, low_thresh=None, high_thresh=None):
-        """Run qc
-
-        .. todo::
-            - add _FillValue attribute
-            - add tests done to 'processing_level' metaDict
-            - add qc input into metadata
-
-        :param df: dataframe
-        :param attr: attribute, qa is being applied to
-        :param sensor_span: for Range Test; tuple of low and high of good values (sensor)
-        :param user_span: for Range Test; tuple of low and high of good values (expected/location appropriate)
-        :param low_reps: for Flat Line check;
-        :param high_reps: for Flat Line check; number of repeating to be considered suspect
-        :param eps: for Flat Line check; number of repeating to be considered bad
-        :param low_thresh: for Spike Test; see qc.spike_check
-        :param high_thresh: for Spike Test; see qc.spike_check
-        :returns: dataframe with primary and secondary flags added
-
-        Expected kwargs: sensor_span, user_span"""
-        data = df[attr].values
-        qc2flags = np.zeros_like(data, dtype='uint8')
-
-        # Missing check
-        if miss_val is not None:
-            qcflagsMiss = qc.check_nulls(data)
-            #nothing for secondary flag if missing?
-
-        else:
-            qcflagsMiss = np.ones_like(arr, dtype='uint8')
-
-        # Range Check
-        # sensor_span = (-5,30)
-        # user_span = (8,30)
-        if sensor_span is not None:
-            qcflagsRange = qc.range_check(data,sensor_span,user_span)
-            qc2flags[(qcflagsRange > 2)] = 1 # Range
-        else:
-            qcflagsRange = np.ones_like(data, dtype='uint8')
-
-        # Flat Line Check
-        # low_reps = 2
-        # high_reps = 5
-        # eps = 0.0001
-        if low_reps and high_reps and eps:
-            qcflagsFlat = qc.flat_line_check(data,low_reps,high_reps,eps)
-            qc2flags[(qcflagsFlat > 2)] = 2 # Flat line
-        else:
-            qcflagsFlat = np.ones_like(data, dtype='uint8')
-
-        # Spike Test
-        # low_thresh = 2
-        # high_thresh = 3
-        if low_thresh and high_thresh:
-            qcflagsSpike = qc.spike_check(data,low_thresh,high_thresh)
-            qc2flags[(qcflagsSpike > 2)] = 3 # Spike
-        else:
-            qcflagsSpike = np.ones_like(data, dtype='uint8')
-
-        # print 'all pre flags:', attr, data[0], type(data[0]), np.isnan(data[0]), qcflagsMiss[0], qcflagsRange[0], qcflagsFlat[0], qcflagsSpike[0]
-        # Find maximum qc flag
-        qcflags = np.maximum.reduce([qcflagsMiss, qcflagsRange, qcflagsFlat, qcflagsSpike])
-        # print 'final primary flags:', attr,   qcflags[0:10]
-        # print 'final secondary flags:',attr, qc2flags[0:10]
-
-        # Output flags
-        df[attr+'_flagPrimary'] = qcflags
-        df[attr+'_flagSecondary'] = qc2flags
-
-        return df
 
     def createNCshell(self, ncfile, ignore):
         #NOT using: 'pH_aux', 'O2', 'O2sat'

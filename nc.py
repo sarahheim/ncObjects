@@ -194,7 +194,7 @@ class NC(object):
         nameOnly = ncfilepath.split('/')[-1]
         if os.path.isfile(ncfilepath):
             fileMb = int(os.path.getsize(ncfilepath) / 1000000)
-            print "Size: Mb", fileMb, ncfilepath
+            # print "Size: Mb", fileMb, ncfilepath
             if fileMb > 10:
                 print "file is getting large, resize"
 #                tmpfilepath = '/tmp/' + ncfilename
