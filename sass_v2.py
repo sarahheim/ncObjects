@@ -222,17 +222,17 @@ class SASS(sccoos.SCCOOS):
         o2.units = 'V' #not psu??
         o2.coordinates = 'time lat lon depth'
         o2.instrument = "instrument3"
-        o2_flagPrim = ncfile.createVariable(
-            'O2_flagPrimary', 'B', ('time'), zlib=True)
-        o2_flagPrim.long_name = ', qc primary flag'
-        # o2_flagPrim.standard_name = " status_flag"
-        o2_flagPrim.flag_values = flagPrim_flag_values
-        o2_flagPrim.flag_meanings = flagPrim_flag_meanings
-        o2_flagSec = ncfile.createVariable(
-            'O2_flagSecondary', 'B', ('time'), zlib=True)
-        o2_flagSec.long_name = ', qc secondary flag'
-        o2_flagSec.flag_values = flagSec_flag_values
-        o2_flagSec.flag_meanings = flagSec_flag_meanings
+        # o2_flagPrim = ncfile.createVariable(
+        #     'O2_flagPrimary', 'B', ('time'), zlib=True)
+        # o2_flagPrim.long_name = ', qc primary flag'
+        # # o2_flagPrim.standard_name = " status_flag"
+        # o2_flagPrim.flag_values = flagPrim_flag_values
+        # o2_flagPrim.flag_meanings = flagPrim_flag_meanings
+        # o2_flagSec = ncfile.createVariable(
+        #     'O2_flagSecondary', 'B', ('time'), zlib=True)
+        # o2_flagSec.long_name = ', qc secondary flag'
+        # o2_flagSec.flag_values = flagSec_flag_values
+        # o2_flagSec.flag_meanings = flagSec_flag_meanings
 
         conv = ncfile.createVariable('convertedOxygen', 'f4', ('time'), zlib=True)
         # conv.standard_name = 'mass_concentration_of_oxygen_in_sea_water'
@@ -240,17 +240,17 @@ class SASS(sccoos.SCCOOS):
         conv.units = 'mL/L' #not psu??
         conv.coordinates = 'time lat lon depth'
         conv.instrument = "instrument3"
-        conv_flagPrim = ncfile.createVariable(
-            'converted_oxygen_flagPrimary', 'B', ('time'), zlib=True)
-        conv_flagPrim.long_name = ', qc primary flag'
-        # conv_flagPrim.standard_name = " status_flag"
-        conv_flagPrim.flag_values = flagPrim_flag_values
-        conv_flagPrim.flag_meanings = flagPrim_flag_meanings
-        conv_flagSec = ncfile.createVariable(
-            'converted_oxygen_flagSecondary', 'B', ('time'), zlib=True)
-        conv_flagSec.long_name = ', qc secondary flag'
-        conv_flagSec.flag_values = flagSec_flag_values
-        conv_flagSec.flag_meanings = flagSec_flag_meanings
+        # conv_flagPrim = ncfile.createVariable(
+        #     'converted_oxygen_flagPrimary', 'B', ('time'), zlib=True)
+        # conv_flagPrim.long_name = ', qc primary flag'
+        # # conv_flagPrim.standard_name = " status_flag"
+        # conv_flagPrim.flag_values = flagPrim_flag_values
+        # conv_flagPrim.flag_meanings = flagPrim_flag_meanings
+        # conv_flagSec = ncfile.createVariable(
+        #     'converted_oxygen_flagSecondary', 'B', ('time'), zlib=True)
+        # conv_flagSec.long_name = ', qc secondary flag'
+        # conv_flagSec.flag_values = flagSec_flag_values
+        # conv_flagSec.flag_meanings = flagSec_flag_meanings
 
 
         sig = ncfile.createVariable('sigmat', 'f4', ('time'), zlib=True)
