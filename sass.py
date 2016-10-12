@@ -78,11 +78,14 @@ class SASS(sccoos.SCCOOS):
        '132.239.117.226': self.staMeta['scripps_pier'],
        '172.16.117.233': self.staMeta['scripps_pier']}
 
-        self.attrArr = ['temperature', 'conductivity', 'pressure', 'aux1', 'aux3', 'chlorophyll',  # NOT INCLUDING 'time'
-           'conductivity_flagPrimary', 'conductivity_flagSecondary',
-           'pressure_flagPrimary', 'pressure_flagSecondary',
-           'salinity_flagPrimary', 'salinity_flagSecondary',
-           'chlorophyll_flagPrimary', 'chlorophyll_flagSecondary']
+       # NOT INCLUDING 'time'
+        self.attrArr = ['temperature', 'conductivity', 'pressure', 'salinity', 'chlorophyll',
+            'temperature_flagPrimary', 'temperature_flagSecondary',
+            'conductivity_flagPrimary', 'conductivity_flagSecondary',
+            'pressure_flagPrimary', 'pressure_flagSecondary',
+            'salinity_flagPrimary', 'salinity_flagSecondary',
+            'chlorophyll_flagPrimary', 'chlorophyll_flagSecondary',
+            'aux1', 'aux3', 'aux4', 'sigmat', 'diagnosticVoltage', 'currentDraw']
 
         self.metaDict.update({
             ##Meta
@@ -329,7 +332,7 @@ class SASS(sccoos.SCCOOS):
         re_s = r'(?:,?#?\s+|,)' # delimiter: space with optional comma, optional pound; or comma alone
         re_serverdate = r'^('+re_Y+r'-[0-1]\d-'+re_d+'T'+re_time+'Z)' # server date
         re_ip = r'(\d{2,3}\.\d{2,3}\.\d{2,3}\.\d{2,3})' # ip address ending in ',# '
-        re_attr = r'(\d+\.?\d*)' # attribute number with optional decimal
+        re_attr = r'(-?\d+\.?\d*)' # attribute number with: optional decimal, optional negative
         re_date = '('+re_d+re_s+re_b+re_s+re_Y+')' # date with Mon spelled/abbreviated
         re_attr8 = re_s.join([re_attr]*8) # 8 consecutive attribute, separated by delimiter
         re_attr3 = re_s.join([re_attr]*3) # 3 consecutive attribute, separated by delimiter
