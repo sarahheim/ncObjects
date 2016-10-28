@@ -323,7 +323,7 @@ class SASS(sccoos.SCCOOS):
         #            'chlorophyll', 'o2', 'convertedOxygen', 'salinity', 'date',
         #            'time', 'sigmat', 'diagnosticVoltage', 'currentDraw']
 
-        print 'filename', filename #for testing!!!
+        # print 'filename', filename #for testing!!!
         # Create pandas dataframe from file
         #print time.strftime("%c"),
 
@@ -417,10 +417,14 @@ class SASS(sccoos.SCCOOS):
         low_reps=2, high_reps=5, eps=0.001, low_thresh=0.8, high_thresh=1.0)
 
         ## Get the last time stamp recored in this location's NetCDF file.
-        lastNC = self.getLastNC(self.staMeta['loc'] + '-')
+        lastNC = self.getLastNC(self.staMeta['loc'] + '-d02-')
+        # print 'latest NC file:', lastNC
 
         # Truncate data to only that which is after last recorded time
         pd_getLastDateNC = pd.to_datetime(self.getLastDateNC(lastNC), unit='s', utc=None)
+        # print 'latest NC datetime:', pd_getLastDateNC
+        # print 'index[0]', pd.to_datetime(df.index[0],utc=None)
+        # print 'index[-1]', pd.to_datetime(df.index[-1],utc=None)
         df = df[pd.to_datetime(df.index,utc=None) > pd_getLastDateNC ]
 
         print str(len(df.index)), self.staMeta['loc']
@@ -431,8 +435,9 @@ class SASS(sccoos.SCCOOS):
             groupedYr = df.groupby(df.index.year)
             for grpYr in groupedYr.indices:
                 # Check file size, nccopy to bring size down, replace original file
-                ncfilename = self.staMeta['loc'] + "-" + str(grpYr) + '.nc'
+                ncfilename = self.staMeta['loc'] + "-d02-" + str(grpYr) + '.nc'
                 filepath = os.path.join(self.ncpath, ncfilename)
+                print filepath
                 self.dataToNC(filepath, df, self.staMeta['loc'])
                 self.fileSizeChecker(filepath)
 
@@ -458,7 +463,7 @@ class SASS(sccoos.SCCOOS):
         loopCount = 1
         # latestDict = {}
         # for loc in self.staMeta:
-        lastNC = self.getLastNC(self.staMeta['loc'] + '-')
+        lastNC = self.getLastNC(self.staMeta['loc'] + '-d02-')
         lastest = self.getLastDateNC(lastNC)
         LRdt = datetime.datetime.utcfromtimestamp(lastest)
         print 'MAX, last recorded', LRdt
