@@ -37,7 +37,7 @@ class SCCOOS(nc.NC):
             'publisher_url':'http://sccoos.org',
             'publisher_email':'info@sccoos.org',
             'naming_authority':'sccoos.org',
-            'source':'insitu observations'
+            'source':'insitu observations',
             })
 
     def addNCshell_SCCOOS(self, ncfile):
@@ -90,6 +90,37 @@ class SCCOOS(nc.NC):
         #return pd.to_datetime(unixtime, unit='s', utc=None)[0].isoformat()
         return unixtime
 
+    def qc_meta(self, attr):
+        qcDict = {'references':'https://github.com/ioos/qartod'}
+        comment = 'The following QC tests were done on '+attr+'.'
+        if self.qc_values[attr]['user_span']:
+            qcDict.update({
+                'data_min': self.qc_values[attr]['user_span'][0],
+                'data_max': self.qc_values[attr]['user_span'][1]
+            })
+            comment += ' Range Check - Suspect: '+str(self.qc_values[attr]['user_span'])
+
+        if self.qc_values[attr]['sensor_span']:
+            qcDict.update({
+                'valid_min': self.qc_values[attr]['sensor_span'][0],
+                'valid_max': self.qc_values[attr]['sensor_span'][1]
+            })
+            comment += ' Range Check - Bad: '+str(self.qc_values[attr]['sensor_span'])
+
+        if self.qc_values[attr]['low_reps'] and self.qc_values[attr]['high_reps'] and self.qc_values[attr]['eps']:
+            comment += ' Flat Line Check - EPS: '+ str(self.qc_values[attr]['eps'])
+            comment += ' Flat Line Check - Suspect: '+ str(self.qc_values[attr]['low_thresh'])
+            comment += ' Flat Line Check - Bad: '+  str(self.qc_values[attr]['high_thresh'])
+
+        if self.qc_values[attr]['low_thresh'] and self.qc_values[attr]['high_thresh']:
+            comment += ' Spike Test - Suspect: '+ str(self.qc_values[attr]['low_reps'])
+            comment += ' Spike Test - Bad: '+ str(self.qc_values[attr]['high_reps'])
+
+        qcDict.update({
+            'comment': comment
+        })
+        return qcDict
+
     def qc_tests(self, df, attr, miss_val=None, sensor_span=None, user_span=None, low_reps=None,
     high_reps=None, eps=None, low_thresh=None, high_thresh=None):
         """Run qc
@@ -103,9 +134,9 @@ class SCCOOS(nc.NC):
         :param attr: attribute, qa is being applied to
         :param sensor_span: for Range Test; tuple of low and high of good values (sensor)
         :param user_span: for Range Test; tuple of low and high of good values (expected/location appropriate)
-        :param low_reps: for Flat Line check;
-        :param high_reps: for Flat Line check; number of repeating to be considered suspect
-        :param eps: for Flat Line check; number of repeating to be considered bad
+        :param low_reps: for Flat Line check; number of repeating to be considered suspect
+        :param high_reps: for Flat Line check; number of repeating to be considered bad
+        :param eps: for Flat Line check;
         :param low_thresh: for Spike Test; see qc.spike_check
         :param high_thresh: for Spike Test; see qc.spike_check
         :returns: dataframe with primary and secondary flags added

@@ -8,7 +8,7 @@ import os, time, datetime
 
 import pandas as pd
 import numpy as np
-# from netCDF4 import Dataset
+from netCDF4 import Dataset
 # from abc import ABCMeta, abstractmethod
 
 import sccoos
@@ -37,6 +37,7 @@ class CAF(sccoos.SCCOOS):
 #        self.ncpath = '/home/scheim/NCobj/CAF'
 #        self.fnformat = "CAF_RTproc_%Y%m%d.dat" #!!!
         self.txtFnPre = 'CAF_RTproc_'
+        self.ncFnPre = 'CAF-'
         self.crontab = True
         self.txtFnDatePattern = '%Y%m%d%H%M'
         print "self.ncpath", self.ncpath
@@ -45,19 +46,29 @@ class CAF(sccoos.SCCOOS):
         'salinity', 'salinity_flagPrimary', 'salinity_flagSecondary',
         'pCO2_atm', 'pCO2_atm_flagPrimary', 'pCO2_atm_flagSecondary',
         'TCO2_mol_kg', 'TCO2_mol_kg_flagPrimary', 'TCO2_mol_kg_flagSecondary']
-    #     self.attrArr = ['TSG_T', 'TSG_S', 'pCO2_atm', 'TCO2_mol_kg',
-    #    'Alk_pTCO2', 'AlkS', 'calcAlk', 'calcTCO2', 'calcpCO2', 'calcCO2aq',
-    #    'calcHCO3', 'calcCO3', 'calcOmega', 'calcpH']
 
         ##Meta
         self.staMeta = {
+            # 'depth': ,!!!
             'lat': 33.1390,
             'lon': -117.3390
+        }
+
+        self.qc_values = { 'temperature': {'miss_val':'Nan', 'sensor_span':(0,120), 'user_span':(0,30),
+            'low_reps':60, 'high_reps':1800, 'eps':0.0001, 'low_thresh':0.5, 'high_thresh':1 },
+            'salinity': {'miss_val':'Nan', 'sensor_span':(0,1000), 'user_span':(10,35),
+            'low_reps':60, 'high_reps':1800, 'eps':0.0001, 'low_thresh':0.5, 'high_thresh':1 },
+            'pCO2_atm': {'miss_val':'Nan', 'sensor_span':(0, 20000), 'user_span':(0,1300),
+            'low_reps':20, 'high_reps':120, 'eps':0.01, 'low_thresh':25, 'high_thresh':50 },
+            'TCO2_mol_kg': {'miss_val':'Nan', 'sensor_span':(0,2500), 'user_span':(0,2500),
+            'low_reps':2, 'high_reps':3, 'eps':0.01, 'low_thresh':None, 'high_thresh':None }
         }
 
         self.metaDict.update({
             'cdm_data_type':'Station',
             'contributor_name': 'Carlsbad Aquafarm/SCCOOS, SCCOOS/IOOS/NOAA, SCCOOS',
+            'contributor_role': 'station operation, station funding, data management', #??
+            'creator_email':'info@sccoos.org', #??
             'creator_name':'Scripps Institution of Oceanography (SIO)', # Todd Martz/ Martz Lab?
             'creator_url':'http://sccoos.org', #Martz Lab url?
             "geospatial_lat_min": self.staMeta['lat'],
@@ -70,9 +81,10 @@ class CAF(sccoos.SCCOOS):
             'institution': 'Southern California Coastal Ocean Observing System (SCCOOS)' + \
             ' at Scripps Institution of Oceanography (SIO)', #or Carlsbad Aquafarm?
             'keywords':'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY, OCEAN CHEMISTRY,',##!!!
-            'metadata_link':'www.sccoos.org/data/oa/',
+            'metadata_link':'http://www.sccoos.org/data/oa/',
             'processing_level':'QA/QC has been performed', ##!!!
             'project':'Burkolator, Carlsbad Aquafarm',
+            'references':'http://www.sccoos.org/data/oa/, http://www.carlsbadaquafarm.com/, https://github.com/ioos/qartod',
             'summary': 'With funding from NOAA and IOOS, and in support of the West Coast' + \
             ' shellfish industry; AOOS, NANOOS, CeNCOOS, and SCCOOS have added Ocean Acidification' + \
             ' monitoring to its ongoing observations of the coastal ocean. This project funds' + \
@@ -81,12 +93,9 @@ class CAF(sccoos.SCCOOS):
             ' (carlsbadaquafarm.com) in San Diego and is operated by the Martz Lab at' + \
             ' the Scripps Institution of Oceanography.',
             'title':'Burkolator: Carlsbad Aquafarm',
-
-            # 'contributor_role': 'station operation, station funding, data management', #??
-            # 'comment':'',
+            # 'comment':'', !!!
             # "geospatial_vertical_min": self.staMeta['depth'],
             # "geospatial_vertical_max": self.staMeta['depth'],
-            # 'contributor_role': 'station operation, station funding, data management',
             # 'geospatial_lat_resolution':'',  # ?
             # 'geospatial_lon_resolution':'',  # ?
             # 'geospatial_vertical_units':'',  # ???
@@ -94,17 +103,32 @@ class CAF(sccoos.SCCOOS):
             # 'geospatial_vertical_positive':''  # ???
             })
 
-    def createNCshell(self, ncfile, ignore):
+    def createNCshell(self, ncName, ignore):
         #NOT using: 'pH_aux', 'O2', 'O2sat'
         print "CAF createNCshell"
-        #ncfile.ip = "132.239.92.62"
-        self.metaDict.update({"date_created": self.tupToISO(time.gmtime())})
+        ncfile = Dataset(ncName, 'w', format='NETCDF4')
+        self.metaDict.update({
+            'id':ncName.split('/')[-1], #filename
+            'date_created': self.tupToISO(time.gmtime())
+        })
         ncfile.setncatts(self.metaDict)
         #Move to NC/SCCOOS class???
         flagPrim_flag_values = bytearray([1, 2, 3, 4, 9]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
         flagPrim_flag_meanings = 'GOOD_DATA UNKNOWN SUSPECT BAD_DATA MISSING'
         flagSec_flag_values = bytearray([0, 1, 2, 3]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
         flagSec_flag_meanings = 'UNSPECIFIED RANGE FLAT_LINE SPIKE'
+        dup_varatts = {
+            'cell_methods': 'time: point longitude: point latitude: point',
+            'source':'insitu observations',
+            'grid_mapping':'crs',
+            'coordinates':'time lat lon depth',
+            'platform':'platform1',
+            'instrument':'instrument1'
+        }
+        dup_flagatts = {
+            'source':'QC results',
+            'comment': "Quality Control test are based on IOOS's Quality Control of Real-Time Ocean Data (QARTOD))"
+        }
 
         # Create Dimensions
         # unlimited axis (can be appended to).
@@ -114,108 +138,152 @@ class CAF(sccoos.SCCOOS):
         #Create Variables
         time_var = ncfile.createVariable(
             'time', np.int32, ('time'), zlib=True)  # int64? Gives error
-        # time_var.setncattr({'standard_name':'time', 'long_name': 'time', 'units':'seconds since 1970-01-01 00:00:00 UTC'})
-        time_var.standard_name = 'time'
-        time_var.units = 'seconds since 1970-01-01 00:00:00 UTC'
-        time_var.long_name = 'time'
-        time_var.calendar = 'julian' #use??
-        time_var.axis = "T"
+        time_var.setncatts({
+            'axis':"T",
+            'calendar':'julian',
+            'comment':'also known as Epoch or Unix time',
+            'long_name':'time',
+            'standard_name':'time',
+            'units':'seconds since 1970-01-01 00:00:00 UTC'})
 
         temperature = ncfile.createVariable('temperature', 'f4', ('time'), zlib=True)
-        temperature.standard_name = 'sea_water_temperature'
-        temperature.long_name = 'sea water temperature'
-        temperature.units = 'celsius'
-        temperature.coordinates = ''
-        temperature.instrument = 'instrument1'
+        temperature.setncatts({
+            'long_name':'sea water temperature',
+            'standard_name':'sea_water_temperature',
+            'units':'celsius'})
+        temperature.setncatts(self.qc_meta('temperature'))
+        temperature.setncatts(dup_varatts)
         temperature_flagPrim = ncfile.createVariable(
             'temperature_flagPrimary', 'B', ('time'), zlib=True)
-        temperature_flagPrim.long_name = 'sea water temperature, qc primary flag'
-        temperature_flagPrim.standard_name = "sea_water_temperature status_flag"
-        temperature_flagPrim.flag_values = flagPrim_flag_values
-        temperature_flagPrim.flag_meanings = flagPrim_flag_meanings
+        temperature_flagPrim.setncatts({
+            'long_name':'sea water temperature, qc primary flag',
+            'standard_name':"sea_water_temperature status_flag",
+            'flag_values':flagPrim_flag_values,
+            'flag_meanings':flagPrim_flag_meanings})
+        temperature_flagPrim.setncatts(dup_flagatts)
         temperature_flagSec = ncfile.createVariable(
             'temperature_flagSecondary', 'B', ('time'), zlib=True)
-        temperature_flagSec.long_name = 'sea water temperature, qc secondary flag'
-        temperature_flagSec.flag_values = flagSec_flag_values
-        temperature_flagSec.flag_meanings = flagSec_flag_meanings
+        temperature_flagSec.setncatts({
+            'long_name': 'sea water temperature, qc secondary flag',
+            'standard_name':"sea_water_temperature status_flag",
+            'flag_values': flagSec_flag_values,
+            'flag_meanings': flagSec_flag_meanings})
+        temperature_flagSec.setncatts(dup_flagatts)
 
         salinity = ncfile.createVariable('salinity', 'f4', ('time'), zlib=True)
-        salinity.standard_name = 'sea_water_salinity'
-        salinity.long_name = 'sea water salinity'
-        salinity.units = 'psu' #?
-        salinity.coordinates = ''
-        salinity.instrument = 'instrument1'
+        salinity.setncatts({
+            'standard_name':'sea_water_salinity',
+            'long_name':'sea water salinity',
+            'units':'psu'}) #?
+        salinity.setncatts(self.qc_meta('salinity'))
+        salinity.setncatts(dup_varatts)
         salinity_flagPrim = ncfile.createVariable(
             'salinity_flagPrimary', 'B', ('time'), zlib=True)
-        salinity_flagPrim.long_name = 'sea water salinity, qc primary flag'
-        salinity_flagPrim.standard_name = "sea_water_practical_salinity status_flag"
-        salinity_flagPrim.flag_values = flagPrim_flag_values
-        salinity_flagPrim.flag_meanings = flagPrim_flag_meanings
+        salinity_flagPrim.setncatts({
+            'long_name':'sea water salinity, qc primary flag',
+            'standard_name':"sea_water_practical_salinity status_flag",
+            'flag_values':flagPrim_flag_values,
+            'flag_meanings':flagPrim_flag_meanings})
+        salinity_flagPrim.setncatts(dup_flagatts)
         salinity_flagSec = ncfile.createVariable(
             'salinity_flagSecondary', 'B', ('time'), zlib=True)
-        salinity_flagSec.long_name = 'sea water salinity, qc secondary flag'
-        salinity_flagSec.flag_values = flagSec_flag_values
-        salinity_flagSec.flag_meanings = flagSec_flag_meanings
+        salinity_flagSec.setncatts({
+            'long_name':'sea water salinity, qc secondary flag',
+            'standard_name':"sea_water_practical_salinity status_flag",
+            'flag_values':flagSec_flag_values,
+            'flag_meanings':flagSec_flag_meanings})
+        salinity_flagSec.setncatts(dup_flagatts)
 
         pCO2_atm = ncfile.createVariable('pCO2_atm', 'f4', ('time'), zlib=True)
-        pCO2_atm.standard_name = 'subsurface_partial_pressure_of_carbon_dioxide_in_sea_water' #SUBsurface?
-        pCO2_atm.long_name = 'partial pressure of carbon dioxide'
-        pCO2_atm.units = 'uatm'
-        pCO2_atm.coordinates = ''
-        pCO2_atm.instrument = 'instrument1'
+        pCO2_atm.setncatts({
+            'standard_name':'subsurface_partial_pressure_of_carbon_dioxide_in_sea_water', #SUBsurface?
+            'long_name':'partial pressure of carbon dioxide',
+            'units':'uatm'})
+        pCO2_atm.setncatts(self.qc_meta('pCO2_atm'))
+        pCO2_atm.setncatts(dup_varatts)
         pCO2_atm_flagPrim = ncfile.createVariable(
             'pCO2_atm_flagPrimary', 'B', ('time'), zlib=True)
-        pCO2_atm_flagPrim.long_name = 'partial pressure of carbon dioxide, qc primary flag'
-        pCO2_atm_flagPrim.standard_name = "subsurface_partial_pressure_of_carbon_dioxide_in_sea_water status_flag"
-        pCO2_atm_flagPrim.flag_values = flagPrim_flag_values
-        pCO2_atm_flagPrim.flag_meanings = flagPrim_flag_meanings
+        pCO2_atm_flagPrim.setncatts({
+            'long_name':'partial pressure of carbon dioxide, qc primary flag',
+            'standard_name':"subsurface_partial_pressure_of_carbon_dioxide_in_sea_water status_flag",
+            'flag_values':flagPrim_flag_values,
+            'flag_meanings':flagPrim_flag_meanings})
+        pCO2_atm_flagPrim.setncatts(dup_flagatts)
         pCO2_atm_flagSec = ncfile.createVariable(
             'pCO2_atm_flagSecondary', 'B', ('time'), zlib=True)
-        pCO2_atm_flagSec.long_name = 'partial pressure of carbon dioxide, qc secondary flag'
-        pCO2_atm_flagSec.flag_values = flagSec_flag_values
-        pCO2_atm_flagSec.flag_meanings = flagSec_flag_meanings
+        pCO2_atm_flagSec.setncatts({
+            'long_name':'partial pressure of carbon dioxide, qc secondary flag',
+            'standard_name':"subsurface_partial_pressure_of_carbon_dioxide_in_sea_water status_flag",
+            'flag_values':flagSec_flag_values,
+            'flag_meanings':flagSec_flag_meanings})
+        pCO2_atm_flagSec.setncatts(dup_flagatts)
 
         TCO2m = ncfile.createVariable('TCO2_mol_kg', 'f4', ('time'), zlib=True)
-        TCO2m.standard_name = 'mole_concentration_of_dissolved_inorganic_carbon_in_sea_water'
-        TCO2m.long_name = 'seawater total dissolved inorganic carbon concentration'
-        TCO2m.units = 'umol/kg'
-        TCO2m.coordinates = ''
-        TCO2m.instrument = 'instrument1'
+        TCO2m.setncatts({
+            'standard_name':'mole_concentration_of_dissolved_inorganic_carbon_in_sea_water',
+            'long_name':'seawater total dissolved inorganic carbon concentration',
+            'units':'umol/kg'})
+        TCO2m.setncatts(self.qc_meta('TCO2_mol_kg'))
+        TCO2m.setncatts(dup_varatts)
         TCO2m_flagPrim = ncfile.createVariable(
             'TCO2_mol_kg_flagPrimary', 'B', ('time'), zlib=True)
-        TCO2m_flagPrim.long_name = 'seawater total dissolved inorganic carbon concentration, qc primary flag'
-        TCO2m_flagPrim.standard_name = "mole_concentration_of_dissolved_inorganic_carbon_in_sea_water status_flag"
-        TCO2m_flagPrim.flag_values = flagPrim_flag_values
-        TCO2m_flagPrim.flag_meanings = flagPrim_flag_meanings
+        TCO2m_flagPrim.setncatts({
+            'long_name':'seawater total dissolved inorganic carbon concentration, qc primary flag',
+            'standard_name':"mole_concentration_of_dissolved_inorganic_carbon_in_sea_water status_flag",
+            'flag_values':flagPrim_flag_values,
+            'flag_meanings':flagPrim_flag_meanings})
+        TCO2m_flagPrim.setncatts(dup_flagatts)
         TCO2m_flagSec = ncfile.createVariable(
             'TCO2_mol_kg_flagSecondary', 'B', ('time'), zlib=True)
-        TCO2m_flagSec.long_name = 'seawater total dissolved inorganic carbon concentration, qc secondary flag'
-        TCO2m_flagSec.flag_values = flagSec_flag_values
-        TCO2m_flagSec.flag_meanings = flagSec_flag_meanings
+        TCO2m_flagSec.setncatts({
+            'long_name':'seawater total dissolved inorganic carbon concentration, qc secondary flag',
+            'standard_name':"mole_concentration_of_dissolved_inorganic_carbon_in_sea_water status_flag",
+            'flag_values':flagSec_flag_values,
+            'flag_meanings':flagSec_flag_meanings })
+        TCO2m_flagSec.setncatts(dup_flagatts)
 
-        # = ncfile.createVariable('', 'f4', ('time'), zlib=True)
-        #.standard_name = ''
-        #.long_name = ''
-        #.units = ''
-        #.coordinates = ''
-        #.instrument = 'instrument1'
 
         #for c in cols:
         #    cVar = ncfile.createVariable(c, 'f4', ('time'), zlib=True)
         #    cVar.long_name = c
 
         instrument1 = ncfile.createVariable('instrument1', 'i') #Licor??
-        instrument1.make = ""
-        instrument1.model = ""
-        instrument1.comment = "beta Burkelator" #?
+        instrument1.setncatts({
+            'make':"",
+            'model':"",
+            'comment':"beta Burkelator" }) #?
 
         platform1 = ncfile.createVariable('platform1', 'i')
-        platform1.long_name = self.metaDict['project']
-        platform1.ioos_code = "urn:ioos:sensor:sccoos:carlsbad"
+        platform1.setncatts({
+        'long_name':self.metaDict['project'],
+        'ioos_code':"urn:ioos:sensor:sccoos:carlsbad" })
 
-        self.addNCshell_SCCOOS(ncfile)
+
+        # self.addNCshell_SCCOOS(ncfile)
+        lat = ncfile.createVariable('lat', 'f4')
+        lat.setncatts(self.meta_lat)
+        lat.setncatts({
+            'valid_min':self.staMeta['lat'],
+            'valid_max':self.staMeta['lat']
+        })
         ncfile.variables['lat'][0] = self.staMeta['lat']
+
+        lon = ncfile.createVariable('lon', 'f4')
+        lon.setncatts(self.meta_lon)
+        lon.setncatts({
+            'valid_min':self.staMeta['lon'],
+            'valid_max':self.staMeta['lon']
+        })
         ncfile.variables['lon'][0] = self.staMeta['lon']
+
+        dep = ncfile.createVariable('depth', 'f4')
+        dep.setncatts(self.meta_dep)
+        # lat.setncatts({
+        #     'valid_min':self.staMeta['depth'],
+        #     'valid_max':self.staMeta['depth']
+        # })
+        # ncfile.variables['depth'][0] = self.staMeta['depth']!!!
+
 
         return ncfile
 
@@ -247,7 +315,7 @@ class CAF(sccoos.SCCOOS):
         low_reps=2, high_reps=3, eps=0.01, low_thresh=None, high_thresh=None)
 
         ## Get the last time stamp recored in this location's NetCDF file.
-        lastNC = self.getLastNC("CAF-")
+        lastNC = self.getLastNC(self.ncFnPre)
         # Truncate data to only that which is after last recorded time
         pd_getLastDateNC = pd.to_datetime(self.getLastDateNC(lastNC), unit='s', utc=None)
         df = df[pd.to_datetime(df.index,utc=None) > pd_getLastDateNC ]
@@ -260,7 +328,7 @@ class CAF(sccoos.SCCOOS):
             groupedYr = df.groupby(df.index.year) # is this necessary or can we just grab the year?
             for grpYr in groupedYr.indices:
                 # Check file size, nccopy to bring size down, replace original file
-                ncfilename = "CAF-" + str(grpYr) + '.nc'
+                ncfilename = self.ncFnPre + str(grpYr) + '.nc'
                 filepath = os.path.join(self.ncpath, ncfilename)
                 self.dataToNC(filepath, df, '')
                 self.fileSizeChecker(filepath)
@@ -287,7 +355,7 @@ class CAF(sccoos.SCCOOS):
         allFilesArr = os.listdir(self.logsdir) #use Latest!!!
         preFilesArr = []
         postFilesArr = []
-        lastNC = self.getLastNC('CAF-')
+        lastNC = self.getLastNC(self.ncFnPre)
         LRnc = self.getLastDateNC(lastNC)
         print pd.to_datetime(LRnc, unit='s', utc=None).isoformat()
         print "LRnc:", LRnc

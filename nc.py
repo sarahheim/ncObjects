@@ -4,7 +4,7 @@
 # Description: adjusting to class/objects, parts taken from sass.py
 #
 
-import os, time, subprocess
+import os, time, subprocess, uuid
 from netCDF4 import Dataset
 from abc import ABCMeta, abstractmethod
 
@@ -43,6 +43,32 @@ class NC(object):
             'time_coverage_units':'seconds since 1970-01-01 00:00:00 UTC',
             'time_coverage_resolution':'1'
             }
+        self.meta_lat = {
+        # lat = ncfile.createVariable('lat', 'f4')
+            'standard_name':'latitude',
+            'long_name':'latitude',
+            'units':'degrees_north',
+            'axis':'Y',
+            'comment':'latitude of sensor'
+        }
+
+        self.meta_lon = {
+        # lon = ncfile.createVariable('lon', 'f4')
+            'standard_name':'longitude',
+            'long_name':'longitude',
+            'units':'degrees_east',
+            'axis':'X',
+            'comment':'longitude of sensor'
+        }
+        self.meta_dep = {
+        # dep = ncfile.createVariable('depth', 'f4')
+            'standard_name':'depth',
+            'long_name':'depth',
+            'units':'m',
+            'axis':'Z',
+            'positive':'down',
+            'comment':'depth of sensor'
+        }
 
     @abstractmethod
     def createNCshell(self, ncfile):
@@ -77,33 +103,36 @@ class NC(object):
         then appends any recent data to netcdfs."""
         pass
 
-    def addNCshell_NC(self, ncfile):
-        """When creating new nc file, at some standard metadata
-
-        .. note: Use at the **end** of ``createNCshell``, at least after createVariable of ``time``
-        :param str ncfile: file name of netCDF to be made, sans-path (uses **ncpath**)
-        """
-        lat = ncfile.createVariable('lat', 'f4')
-        lat.standard_name = 'latitude'
-        lat.long_name = 'latitude'
-        lat.units = 'degrees_north'
-        lat.axis = 'Y'
-#        ncfile.variables['lat'][0] = ips[ip]['lat']
-        lon = ncfile.createVariable('lon', 'f4')
-        lon.standard_name = 'longitude'
-        lon.long_name = 'longitude'
-        lon.units = 'degrees_east'
-        lon.axis = 'X'
-#        ncfile.variables['lon'][0] = ips[ip]['lon']
-        dep = ncfile.createVariable('depth', 'f4')
-        dep.standard_name = 'depth'
-        dep.long_name = 'depth'
-        dep.units = 'm'
-        dep.axis = 'Z'
-        dep.positive = 'down' #??
-#        ncfile.variables['depth'][0] = ips[ip]['depth']
-
-        return ncfile
+#     def addNCshell_NC(self, ncfile):
+#         """When creating new nc file, at some standard metadata
+#
+#         .. note: Use at the **end** of ``createNCshell``, at least after createVariable of ``time``
+#         :param str ncfile: file name of netCDF to be made, sans-path (uses **ncpath**)
+#         """
+#         lat = ncfile.createVariable('lat', 'f4')
+#         lat.standard_name = 'latitude'
+#         lat.long_name = 'latitude'
+#         lat.units = 'degrees_north'
+#         lat.axis = 'Y'
+#         lat.comment = 'latitude of sensor'
+# #        ncfile.variables['lat'][0] = ips[ip]['lat']
+#         lon = ncfile.createVariable('lon', 'f4')
+#         lon.standard_name = 'longitude'
+#         lon.long_name = 'longitude'
+#         lon.units = 'degrees_east'
+#         lon.axis = 'X'
+#         lon.comment = 'longitude of sensor'
+# #        ncfile.variables['lon'][0] = ips[ip]['lon']
+#         dep = ncfile.createVariable('depth', 'f4')
+#         dep.standard_name = 'depth'
+#         dep.long_name = 'depth'
+#         dep.units = 'm'
+#         dep.axis = 'Z'
+#         dep.positive = 'down' #??
+#         dep.comment = 'depth of sensor'
+# #        ncfile.variables['depth'][0] = ips[ip]['depth']
+#
+#         return ncfile
 
     def updateNCattrs_single(self, ncName):
         """on a single file: run when ONLY nc METADATA needs updating, NOT any data
@@ -186,6 +215,7 @@ class NC(object):
         "time_coverage_duration": self.ISOduration(minTimeS, maxTimeS),
         "date_modified": self.tupToISO(time.gmtime()), #time.ctime(time.time()),
         "date_issued": self.tupToISO(time.gmtime()), #time.ctime(time.time()),
+        "uuid": uuid.uuid4()
         })
 
     def fileSizeChecker(self, ncfilepath):
@@ -221,8 +251,10 @@ class NC(object):
         """Take dataframe and put in netCDF (new file or append).
         Assumes there's a 'time' variable in data/ncfile"""
         if not os.path.isfile(ncName):
-            ncfile = Dataset(ncName, 'w', format='NETCDF4')
-            ncfile = self.createNCshell(ncfile, lookup)
+            # ncfile = Dataset(ncName, 'w', format='NETCDF4')
+            # ^ moved to createNCshell
+            # ncfile = self.createNCshell(ncfile, lookup)
+            ncfile = self.createNCshell(ncName, lookup)
             ncfile.variables['time'][:] = subset.index.astype('int64') // 10**9
             for attr in self.attrArr:
                 #             ncfile.variables['temperature'][:] = subset['temperature'].values

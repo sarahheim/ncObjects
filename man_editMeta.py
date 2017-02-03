@@ -9,9 +9,9 @@ staMeta = {
 }
 
 print staMeta
-for i in range(13,17):
+for i in range(5,17):
     for sta in staMeta:
-       fn = sta+'-20'+str(i)+'.nc'
+       fn = sta+'-20'+str(i).zfill(2)+'.nc'
        print fn
        print staMeta[sta]['abbr']
        ncName = os.path.join('./SASS_copy/', fn)
@@ -21,9 +21,9 @@ for i in range(13,17):
            #print ncfile.__dict__
            newMeta = {'contributor_name': staMeta[sta]['abbr']+'/SCCOOS, SCCOOS/IOOS/NOAA, SCCOOS'}
            ncfile.setncatts(newMeta)
+           nowStr = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
            ncfile.setncatts({
-           "date_modified": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), #time.ctime(time.time()),
-           "date_issued": time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()), #time.ctime(time.time()),
+           "date_modified": nowStr,
+           "date_issued": nowStr,
            })
            print 'EDITED'
-

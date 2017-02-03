@@ -8,7 +8,7 @@ import os, time, datetime
 
 import pandas as pd
 import numpy as np
-# from netCDF4 import Dataset
+from netCDF4 import Dataset
 # from abc import ABCMeta, abstractmethod
 
 import sccoos
@@ -109,13 +109,14 @@ class SASS(sccoos.SCCOOS):
             ' land run-off, and algal blooms.'
             })
 
-    def createNCshell(self, ncfile, sta):
+    def createNCshell(self, ncName, sta):
         """
         .. todo::
             - add more history for stations
             - move createVariables to external text file??
         """
-        print "SASS createNCshell", ncfile
+        print "SASS createNCshell", ncName
+        ncfile = Dataset(ncName, 'w', format='NETCDF4')
         self.metaDict.update({
         'comment': 'The '+self.staMeta[sta]['loc_name']+' automated shore station operated' + \
         ' by ' + self.staMeta[sta]['inst'] + \
@@ -298,9 +299,24 @@ class SASS(sccoos.SCCOOS):
         platform1.long_name = self.staMeta[sta]['loc_name']
         platform1.ioos_code = "urn:ioos:sensor:sccoos:"+self.staMeta[sta]['loc']
 
-        self.addNCshell_SCCOOS(ncfile)
+        #self.addNCshell_SCCOOS(ncfile)
+        lat = ncfile.createVariable('lat', 'f4')
+        lat.setncatts(self.meta_lat)
+        lat.setncatts({
+            'valid_min':self.staMeta[sta]['lat'],
+            'valid_max':self.staMeta[sta]['lat']
+        })
         ncfile.variables['lat'][0] = self.staMeta[sta]['lat']
+
+        lon = ncfile.createVariable('lon', 'f4')
+        lon.setncatts(self.meta_lon)
+        lon.setncatts({
+            'valid_min':self.staMeta[sta]['lon'],
+            'valid_max':self.staMeta[sta]['lon']
+        })
         ncfile.variables['lon'][0] = self.staMeta[sta]['lon']
+
+        dep = ncfile.createVariable('depth', 'f4')
         ncfile.variables['depth'][0] = self.staMeta[sta]['depth']
 
         return ncfile
