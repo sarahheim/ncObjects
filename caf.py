@@ -54,13 +54,14 @@ class CAF(sccoos.SCCOOS):
             'lon': -117.3390
         }
 
-        self.qc_values = { 'temperature': {'miss_val':'Nan', 'sensor_span':(0,120), 'user_span':(0,30),
-            'low_reps':60, 'high_reps':1800, 'eps':0.0001, 'low_thresh':0.5, 'high_thresh':1 },
-            'salinity': {'miss_val':'Nan', 'sensor_span':(0,1000), 'user_span':(10,35),
-            'low_reps':60, 'high_reps':1800, 'eps':0.0001, 'low_thresh':0.5, 'high_thresh':1 },
-            'pCO2_atm': {'miss_val':'Nan', 'sensor_span':(0, 20000), 'user_span':(0,1300),
+        #match values to text2nc section 
+        self.qc_values = { 'temperature': {'miss_val':'Nan', 'sensor_span':(0,120), 'user_span':(10,30),
+            'low_reps':4, 'high_reps':120, 'eps':0.0001, 'low_thresh':0.5, 'high_thresh':1 },
+            'salinity': {'miss_val':'Nan', 'sensor_span':(20,40), 'user_span':(20,35),
+            'low_reps':4, 'high_reps':120, 'eps':0.0001, 'low_thresh':0.5, 'high_thresh':1 },
+            'pCO2_atm': {'miss_val':'Nan', 'sensor_span':(200, 1500), 'user_span':(250,800),
             'low_reps':20, 'high_reps':120, 'eps':0.01, 'low_thresh':25, 'high_thresh':50 },
-            'TCO2_mol_kg': {'miss_val':'Nan', 'sensor_span':(0,2500), 'user_span':(0,2500),
+            'TCO2_mol_kg': {'miss_val':'Nan', 'sensor_span':(1900,2300), 'user_span':(1900,2300),
             'low_reps':2, 'high_reps':3, 'eps':0.01, 'low_thresh':None, 'high_thresh':None }
         }
 
@@ -305,13 +306,18 @@ class CAF(sccoos.SCCOOS):
         df.rename(columns={'TSG_T':'temperature', 'TSG_S':'salinity'}, inplace=True)
         #self.attrArr = df.columns
 
-        df = self.qc_tests(df, 'temperature', miss_val='Nan', sensor_span=(0,120), user_span=(0,30),
-        low_reps=60, high_reps=1800, eps=0.0001, low_thresh=0.5, high_thresh=1)
-        df = self.qc_tests(df, 'salinity', miss_val='Nan', sensor_span=(0,1000), user_span=(10,35),
-        low_reps=60, high_reps=1800, eps=0.0001, low_thresh=0.5, high_thresh=1)
-        df = self.qc_tests(df, 'pCO2_atm', miss_val='Nan', sensor_span=(0, 20000), user_span=(0,1300),
+        #match values to qc_values metadata!!!
+        df = self.qc_tests(df, 'temperature', miss_val='Nan', 
+        sensor_span=(0,120), user_span=(10,30),
+        low_reps=4, high_reps=120, eps=0.0001, low_thresh=0.5, high_thresh=1)
+        df = self.qc_tests(df, 'salinity', miss_val='Nan', 
+        sensor_span=(20,40), user_span=(20,35),
+        low_reps=4, high_reps=120, eps=0.0001, low_thresh=0.5, high_thresh=1)
+        df = self.qc_tests(df, 'pCO2_atm', miss_val='Nan', 
+        sensor_span=(200, 1500), user_span=(250,800),
         low_reps=20, high_reps=120, eps=0.01, low_thresh=25, high_thresh=50)
-        df = self.qc_tests(df, 'TCO2_mol_kg', miss_val='Nan', sensor_span=(0,2500), user_span=(0,2500),
+        df = self.qc_tests(df, 'TCO2_mol_kg', miss_val='Nan', 
+        sensor_span=(1900,2300), user_span=(1900,2300),
         low_reps=2, high_reps=3, eps=0.01, low_thresh=None, high_thresh=None)
 
         ## Get the last time stamp recored in this location's NetCDF file.

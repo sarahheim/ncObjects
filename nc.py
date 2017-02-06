@@ -215,7 +215,7 @@ class NC(object):
         "time_coverage_duration": self.ISOduration(minTimeS, maxTimeS),
         "date_modified": self.tupToISO(time.gmtime()), #time.ctime(time.time()),
         "date_issued": self.tupToISO(time.gmtime()), #time.ctime(time.time()),
-        "uuid": uuid.uuid4()
+        "uuid": str(uuid.uuid4())
         })
 
     def fileSizeChecker(self, ncfilepath):
