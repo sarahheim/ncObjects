@@ -56,9 +56,9 @@ class CAF(sccoos.SCCOOS):
 
         #match values to text2nc section 
         self.qc_values = { 'temperature': {'miss_val':'Nan', 'sensor_span':(0,120), 'user_span':(10,30),
-            'low_reps':4, 'high_reps':120, 'eps':0.0001, 'low_thresh':0.5, 'high_thresh':1 },
+            'low_reps':50, 'high_reps':120, 'eps':0.0125, 'low_thresh':0.5, 'high_thresh':1 },
             'salinity': {'miss_val':'Nan', 'sensor_span':(20,40), 'user_span':(20,35),
-            'low_reps':4, 'high_reps':120, 'eps':0.0001, 'low_thresh':0.5, 'high_thresh':1 },
+            'low_reps':20, 'high_reps':120, 'eps':0.0001, 'low_thresh':0.5, 'high_thresh':1 },
             'pCO2_atm': {'miss_val':'Nan', 'sensor_span':(200, 1500), 'user_span':(250,800),
             'low_reps':20, 'high_reps':120, 'eps':0.01, 'low_thresh':25, 'high_thresh':50 },
             'TCO2_mol_kg': {'miss_val':'Nan', 'sensor_span':(1900,2300), 'user_span':(1900,2300),
@@ -309,10 +309,10 @@ class CAF(sccoos.SCCOOS):
         #match values to qc_values metadata!!!
         df = self.qc_tests(df, 'temperature', miss_val='Nan', 
         sensor_span=(0,120), user_span=(10,30),
-        low_reps=4, high_reps=120, eps=0.0001, low_thresh=0.5, high_thresh=1)
+        low_reps=50, high_reps=120, eps=0.0125, low_thresh=0.5, high_thresh=1)
         df = self.qc_tests(df, 'salinity', miss_val='Nan', 
         sensor_span=(20,40), user_span=(20,35),
-        low_reps=4, high_reps=120, eps=0.0001, low_thresh=0.5, high_thresh=1)
+        low_reps=20, high_reps=120, eps=0.0001, low_thresh=0.5, high_thresh=1)
         df = self.qc_tests(df, 'pCO2_atm', miss_val='Nan', 
         sensor_span=(200, 1500), user_span=(250,800),
         low_reps=20, high_reps=120, eps=0.01, low_thresh=25, high_thresh=50)
