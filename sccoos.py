@@ -7,7 +7,7 @@
 
 import os #, time, datetime
 
-# import pandas as pd
+import pandas as pd
 import numpy as np
 from netCDF4 import Dataset
 from abc import ABCMeta, abstractmethod
@@ -33,9 +33,12 @@ class SCCOOS(nc.NC):
             # ' at Scripps Institution of Oceanography (SIO)',
             # 'creator_url':'https://sccoos.org',
             'institution': 'Scripps Institution of Oceanography, University of California San Diego',
+            'publisher_institution': 'Scripps Institution of Oceanography (SIO)',
             'publisher_name':'Southern California Coastal Ocean Observing System',
+            'publisher_type': 'position',
             'publisher_url':'http://sccoos.org',
             'publisher_email':'info@sccoos.org',
+            'program': 'Southern California Coastal Ocean Observing System (SCCOOS)'
             'naming_authority':'sccoos.org',
             'source':'insitu observations',
             })
@@ -142,44 +145,44 @@ class SCCOOS(nc.NC):
         :returns: dataframe with primary and secondary flags added
 
         Expected kwargs: sensor_span, user_span"""
-        data = df[attr].values
-        qc2flags = np.zeros_like(data, dtype='uint8')
+        # data = df[attr].values
+        qc2flags = np.zeros_like(df[attr].values, dtype='uint8')
 
         # Missing check
         if miss_val is not None:
-            qcflagsMiss = qc.check_nulls(data)
+            qcflagsMiss = qc.check_nulls(df[attr].values)
             #nothing for secondary flag if missing?
 
         else:
-            qcflagsMiss = np.ones_like(data, dtype='uint8')
+            qcflagsMiss = np.ones_like(df[attr].values, dtype='uint8')
 
         # Range Check
         # sensor_span = (-5,30)
         # user_span = (8,30)
         if sensor_span is not None:
-            qcflagsRange = qc.range_check(data,sensor_span,user_span)
+            qcflagsRange = qc.range_check(df[attr].values,sensor_span,user_span)
             qc2flags[(qcflagsRange > 2)] = 1 # Range
         else:
-            qcflagsRange = np.ones_like(data, dtype='uint8')
+            qcflagsRange = np.ones_like(df[attr].values, dtype='uint8')
 
         # Flat Line Check
         # low_reps = 2
         # high_reps = 5
         # eps = 0.0001
         if low_reps and high_reps and eps:
-            qcflagsFlat = qc.flat_line_check(data,low_reps,high_reps,eps)
+            qcflagsFlat = qc.flat_line_check(df[attr].values,low_reps,high_reps,eps)
             qc2flags[(qcflagsFlat > 2)] = 2 # Flat line
         else:
-            qcflagsFlat = np.ones_like(data, dtype='uint8')
+            qcflagsFlat = np.ones_like(df[attr].values, dtype='uint8')
 
         # Spike Test
         # low_thresh = 2
         # high_thresh = 3
         if low_thresh and high_thresh:
-            qcflagsSpike = qc.spike_check(data,low_thresh,high_thresh)
+            qcflagsSpike = qc.spike_check(df[attr].values,low_thresh,high_thresh)
             qc2flags[(qcflagsSpike > 2)] = 3 # Spike
         else:
-            qcflagsSpike = np.ones_like(data, dtype='uint8')
+            qcflagsSpike = np.ones_like(df[attr].values, dtype='uint8')
 
         # print 'all pre flags:', attr, data[0], type(data[0]), np.isnan(data[0]), qcflagsMiss[0], qcflagsRange[0], qcflagsFlat[0], qcflagsSpike[0]
         # Find maximum qc flag
@@ -188,8 +191,15 @@ class SCCOOS(nc.NC):
         # print 'final secondary flags:',attr, qc2flags[0:10]
 
         # Output flags
-        df[attr+'_flagPrimary'] = qcflags
-        df[attr+'_flagSecondary'] = qc2flags
+        # print qcflags
+        # print qc2flags
+        # df.loc[:, (attr+'_flagPrimary')] = qcflags
+        # df.loc[:, (attr+'_flagSecondary')] = qc2flags
+        flags = pd.DataFrame({attr+'_flagPrimary':qcflags , attr+'_flagSecondary':qc2flags} , index=df.index)
+        df = pd.concat([df, flags], axis=1)
+        del qcflags, qc2flags
+        # df.loc[:, attr+'_flagPrimary'] = pd.DataFrame(qcflags, index=df.index)
+        # df.loc[:, attr+'_flagSecondary'] = pd.DataFrame(qc2flags, index=df.index)
 
         return df
 

@@ -49,33 +49,43 @@ class CAF(sccoos.SCCOOS):
 
         ##Meta
         self.staMeta = {
-            # 'depth': ,!!!
+            'depth': , 0.9
             'lat': 33.1390,
             'lon': -117.3390
         }
 
-        #match values to text2nc section 
-        self.qc_values = { 'temperature': {'miss_val':'Nan', 'sensor_span':(0,120), 'user_span':(10,30),
-            'low_reps':50, 'high_reps':120, 'eps':0.01, 'low_thresh':0.5, 'high_thresh':1 },
-            'salinity': {'miss_val':'Nan', 'sensor_span':(20,40), 'user_span':(20,35),
-            'low_reps':20, 'high_reps':120, 'eps':0.0001, 'low_thresh':0.5, 'high_thresh':1 },
-            'pCO2_atm': {'miss_val':'Nan', 'sensor_span':(200, 1500), 'user_span':(250,800),
+        self.qc_values = { 'temperature': {'miss_val':'Nan', 'sensor_span':(0,120), 'user_span':(0,30),
+            'low_reps':60, 'high_reps':1800, 'eps':0.0001, 'low_thresh':0.5, 'high_thresh':1 },
+            'salinity': {'miss_val':'Nan', 'sensor_span':(0,1000), 'user_span':(10,35),
+            'low_reps':60, 'high_reps':1800, 'eps':0.0001, 'low_thresh':0.5, 'high_thresh':1 },
+            'pCO2_atm': {'miss_val':'Nan', 'sensor_span':(0, 20000), 'user_span':(0,1300),
             'low_reps':20, 'high_reps':120, 'eps':0.01, 'low_thresh':25, 'high_thresh':50 },
-            'TCO2_mol_kg': {'miss_val':'Nan', 'sensor_span':(1900,2300), 'user_span':(1900,2300),
+            'TCO2_mol_kg': {'miss_val':'Nan', 'sensor_span':(0,2500), 'user_span':(0,2500),
             'low_reps':2, 'high_reps':3, 'eps':0.01, 'low_thresh':None, 'high_thresh':None }
         }
 
         self.metaDict.update({
+            'title':'Burkolator: Carlsbad Aquafarm',
+            'product_version': 'v1',
             'cdm_data_type':'Station',
             'contributor_name': 'Carlsbad Aquafarm/SCCOOS, SCCOOS/IOOS/NOAA, SCCOOS',
             'contributor_role': 'station operation, station funding, data management', #??
             'creator_email':'info@sccoos.org', #??
             'creator_name':'Scripps Institution of Oceanography (SIO)', # Todd Martz/ Martz Lab?
+            'creator_institution':'Scripps Institution of Oceanography (SIO)',
+            'creator_type':'person',
             'creator_url':'http://sccoos.org', #Martz Lab url?
+            'geospatial_bounds_crs': 'EPSG:4326',
+            'geospatial_bounds_vertical_crs': 'EPSG:5829',
+            'geospatial_bounds': 'POINT(', self.staMeta['lon'],' ',self.staMeta['lat'],')'
             "geospatial_lat_min": self.staMeta['lat'],
             "geospatial_lat_max": self.staMeta['lat'],
             "geospatial_lon_min": self.staMeta['lon'],
             "geospatial_lon_max": self.staMeta['lon'],
+            "geospatial_vertical_min": self.staMeta['depth'],
+            "geospatial_vertical_max": self.staMeta['depth'],
+            "geospatial_vertical_units": 'm',
+            'geospatial_vertical_positive': 'down',
             'history':'Carlsbad Aquafarm cultivates Mediterranean Blue Mussels,' + \
             ' Pacific Oysters and Ogo. The company has been in operation since 1990 in Carlsbad.',
             'ip':"132.239.92.62",
@@ -93,15 +103,15 @@ class CAF(sccoos.SCCOOS):
             ' University. The SCCOOS Burkolator is located at the Carlsbad Aquafarm' + \
             ' (carlsbadaquafarm.com) in San Diego and is operated by the Martz Lab at' + \
             ' the Scripps Institution of Oceanography.',
-            'title':'Burkolator: Carlsbad Aquafarm',
+            'platform_vocabulary': 'GCMD Earth Science Keywords. Version 5.3.3',
+            'platform': 'In Situ Land-based Platforms > Ocean Platform/Ocean Stations > Coastal Stations',
+            'instrument_vocabulary': 'GCMD Earth Science Keywords. Version 5.3.3',
+            'instrument': 'Earth Science > Oceans > Ocean Chemistry > Chlorophyll, Earth Science > Oceans > Ocean Optics > Turbidity, Earth Science > Oceans > Ocean Pressure > Water Pressure, Earth Science > Oceans > Ocean Temperature > Water Temperature, Earth Science > Oceans > Salinity/Density > Conductivity, Earth Science > Oceans > Salinity/Density > Salinity, Earth Science > Oceans > Water Quality, Earth Science>Oceans>Ocean Chemistry>pH, Earth Science>Oceans>Ocean Chemistry>Carbon Dioxide',
+
             # 'comment':'', !!!
-            # "geospatial_vertical_min": self.staMeta['depth'],
-            # "geospatial_vertical_max": self.staMeta['depth'],
             # 'geospatial_lat_resolution':'',  # ?
             # 'geospatial_lon_resolution':'',  # ?
-            # 'geospatial_vertical_units':'',  # ???
             # 'geospatial_vertical_resolution':'',  # ???
-            # 'geospatial_vertical_positive':''  # ???
             })
 
     def createNCshell(self, ncName, ignore):
@@ -151,7 +161,8 @@ class CAF(sccoos.SCCOOS):
         temperature.setncatts({
             'long_name':'sea water temperature',
             'standard_name':'sea_water_temperature',
-            'units':'celsius'})
+            'units':'celsius',
+            'coverage_content_type':'physicalMeasurement'})
         temperature.setncatts(self.qc_meta('temperature'))
         temperature.setncatts(dup_varatts)
         temperature_flagPrim = ncfile.createVariable(
@@ -175,7 +186,8 @@ class CAF(sccoos.SCCOOS):
         salinity.setncatts({
             'standard_name':'sea_water_salinity',
             'long_name':'sea water salinity',
-            'units':'psu'}) #?
+            'units':'psu',
+            'coverage_content_type':'physicalMeasurement'}) #?
         salinity.setncatts(self.qc_meta('salinity'))
         salinity.setncatts(dup_varatts)
         salinity_flagPrim = ncfile.createVariable(
@@ -197,16 +209,17 @@ class CAF(sccoos.SCCOOS):
 
         pCO2_atm = ncfile.createVariable('pCO2_atm', 'f4', ('time'), zlib=True)
         pCO2_atm.setncatts({
-            'standard_name':'subsurface_partial_pressure_of_carbon_dioxide_in_sea_water', #SUBsurface?
+            'standard_name':'surface_partial_pressure_of_carbon_dioxide_in_sea_water', #SUBsurface?
             'long_name':'partial pressure of carbon dioxide',
-            'units':'uatm'})
+            'units':'uatm',
+            'coverage_content_type':'physicalMeasurement'})
         pCO2_atm.setncatts(self.qc_meta('pCO2_atm'))
         pCO2_atm.setncatts(dup_varatts)
         pCO2_atm_flagPrim = ncfile.createVariable(
             'pCO2_atm_flagPrimary', 'B', ('time'), zlib=True)
         pCO2_atm_flagPrim.setncatts({
             'long_name':'partial pressure of carbon dioxide, qc primary flag',
-            'standard_name':"subsurface_partial_pressure_of_carbon_dioxide_in_sea_water status_flag",
+            'standard_name':"surface_partial_pressure_of_carbon_dioxide_in_sea_water status_flag",
             'flag_values':flagPrim_flag_values,
             'flag_meanings':flagPrim_flag_meanings})
         pCO2_atm_flagPrim.setncatts(dup_flagatts)
@@ -214,7 +227,7 @@ class CAF(sccoos.SCCOOS):
             'pCO2_atm_flagSecondary', 'B', ('time'), zlib=True)
         pCO2_atm_flagSec.setncatts({
             'long_name':'partial pressure of carbon dioxide, qc secondary flag',
-            'standard_name':"subsurface_partial_pressure_of_carbon_dioxide_in_sea_water status_flag",
+            'standard_name':"surface_partial_pressure_of_carbon_dioxide_in_sea_water status_flag",
             'flag_values':flagSec_flag_values,
             'flag_meanings':flagSec_flag_meanings})
         pCO2_atm_flagSec.setncatts(dup_flagatts)
@@ -223,7 +236,8 @@ class CAF(sccoos.SCCOOS):
         TCO2m.setncatts({
             'standard_name':'mole_concentration_of_dissolved_inorganic_carbon_in_sea_water',
             'long_name':'seawater total dissolved inorganic carbon concentration',
-            'units':'umol/kg'})
+            'units':'umol/kg',
+            'coverage_content_type':'physicalMeasurement'})
         TCO2m.setncatts(self.qc_meta('TCO2_mol_kg'))
         TCO2m.setncatts(dup_varatts)
         TCO2m_flagPrim = ncfile.createVariable(
@@ -244,12 +258,16 @@ class CAF(sccoos.SCCOOS):
         TCO2m_flagSec.setncatts(dup_flagatts)
 
 
-        #for c in cols:
-        #    cVar = ncfile.createVariable(c, 'f4', ('time'), zlib=True)
-        #    cVar.long_name = c
+        crs = ncfile.createVariable('crs', 'd')
+        crs.grid_mapping_name = "latitude_longitude"
+        crs.longitude_of_prime_meridian = 0.0
+        crs.epsg_code = "EPSG:4326"
+        crs.semi_major_axis = 6378137.0
+        crs.inverse_flattening = 298.257223563
 
         instrument1 = ncfile.createVariable('instrument1', 'i') #Licor??
         instrument1.setncatts({
+            'long_name': "Burkolator",
             'make':"",
             'model':"",
             'comment':"beta Burkelator" }) #?
@@ -278,12 +296,12 @@ class CAF(sccoos.SCCOOS):
         ncfile.variables['lon'][0] = self.staMeta['lon']
 
         dep = ncfile.createVariable('depth', 'f4')
-        dep.setncatts(self.meta_dep)
-        # lat.setncatts({
-        #     'valid_min':self.staMeta['depth'],
-        #     'valid_max':self.staMeta['depth']
-        # })
-        # ncfile.variables['depth'][0] = self.staMeta['depth']!!!
+        dep.setncatts(self.meta_dep) #???
+        dep.setncatts({
+            'valid_min':self.staMeta['depth'],
+            'valid_max':self.staMeta['depth']
+        })
+        ncfile.variables['depth'][0] = self.staMeta['depth']
 
 
         return ncfile
@@ -306,18 +324,13 @@ class CAF(sccoos.SCCOOS):
         df.rename(columns={'TSG_T':'temperature', 'TSG_S':'salinity'}, inplace=True)
         #self.attrArr = df.columns
 
-        #match values to qc_values metadata!!!
-        df = self.qc_tests(df, 'temperature', miss_val='Nan', 
-        sensor_span=(0,120), user_span=(10,30),
-        low_reps=50, high_reps=120, eps=0.01, low_thresh=0.5, high_thresh=1)
-        df = self.qc_tests(df, 'salinity', miss_val='Nan', 
-        sensor_span=(20,40), user_span=(20,35),
-        low_reps=20, high_reps=120, eps=0.0001, low_thresh=0.5, high_thresh=1)
-        df = self.qc_tests(df, 'pCO2_atm', miss_val='Nan', 
-        sensor_span=(200, 1500), user_span=(250,800),
+        df = self.qc_tests(df, 'temperature', miss_val='Nan', sensor_span=(0,120), user_span=(0,30),
+        low_reps=60, high_reps=1800, eps=0.0001, low_thresh=0.5, high_thresh=1)
+        df = self.qc_tests(df, 'salinity', miss_val='Nan', sensor_span=(0,1000), user_span=(10,35),
+        low_reps=60, high_reps=1800, eps=0.0001, low_thresh=0.5, high_thresh=1)
+        df = self.qc_tests(df, 'pCO2_atm', miss_val='Nan', sensor_span=(0, 20000), user_span=(0,1300),
         low_reps=20, high_reps=120, eps=0.01, low_thresh=25, high_thresh=50)
-        df = self.qc_tests(df, 'TCO2_mol_kg', miss_val='Nan', 
-        sensor_span=(1900,2300), user_span=(1900,2300),
+        df = self.qc_tests(df, 'TCO2_mol_kg', miss_val='Nan', sensor_span=(0,2500), user_span=(0,2500),
         low_reps=2, high_reps=3, eps=0.01, low_thresh=None, high_thresh=None)
 
         ## Get the last time stamp recored in this location's NetCDF file.

@@ -8,7 +8,7 @@ import os, time, datetime
 
 import pandas as pd
 import numpy as np
-from netCDF4 import Dataset
+# from netCDF4 import Dataset
 # from abc import ABCMeta, abstractmethod
 
 import sccoos
@@ -23,6 +23,7 @@ class SASS(sccoos.SCCOOS):
         .. todo::
             - change ncpath (currently local for testing)
             - move metadata to external text file(s)?
+            - Add creator_institution. 'inst' is creator_name (change?).
         """
         super(SASS, self).__init__()
         #print "init sass"
@@ -109,14 +110,13 @@ class SASS(sccoos.SCCOOS):
             ' land run-off, and algal blooms.'
             })
 
-    def createNCshell(self, ncName, sta):
+    def createNCshell(self, ncfile, sta):
         """
         .. todo::
             - add more history for stations
             - move createVariables to external text file??
         """
-        print "SASS createNCshell", ncName
-        ncfile = Dataset(ncName, 'w', format='NETCDF4')
+        print "SASS createNCshell", ncfile
         self.metaDict.update({
         'comment': 'The '+self.staMeta[sta]['loc_name']+' automated shore station operated' + \
         ' by ' + self.staMeta[sta]['inst'] + \
@@ -277,10 +277,11 @@ class SASS(sccoos.SCCOOS):
         ncfile.variables['station'][:len(self.staMeta[sta]['loc'])] = list(self.staMeta[sta]['loc'])
 
         crs = ncfile.createVariable('crs', 'd')
-        crs.grid_mapping_name = "latitude_longitude";
-        crs.epsg_code = "EPSG:4326" ;
-        crs.semi_major_axis = 6378137.0 ;
-        crs.inverse_flattening = 298.257223563 ;
+        crs.grid_mapping_name = "latitude_longitude"
+        crs.longitude_of_prime_meridian = 0.0
+        crs.epsg_code = "EPSG:4326"
+        crs.semi_major_axis = 6378137.0
+        crs.inverse_flattening = 298.257223563
 
         instrument1 = ncfile.createVariable('instrument1', 'i')
         instrument1.make = "Seabird"
@@ -299,24 +300,9 @@ class SASS(sccoos.SCCOOS):
         platform1.long_name = self.staMeta[sta]['loc_name']
         platform1.ioos_code = "urn:ioos:sensor:sccoos:"+self.staMeta[sta]['loc']
 
-        #self.addNCshell_SCCOOS(ncfile)
-        lat = ncfile.createVariable('lat', 'f4')
-        lat.setncatts(self.meta_lat)
-        lat.setncatts({
-            'valid_min':self.staMeta[sta]['lat'],
-            'valid_max':self.staMeta[sta]['lat']
-        })
+        self.addNCshell_SCCOOS(ncfile)
         ncfile.variables['lat'][0] = self.staMeta[sta]['lat']
-
-        lon = ncfile.createVariable('lon', 'f4')
-        lon.setncatts(self.meta_lon)
-        lon.setncatts({
-            'valid_min':self.staMeta[sta]['lon'],
-            'valid_max':self.staMeta[sta]['lon']
-        })
         ncfile.variables['lon'][0] = self.staMeta[sta]['lon']
-
-        dep = ncfile.createVariable('depth', 'f4')
         ncfile.variables['depth'][0] = self.staMeta[sta]['depth']
 
         return ncfile
