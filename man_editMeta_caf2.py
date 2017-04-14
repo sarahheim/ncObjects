@@ -24,7 +24,7 @@ for i in range(15, 18):
             'instrument': 'Earth Science > Oceans > Ocean Chemistry > Chlorophyll, Earth Science > Oceans > Ocean Optics > Turbidity, Earth Science > Oceans > Ocean Pressure > Water Pressure, Earth Science > Oceans > Ocean Temperature > Water Temperature, Earth Science > Oceans > Salinity/Density > Conductivity, Earth Science > Oceans > Salinity/Density > Salinity, Earth Science > Oceans > Water Quality, Earth Science>Oceans>Ocean Chemistry>pH, Earth Science>Oceans>Ocean Chemistry>Carbon Dioxide',
             'geospatial_bounds_crs': 'EPSG:4326',
             'geospatial_bounds_vertical_crs': 'EPSG:5829',
-            'geospatial_bounds': 'POINT(-117.339 33.139)'
+            'geospatial_bounds': 'POINT(-117.339 33.139)',
             "geospatial_vertical_units": 'm',
             'geospatial_vertical_positive': 'down',
         }

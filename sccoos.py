@@ -38,7 +38,7 @@ class SCCOOS(nc.NC):
             'publisher_type': 'position',
             'publisher_url':'http://sccoos.org',
             'publisher_email':'info@sccoos.org',
-            'program': 'Southern California Coastal Ocean Observing System (SCCOOS)'
+            'program': 'Southern California Coastal Ocean Observing System (SCCOOS)',
             'naming_authority':'sccoos.org',
             'source':'insitu observations',
             })
