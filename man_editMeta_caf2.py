@@ -11,42 +11,39 @@ for i in range(15, 18):
 
         #GLOBAL ATTRIBUTES
         newMeta = {
-            'Conventions':'CF-1.6, ACDD-1.3',
-            'product_version': 'v1',
-            'creator_type':'person',
-            'creator_institution':'Scripps Institution of Oceanography (SIO)',
-            'publisher_institution': 'Scripps Institution of Oceanography (SIO)',
-            'publisher_type': 'position',
-            'program': 'Southern California Coastal Ocean Observing System (SCCOOS)',
-            'platform_vocabulary': 'GCMD Earth Science Keywords. Version 5.3.3',
-            'platform': 'In Situ Land-based Platforms > Ocean Platform/Ocean Stations > Coastal Stations',
-            'instrument_vocabulary': 'GCMD Earth Science Keywords. Version 5.3.3',
-            'instrument': 'Earth Science > Oceans > Ocean Chemistry > Chlorophyll, Earth Science > Oceans > Ocean Optics > Turbidity, Earth Science > Oceans > Ocean Pressure > Water Pressure, Earth Science > Oceans > Ocean Temperature > Water Temperature, Earth Science > Oceans > Salinity/Density > Conductivity, Earth Science > Oceans > Salinity/Density > Salinity, Earth Science > Oceans > Water Quality, Earth Science>Oceans>Ocean Chemistry>pH, Earth Science>Oceans>Ocean Chemistry>Carbon Dioxide',
-            'geospatial_bounds_crs': 'EPSG:4326',
-            'geospatial_bounds_vertical_crs': 'EPSG:5829',
-            'geospatial_bounds': 'POINT(-117.339 33.139)',
-            "geospatial_vertical_units": 'm',
-            'geospatial_vertical_positive': 'down',
+            'time_coverage_resolution': 'P1S'
         }
         ncfile.setncatts(newMeta)
 
         # #VARIABLE ATTRIBUTES
         # print '\tpre-Standard_name:',ncfile.variables['pCO2_atm'].getncattr('standard_name')
         # ncfile.variables['pCO2_atm'].setncatts(              { 'standard_name': 'surface_partial_pressure_of_carbon_dioxide_in_sea_water' })
-        ncfile.variables['pCO2_atm_flagPrimary'].setncatts(  { 'standard_name': 'surface_partial_pressure_of_carbon_dioxide_in_sea_water status_flag' })
-        ncfile.variables['pCO2_atm_flagSecondary'].setncatts({ 'standard_name': 'surface_partial_pressure_of_carbon_dioxide_in_sea_water status_flag' })
-        ncfile.variables['pCO2_atm_flagSecondary'].setncatts({ 'long_name': "Burkolator" })
-        ncfile.variables['temperature'].setncatts({ 'coverage_content_type':'physicalMeasurement' })
-        ncfile.variables['salinity'].setncatts({ 'coverage_content_type':'physicalMeasurement' })
-        ncfile.variables['pCO2_atm'].setncatts({ 'coverage_content_type':'physicalMeasurement' })
-        ncfile.variables['TCO2_mol_kg'].setncatts({ 'coverage_content_type':'physicalMeasurement' })
+        # ncfile.variables['pCO2_atm_flagPrimary'].setncatts(  { 'standard_name': 'surface_partial_pressure_of_carbon_dioxide_in_sea_water status_flag' })
+        # ncfile.variables['pCO2_atm_flagSecondary'].setncatts({ 'standard_name': 'surface_partial_pressure_of_carbon_dioxide_in_sea_water status_flag' })
+        # ncfile.variables['pCO2_atm_flagSecondary'].setncatts({ 'long_name': "Burkolator" })
+        # ncfile.variables['temperature'].setncatts({ 'instrument':'instrument2' })
+        # ncfile.variables['salinity'].setncatts({ 'instrument':'instrument2' })
+        ncfile.variables['instrument1'].setncatts({
+            'long_name': "Burkolator",
+            'comment':"Burkolator",
+            'make':"LI-COR",
+            'model':"LI-840"
+        })
 
-        crs = ncfile.createVariable('crs', 'd')
-        crs.grid_mapping_name = "latitude_longitude";
-        crs.longitude_of_prime_meridian = 0.0;
-        crs.epsg_code = "EPSG:4326" ;
-        crs.semi_major_axis = 6378137.0 ;
-        crs.inverse_flattening = 298.257223563 ;
+        # instrument2 = ncfile.createVariable('instrument2', 'i') #Licor??
+        # instrument2.setncatts({
+        #     'long_name': "DirectLine DL423 Sensor Module",
+        #     # 'comment':"DirectLine DL423 Sensor Module",
+        #     'make':"Honeywell",
+        #     'model':"DL423"
+        # })
+        #
+        # crs = ncfile.createVariable('crs', 'd')
+        # crs.grid_mapping_name = "latitude_longitude";
+        # crs.longitude_of_prime_meridian = 0.0;
+        # crs.epsg_code = "EPSG:4326" ;
+        # crs.semi_major_axis = 6378137.0 ;
+        # crs.inverse_flattening = 298.257223563 ;
 
         #global attr, always update with any modification
         nowStr = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())

@@ -133,8 +133,7 @@ class CAF(sccoos.SCCOOS):
             'source':'insitu observations',
             'grid_mapping':'crs',
             'coordinates':'time lat lon depth',
-            'platform':'platform1',
-            'instrument':'instrument1'
+            'platform':'platform1'
         }
         dup_flagatts = {
             'source':'QC results',
@@ -162,6 +161,7 @@ class CAF(sccoos.SCCOOS):
             'long_name':'sea water temperature',
             'standard_name':'sea_water_temperature',
             'units':'celsius',
+            'instrument':'instrument2',
             'coverage_content_type':'physicalMeasurement'})
         temperature.setncatts(self.qc_meta('temperature'))
         temperature.setncatts(dup_varatts)
@@ -187,6 +187,7 @@ class CAF(sccoos.SCCOOS):
             'standard_name':'sea_water_salinity',
             'long_name':'sea water salinity',
             'units':'psu',
+            'instrument':'instrument2',
             'coverage_content_type':'physicalMeasurement'}) #?
         salinity.setncatts(self.qc_meta('salinity'))
         salinity.setncatts(dup_varatts)
@@ -212,6 +213,7 @@ class CAF(sccoos.SCCOOS):
             'standard_name':'surface_partial_pressure_of_carbon_dioxide_in_sea_water', #SUBsurface?
             'long_name':'partial pressure of carbon dioxide',
             'units':'uatm',
+            'instrument':'instrument1',
             'coverage_content_type':'physicalMeasurement'})
         pCO2_atm.setncatts(self.qc_meta('pCO2_atm'))
         pCO2_atm.setncatts(dup_varatts)
@@ -237,6 +239,7 @@ class CAF(sccoos.SCCOOS):
             'standard_name':'mole_concentration_of_dissolved_inorganic_carbon_in_sea_water',
             'long_name':'seawater total dissolved inorganic carbon concentration',
             'units':'umol/kg',
+            'instrument':'instrument1',
             'coverage_content_type':'physicalMeasurement'})
         TCO2m.setncatts(self.qc_meta('TCO2_mol_kg'))
         TCO2m.setncatts(dup_varatts)
@@ -268,9 +271,18 @@ class CAF(sccoos.SCCOOS):
         instrument1 = ncfile.createVariable('instrument1', 'i') #Licor??
         instrument1.setncatts({
             'long_name': "Burkolator",
-            'make':"",
-            'model':"",
-            'comment':"beta Burkelator" }) #?
+            'comment':"Burkolator",
+            'make':"LI-COR",
+            'model':"LI-840"
+        })
+
+        instrument2 = ncfile.createVariable('instrument2', 'i') #Licor??
+        instrument2.setncatts({
+            'long_name': "DirectLine DL423 Sensor Module",
+            # 'comment':"DirectLine DL423 Sensor Module",
+            'make':"Honeywell",
+            'model':"DL423"
+        })
 
         platform1 = ncfile.createVariable('platform1', 'i')
         platform1.setncatts({
