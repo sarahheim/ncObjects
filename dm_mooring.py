@@ -35,6 +35,7 @@ class Moor(sccoos.SCCOOS):
         # self.ncpath = '/data/InSitu/Moor/netcdf'
         self.ncpath = '/home/scheim/NCobj/DM_Moor'
         self.extsDictFn = 'delmar_mooring_extensions.json'
+        print "USING JSON", self.extsDictFn
         # self.txtFnPre = 'CAF_RTproc_' !!!!!
         self.ncFnPre = 'Moor-'
         self.crontab = False
@@ -78,7 +79,7 @@ class Moor(sccoos.SCCOOS):
             ' at Scripps Institution of Oceanography (SIO)',
             'keywords':'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY, TEMPERATURE,',##!!!
             'metadata_link':'http://mooring.ucsd.edu/index.html?/projects/delmar/delmar_intro.html',
-            'processing_level':'QA/QC has been performed', ##!!!
+            'processing_level':'temporary QA/QC has been performed.', ##!!!
             'project':'Del Mar, Mooring',
             'references':'http://www.sccoos.org/data/, http://mooring.ucsd.edu/index.html?/projects/delmar/delmar_intro.html, https://scripps.ucsd.edu/hlab, https://github.com/ioos/qartod',
             'summary': 'With funding from.. ' + \
@@ -86,7 +87,7 @@ class Moor(sccoos.SCCOOS):
             ' Originally, the platform was developed in collaboration with the Hydraulics Laboratory as a part of the Southern California Coastal Ocean Observing System (SCCOOS). It has since developed into a testbed for instrument development, like for the first GEOCE mooring deployed in August 2008 until November 2009.' + \
             ' The mooring is operational, delivering real-time data, and being serviced annually. Recent servicing trips were incorporated into a university class, where students of the marine sciences and engineering could get hands-on experience with instrumentation, ship operations, and data acquisition.'+ \
             ' at the Scripps Institution of Oceanography.',
-            # 'comment':'', !!!
+            'comment':'qc parameters are placeholders. general values used for testing',
             # 'geospatial_lat_resolution':'',  # ?
             # 'geospatial_lon_resolution':'',  # ?
             # 'geospatial_vertical_resolution':'',  # ???
@@ -512,7 +513,7 @@ class Moor(sccoos.SCCOOS):
 
     def text2nc(self, filename):
         fnEnd = filename.split('.', 1)[-1]
-        print filename, fnEnd
+        print 'text2nc', filename, fnEnd
         filepath = os.path.join(self.logsdir, filename)
         # fnMod = int(os.path.getmtime(filepath))
         fnSz = os.path.getsize(filepath)
@@ -550,7 +551,7 @@ class Moor(sccoos.SCCOOS):
                 for attr in fDict['depths'][dep]['qc']:
                     # print 'QCing', dep, attr
                     qcIn = fDict['depths'][dep]['qc'][attr]
-                    # print 'QC input:', qcIn
+                    print 'QC input:', qcIn
                     dfDep = self.qc_tests(dfDep, attr,
                         sensor_span=qcIn['sensor_span'], user_span=qcIn['user_span'],
                         low_reps=qcIn['low_reps'], high_reps=qcIn['high_reps'], eps=qcIn['eps'],
@@ -581,8 +582,8 @@ class Moor(sccoos.SCCOOS):
             dfMax = df['epoch'].max()
             extDict[fnEnd]['latest_file'] = filename
             extDict[fnEnd]['latest_epoch'] = dfMax
-            extDict[fnEnd]['last_size'] = fnSz
-            # extDict[fnEnd]['last_mod'] = fnMod
+            extDict[fnEnd]['latest_file_size'] = fnSz
+            # extDict[fnEnd]['latest_file_mod'] = fnMod
             with open(self.extsDictFn, 'w') as json_file:
                 json.dump(extDict, json_file, indent=4)
             print 'file done:', filename
@@ -601,23 +602,46 @@ class Moor(sccoos.SCCOOS):
         with open(self.extsDictFn) as json_file:
             extDict = json.load(json_file)
         print extDict
-        #start with last recorded file
-        #check if last_mod is diff
-            #append
-        #look for new files
+        loopFlag = 0
+        todayStr = time.strftime('%Y%m%d',time.gmtime())
+        print todayStr
+        for ext in extDict:
+            filename = extDict[ext]['latest_file']
+            fnEnd = filename.split('.', 1)[-1]
+            fnDate = filename.split('.', 1)[0].split('_')[-1]
+            print 'filename date:', fnDate
+            prevFnSz = extDict[ext]['latest_file_size']
+            nowFnSz = os.path.getsize(os.path.join(os.path.join(self.logsdir, filename)))
+            print 'last sizes', prevFnSz, nowFnSz
+            # if the size of the last file recorded has changed, append it
+            if (prevFnSz != nowFnSz): self.text2nc(filename)
+            if (fnDate != todayStr): loopFlag +=1
 
-        #if
-        #Opt 1
-        filesArr = os.listdir(self.logsdir)
-        filesArr.sort()
-        for fn in filesArr:
-            print fn
-            #if fn is newer? use modified date or date in name?
-            #append
+        print 'flag', loopFlag
+        if loopFlag > 0:
+            #Opt 1
+            filesArr = os.listdir(self.logsdir)
+            filesArr.sort()
+            for fn in filesArr:
+                print fn
+                fnEnd = fn.split('.', 1)[-1]
+                print 'fnEnd:', fnEnd
+                if (fnEnd in self.filesDict):
+                    print 'fileDate:', fn.split('.', 1)[0].split('_')[-1]
+                    fileDate = time.strptime(fn.split('.', 1)[0].split('_')[-1], '%Y%m%d')
+                    lastFile = extDict[fnEnd]['latest_file'] ##asuming dictionary contains filename & isfile
+                    print 'lastDate:', lastFile.split('.', 1)[0].split('_')[-1]
+                    lastDate = time.strptime(lastFile.split('.', 1)[0].split('_')[-1], '%Y%m%d')
+                    if fileDate > lastDate:
+                        self.text2nc(fn)
+                        with open(self.extsDictFn) as json_file:
+                            extDict = json.load(json_file)
+                    # now = time.gmtime()
 
-        #Opt 2
-        #Or increment from latest_file/ if lates_file is before today
-        #What if
+            #Opt 2
+            #Or increment from latest_file/ if lates_file is before today
+            #What if
+        print "DONE! Appending"
 
 print '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
 print '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
@@ -625,10 +649,7 @@ m = Moor()
 print "ncpath", m.ncpath
 print "logsdir", m.logsdir
 # m.createNCshell('test.nc', '')
-# m.text2nc('CT1169100u_11691_20160506.002c.mc1') #runs, but not correct
-# m.text2nc('CT1169100u_11691_20160507.002c.mc1') #works
-# m.text2nc('CT1169100u_11691_20160508.002c.mc1')
-# m.text2nc('OS1169149u_11691_20160506_.002c')
-# m.text2nc('OS1169149u_11691_20160506.002c')
+# m.text2nc('CT1169100u_11691_20160506.002c.mc1')
 # m.text2nc('')
 m.text2nc_all()
+# m.text2nc_append()

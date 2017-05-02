@@ -159,7 +159,7 @@ class SCCOOS(nc.NC):
         # Range Check
         # sensor_span = (-5,30)
         # user_span = (8,30)
-        if sensor_span is not None:
+        if sensor_span or user_span:
             qcflagsRange = qc.range_check(df[attr].values,sensor_span,user_span)
             qc2flags[(qcflagsRange > 2)] = 1 # Range
         else:

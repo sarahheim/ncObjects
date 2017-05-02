@@ -78,22 +78,29 @@ def range_check(arr, sensor_span, user_span=None):
     user defined range.
     """
     flag_arr = np.ones_like(arr, dtype='uint8')
-    if len(sensor_span) != 2:
-        raise ValueError("Sensor range extent must be size two.")
-    # Ensure coordinates are in proper order.
-    s_span_sorted = sorted(sensor_span)
-    if user_span is not None:
+
+    if sensor_span:
+        if len(sensor_span) != 2:
+            raise ValueError("Sensor range extent must be size two.")
+        # Ensure coordinates are in proper order.
+        s_span_sorted = sorted(sensor_span)
+
+    if user_span:
         if len(user_span) != 2:
             raise ValueError("User defined range extent must be size two.")
         u_span_sorted = sorted(user_span)
-        if (u_span_sorted[0] < s_span_sorted[0] or
-           u_span_sorted[1] > s_span_sorted[1]):
-            raise ValueError("User span range may not exceed sensor bounds.")
-        # Test timing.
+        if sensor_span is not None:
+            if (u_span_sorted[0] < s_span_sorted[0] or
+               u_span_sorted[1] > s_span_sorted[1]):
+                raise ValueError("User span range may not exceed sensor bounds.")
+            # Test timing.
         flag_arr[(arr < u_span_sorted[0]) |
                  (arr > u_span_sorted[1])] = QCFlags.SUSPECT
-    flag_arr[(arr < s_span_sorted[0]) |
-             (arr > s_span_sorted[1])] = QCFlags.BAD_DATA
+
+    if sensor_span:
+        flag_arr[(arr < s_span_sorted[0]) |
+                 (arr > s_span_sorted[1])] = QCFlags.BAD_DATA
+
     return flag_arr
 
 
