@@ -93,7 +93,7 @@ class SCCOOS(nc.NC):
         #return pd.to_datetime(unixtime, unit='s', utc=None)[0].isoformat()
         return unixtime
 
-    def qc_meta(self, qcDict):
+    def qc_meta(self, attr, qcDict):
         qcDict = {'references':'https://github.com/ioos/qartod'}
         comment = 'The following QC tests were done on '+attr+'.'
         if 'user_span' in qcDict:

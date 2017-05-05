@@ -163,7 +163,7 @@ class CAF(sccoos.SCCOOS):
             'units':'celsius',
             'instrument':'instrument2',
             'coverage_content_type':'physicalMeasurement'})
-        temperature.setncatts(self.qc_meta(self.qc_values['temperature']))
+        temperature.setncatts(self.qc_meta('temperature', self.qc_values['temperature']))
         temperature.setncatts(dup_varatts)
         temperature_flagPrim = ncfile.createVariable(
             'temperature_flagPrimary', 'B', ('time'), zlib=True)
@@ -189,7 +189,7 @@ class CAF(sccoos.SCCOOS):
             'units':'psu',
             'instrument':'instrument2',
             'coverage_content_type':'physicalMeasurement'}) #?
-        salinity.setncatts(self.qc_meta(self.qc_values['salinity']))
+        salinity.setncatts(self.qc_meta('salinity', self.qc_values['salinity']))
         salinity.setncatts(dup_varatts)
         salinity_flagPrim = ncfile.createVariable(
             'salinity_flagPrimary', 'B', ('time'), zlib=True)
@@ -215,7 +215,7 @@ class CAF(sccoos.SCCOOS):
             'units':'uatm',
             'instrument':'instrument1',
             'coverage_content_type':'physicalMeasurement'})
-        pCO2_atm.setncatts(self.qc_meta(self.qc_values['pCO2_atm']))
+        pCO2_atm.setncatts(self.qc_meta('pCO2_atm', self.qc_values['pCO2_atm']))
         pCO2_atm.setncatts(dup_varatts)
         pCO2_atm_flagPrim = ncfile.createVariable(
             'pCO2_atm_flagPrimary', 'B', ('time'), zlib=True)
@@ -241,7 +241,7 @@ class CAF(sccoos.SCCOOS):
             'units':'umol/kg',
             'instrument':'instrument1',
             'coverage_content_type':'physicalMeasurement'})
-        TCO2m.setncatts(self.qc_meta(self.qc_values['TCO2_mol_kg']))
+        TCO2m.setncatts(self.qc_meta('TCO2_mol_kg', self.qc_values['TCO2_mol_kg']))
         TCO2m.setncatts(dup_varatts)
         TCO2m_flagPrim = ncfile.createVariable(
             'TCO2_mol_kg_flagPrimary', 'B', ('time'), zlib=True)
