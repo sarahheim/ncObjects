@@ -93,31 +93,31 @@ class SCCOOS(nc.NC):
         #return pd.to_datetime(unixtime, unit='s', utc=None)[0].isoformat()
         return unixtime
 
-    def qc_meta(self, attr):
+    def qc_meta(self, qcDict):
         qcDict = {'references':'https://github.com/ioos/qartod'}
         comment = 'The following QC tests were done on '+attr+'.'
-        if self.qc_values[attr]['user_span']:
+        if 'user_span' in qcDict:
             qcDict.update({
-                'data_min': self.qc_values[attr]['user_span'][0],
-                'data_max': self.qc_values[attr]['user_span'][1]
+                'data_min': qcDict['user_span'][0],
+                'data_max': qcDict['user_span'][1]
             })
-            comment += ' Range Check - Suspect: '+str(self.qc_values[attr]['user_span'])
+            comment += ' Range Check - Suspect: '+str(qcDict['user_span'])
 
-        if self.qc_values[attr]['sensor_span']:
+        if 'sensor_span' in qcDict:
             qcDict.update({
-                'valid_min': self.qc_values[attr]['sensor_span'][0],
-                'valid_max': self.qc_values[attr]['sensor_span'][1]
+                'valid_min': qcDict['sensor_span'][0],
+                'valid_max': qcDict['sensor_span'][1]
             })
-            comment += ' Range Check - Bad: '+str(self.qc_values[attr]['sensor_span'])
+            comment += ' Range Check - Bad: '+str(qcDict['sensor_span'])
 
-        if self.qc_values[attr]['low_reps'] and self.qc_values[attr]['high_reps'] and self.qc_values[attr]['eps']:
-            comment += ' Flat Line Check - EPS: '+ str(self.qc_values[attr]['eps'])
-            comment += ' Flat Line Check - Suspect: '+ str(self.qc_values[attr]['low_thresh'])
-            comment += ' Flat Line Check - Bad: '+  str(self.qc_values[attr]['high_thresh'])
+        if ('low_reps' in qcDict) and ('high_reps' in qcDict) and ('eps' in qcDict):
+            comment += ' Flat Line Check - EPS: '+ str(qcDict['eps'])
+            comment += ' Flat Line Check - Suspect: '+ str(qcDict['low_thresh'])
+            comment += ' Flat Line Check - Bad: '+  str(qcDict['high_thresh'])
 
-        if self.qc_values[attr]['low_thresh'] and self.qc_values[attr]['high_thresh']:
-            comment += ' Spike Test - Suspect: '+ str(self.qc_values[attr]['low_reps'])
-            comment += ' Spike Test - Bad: '+ str(self.qc_values[attr]['high_reps'])
+        if ('low_thresh' in qcDict) and ('high_thresh' in qcDict):
+            comment += ' Spike Test - Suspect: '+ str(qcDict['low_reps'])
+            comment += ' Spike Test - Bad: '+ str(qcDict['high_reps'])
 
         qcDict.update({
             'comment': comment
