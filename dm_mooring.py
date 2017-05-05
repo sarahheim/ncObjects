@@ -99,176 +99,199 @@ class Moor(sccoos.SCCOOS):
         })
 
         self.depArr = [0,7.5,16,25,35,47.5,60,75,90]
+        #m = meters; d = deployment for depth
+        self.instrDict = {
+            '6109':{
+                'm': 0,
+                'd': 1,
+                'meta': {'make':"Sea-Bird", 'model':"SBE 16plus SeaCAT"},
+                'qc':{
+                    'temperature':{
+                        'miss_val':None,
+                        'sensor_span': (-5,35), 'user_span': (12,27),
+                        'low_reps':3, 'high_reps':5, 'eps':0.0001,
+                        'low_thresh': 1, 'high_thresh': 2
+                    },
+                    'salinity':{
+                        'miss_val':None,
+                        'sensor_span': (2,42), 'user_span': (30, 35),
+                        'low_reps':3, 'high_reps':5, 'eps':0.00004,
+                        'low_thresh': 0.4, 'high_thresh': 1.5
+                    }
+                }
+            },
+            '05259':{
+                'm': 7.5,
+                'd': 1,
+                'meta': {'make':"Sea-Bird", 'model':"SBE 37 MicroCAT"},
+                'qc':{
+                    'temperature':{
+                        'miss_val':None,
+                        'sensor_span': (-5,45), 'user_span': (15,26),
+                        'low_reps':3, 'high_reps':5, 'eps':0.0001,
+                        'low_thresh': 2, 'high_thresh': 4
+                    },
+                    'salinity':{
+                        'miss_val':None,
+                        'sensor_span': None, 'user_span': (30,35),
+                        'low_reps':3, 'high_reps':5, 'eps':0.0001,
+                        'low_thresh': 0.5, 'high_thresh': 1.5
+                    }
+                }
+            },
+            '2751':{
+                'm': 16,
+                'd': 1,
+                'meta': {'make':"Sea-Bird", 'model':"SBE 16 SeaCat"},
+                'qc':{
+                    'temperature':{
+                        'miss_val':None,
+                        'sensor_span': (-5,35), 'user_span': (10,20),
+                        'low_reps':3, 'high_reps':5, 'eps':0.001,
+                        'low_thresh':1.5, 'high_thresh': 3
+                    },
+                    'salinity':{
+                        'miss_val':None,
+                        'sensor_span': None, 'user_span': (30,35),
+                        'low_reps':3, 'high_reps':5, 'eps':0.0001,
+                        'low_thresh': 0.4, 'high_thresh': 1
+                    },
+                }
+            },
+            '05357':{
+                'm': 25,
+                'd': 1,
+                'meta': {'make':"Sea-Bird",'model':"SBE 37 MicroCAT"},
+                'qc':{
+                    'temperature':{
+                        'miss_val':None,
+                        'sensor_span': (-5,45), 'user_span': (10,16),
+                        'low_reps':3, 'high_reps':5, 'eps':0.0001,
+                        'low_thresh': 2, 'high_thresh': 4
+                    },
+                    'salinity':{
+                        'miss_val':None,
+                        'sensor_span': None, 'user_span': (30,35),
+                        'low_reps':3, 'high_reps':5, 'eps':0.0001,
+                        'low_thresh': 0.4, 'high_thresh': 1
+                    }
+                }
+            },
+            '06432':{
+                'm': 35,
+                'd': 1,
+                'meta': {'make':"Sea-Bird", 'model':"SBE 16plus SeaCAT"},
+                'qc':{
+                    'temperature':{
+                        'miss_val':None,
+                        'sensor_span': (-5,35), 'user_span': (11,15),
+                        'low_reps':3, 'high_reps':5, 'eps':0.0001,
+                        'low_thresh':0.6, 'high_thresh': 1.5
+                    },
+                    'salinity':{
+                        'miss_val':None,
+                        'sensor_span': (2,42), 'user_span': (30,35),
+                        'low_reps':3, 'high_reps':5, 'eps':0.00004,
+                        'low_thresh':0.5, 'high_thresh': 1.5
+                    }
+                }
+            },
+            '05358':{
+                'm': 47.5,
+                'd': 1,
+                'meta': {'make':"Sea-Bird", 'model':"SBE 37 MicroCAT"},
+                'qc':{
+                    'temperature':{
+                        'miss_val':None,
+                        'sensor_span': (-5,45), 'user_span': (10,15),
+                        'low_reps':3, 'high_reps':5, 'eps':0.0001,
+                        'low_thresh': 1, 'high_thresh': 3
+                    },
+                    'salinity':{
+                        'miss_val':None,
+                        'sensor_span': None, 'user_span': (30,35),
+                        'low_reps':3, 'high_reps':5, 'eps':0.0001,
+                        'low_thresh': 0.5, 'high_thresh': 1.5
+                    }
+                }
+            },
+            '05949':{
+                'm': 60,
+                'd': 1,
+                'meta': {'make':"Sea-Bird",'model':"SBE 37 MicroCAT"},
+                'qc':{
+                    'temperature':{
+                        'miss_val':None,
+                        'sensor_span': (-5,45), 'user_span': (8,14),
+                        'low_reps':3, 'high_reps':5, 'eps':0.0001,
+                        'low_thresh':0.7, 'high_thresh': 3
+                    },
+                    'salinity':{
+                        'miss_val':None,
+                        'sensor_span': None, 'user_span': (30,35),
+                        'low_reps':3, 'high_reps':5, 'eps':0.0001,
+                        'low_thresh':0.5,'high_thresh': 1
+                    }
+                }
+            },
+            '06984':{
+                'm': 75,
+                'd': 1,
+                'meta': {'make':"Sea-Bird", 'model':"SBE 37 MicroCAT"},
+                'qc':{
+                    'temperature':{
+                        'miss_val':None,
+                        'sensor_span': (-5,45), 'user_span': (9,13),
+                        'low_reps':3, 'high_reps':5, 'eps':0.0001,
+                        'low_thresh':0.7, 'high_thresh': 2
+                    },
+                    'salinity':{
+                        'miss_val':None,
+                        'sensor_span': None, 'user_span': (30,35),
+                        'low_reps':3, 'high_reps':5, 'eps':0.0001,
+                        'low_thresh':0.5, 'high_thresh': 1
+                    }
+                }
+            },
+            '4402':{
+                'm': 90,
+                'd': 1,
+                'meta': {'make':"Sea-Bird",'model':"SBE 16plus SeaCAT"},
+                'qc':{
+                    'temperature':{
+                        'miss_val':None,
+                        'sensor_span': (-5,35), 'user_span': (9,13),
+                        'low_reps':3, 'high_reps':5, 'eps':0.0001,
+                        'low_thresh':0.6, 'high_thresh': 1.5
+                    },
+                    'salinity':{
+                        'miss_val':None,
+                        'sensor_span': (2,42), 'user_span': (30,35),
+                        'low_reps':3, 'high_reps':5, 'eps':0.00004,
+                        'low_thresh':0.5, 'high_thresh': 1.5
+                    }
+                }
+            }
+        }
         self.filesDict = {
             '002c.sc0': {
                 'hdr_cols': ['sn', 'temperature', 'conductivity', 'ign1', 'ign2', 'ign3', 'datetime_str', 'salinity'],
-                'instrument':'Seacat',
-                'depths':{
-                    '6109': {'m':0,
-                        'qc':{
-                            'temperature':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (12,27),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh': 1, 'high_thresh': 2
-                            },
-                            'salinity':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (30, 35),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh': 0.4, 'high_thresh': 1.5
-                            }
-                        }
-                }},
+                'instruments': ['6109'],
                 'reader': 1
             },
             '002c': {
                 'hdr_cols': ['sn', 'temperature', 'conductivity', 'pressure', 'date', 'time', 'ign1', 'salinity'],
-                'instrument':'old seacat',
-                # 'depths':{'2751':16},
-                'depths':{
-                    '2751': {'m':16,
-                        'qc':{
-                            'temperature':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (10,20),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh':1.5, 'high_thresh': 3
-                            },
-                            'salinity':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (30,35),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh': 0.4, 'high_thresh': 1
-                            },
-                        }
-                }},
+                'instruments': ['2751'],
                 'reader': 2
             },
             '002c.mc1': {
                 'hdr_cols': ['sn', 'temperature', 'conductivity', 'date', 'time', 'ign1', 'salinity'],
-                'instrument':'micro cat',
-                'depths':{
-                    '05259': {'m':7.5,
-                        'qc':{
-                            'temperature':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (15,26),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh': 2, 'high_thresh': 4
-                            },
-                            'salinity':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (30,35),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh': 0.5, 'high_thresh': 1.5
-                            }
-                        }
-                    },
-                    '05357': {'m': 25,
-                        'qc':{
-                            'temperature':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (10,16),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh': 2, 'high_thresh': 4
-                            },
-                            'salinity':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (30,35),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh': 0.4, 'high_thresh': 1
-                            }
-                        }
-                    },
-                    '05358': {'m':47.5,
-                        'qc':{
-                            'temperature':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (10,15),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh': 1, 'high_thresh': 3
-                            },
-                            'salinity':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (30,35),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh': 0.5, 'high_thresh': 1.5
-                            }
-                        }
-                    },
-                    '05949': {'m':60,
-                        'qc':{
-                            'temperature':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (8,14),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh':0.7, 'high_thresh': 3
-                            },
-                            'salinity':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (30,35),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh':0.5,'high_thresh': 1
-                            }
-                        }
-                    },
-                    '06984': {'m':75,
-                        'qc':{
-                            'temperature':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (9,13),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh':0.7, 'high_thresh': 2
-                            },
-                            'salinity':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (30,35),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh':0.5, 'high_thresh': 1
-                            }
-                        }
-                    },
-                },
+                'instruments': ['05259','05357','05358','05949','06984'],
                 'reader': 2
             },
             '002c.sc1': {
                 'hdr_cols': ['sn', 'temperature', 'conductivity', 'ign1', 'ign2', 'day', 'mon', 'yr', 'time', 'ign3', 'salinity'],
-                'instrument':'seacat',
-                'depths':{
-                    '06432': {'m':35,
-                        'qc':{
-                            'temperature':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (11,15),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh':0.6, 'high_thresh': 1.5
-                            },
-                            'salinity':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (30,35),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh':0.5, 'high_thresh': 1.5
-                            }
-                        }
-                    },
-                    '4402': {'m':90,
-                        'qc':{
-                            'temperature':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (9,13),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh':0.6, 'high_thresh': 1.5
-                            },
-                            'salinity':{
-                                'miss_val':None,
-                                'sensor_span': None, 'user_span': (30,35),
-                                'low_reps':3, 'high_reps':5, 'eps':0.0001,
-                                'low_thresh':0.5, 'high_thresh': 1.5
-                            }
-                        }
-                    },
-                },
+                'instruments': ['06432','4402'],
                 'reader': 3
             }
         }
@@ -293,108 +316,106 @@ class Moor(sccoos.SCCOOS):
             'grid_mapping':'crs',
             'coordinates':'time lat lon depth',
             'platform':'platform1',
-            'instrument':'instrument1'
+            # 'instrument':'instrument1'
         }
         dup_flagatts = {
             'source':'QC results',
             'comment': "Quality Control test are based on IOOS's Quality Control of Real-Time Ocean Data (QARTOD))"
         }
 
-        for d in self.depArr:
-            #Create group for each depth
-            dep = ncfile.createGroup(str(d))
+        # for dI, d in enumerate(self.depArr):
+        for m in self.depArr:
+            for i in self.instrDict:
+                # a depth could change instruments
+                if self.instrDict[i]['m'] == m:
+                    ncGrp = str(self.instrDict[i]['m'])+'m'+str(self.instrDict[i]['d'])+'d'
+                    #instrument variables are in the root group
+                    inst = ncfile.createVariable('instrument'+ncGrp, 'i')
+                    inst.setncatts(self.instrDict[i]['meta'])
+                    inst.setncatts({
+                        "geospatial_vertical_min": self.instrDict[i]['m'],
+                        "geospatial_vertical_max": self.instrDict[i]['m'],
+                    })
 
-            # Create Dimensions
-            # unlimited axis (can be appended to).
-            time_dim = dep.createDimension('time', None)
+                    #Create group for each depth/deployment
+                    dep = ncfile.createGroup(ncGrp)
+
+                    # Create Dimensions
+                    # unlimited axis (can be appended to).
+                    time_dim = dep.createDimension('time', None)
 
 
-            # #Create Variables
-            # dep = ncfile.createVariable('depth', 'f4', ('dep',), zlib=True)
-            # dep.setncatts(self.meta_dep)
-            # dep[:] = self.depArr
-            # # lat.setncatts({
-            # #     'valid_min':self.staMeta['depth'],
-            # #     'valid_max':self.staMeta['depth']
-            # # })
+                    # #Create Variables
+                    # dep = ncfile.createVariable('depth', 'f4', ('dep',), zlib=True)
+                    # dep.setncatts(self.meta_dep)
+                    # dep[:] = self.depArr
+                    # # lat.setncatts({
+                    # #     'valid_min':self.staMeta['depth'],
+                    # #     'valid_max':self.staMeta['depth']
+                    # # })
 
 
-            time_var = dep.createVariable(
-                'time', np.int32, ('time'), zlib=True)  # int64? Gives error
-            time_var.setncatts({
-                'axis':"T",
-                'calendar':'julian',
-                'comment':'also known as Epoch or Unix time',
-                'long_name':'time',
-                'standard_name':'time',
-                'units':'seconds since 1970-01-01 00:00:00 UTC'})
+                    time_var = dep.createVariable(
+                        'time', np.int32, ('time'), zlib=True)  # int64? Gives error
+                    time_var.setncatts({
+                        'axis':"T",
+                        'calendar':'julian',
+                        'comment':'also known as Epoch or Unix time',
+                        'long_name':'time',
+                        'standard_name':'time',
+                        'units':'seconds since 1970-01-01 00:00:00 UTC'})
 
-            # test = dep.createVariable(
-            #     'test', np.int32, ('time'), zlib=True)  # np.int32
+                    # test = dep.createVariable(
+                    #     'test', np.int32, ('time'), zlib=True)  # np.int32
 
-            temperature = dep.createVariable('temperature', 'f4', ('time'), zlib=True)
-            temperature.setncatts({
-                'long_name':'sea water temperature',
-                'standard_name':'sea_water_temperature',
-                'units':'celsius'})
-            # temperature.setncatts(self.qc_meta['temperature'])
-            temperature.setncatts(dup_varatts)
-            temperature_flagPrim = dep.createVariable(
-                'temperature_flagPrimary', 'B', ('time'), zlib=True)
-            temperature_flagPrim.setncatts({
-                'long_name':'sea water temperature, qc primary flag',
-                'standard_name':"sea_water_temperature status_flag",
-                'flag_values':flagPrim_flag_values,
-                'flag_meanings':flagPrim_flag_meanings})
-            temperature_flagPrim.setncatts(dup_flagatts)
-            temperature_flagSec = dep.createVariable(
-                'temperature_flagSecondary', 'B', ('time'), zlib=True)
-            temperature_flagSec.setncatts({
-                'long_name': 'sea water temperature, qc secondary flag',
-                'standard_name':"sea_water_temperature status_flag",
-                'flag_values': flagSec_flag_values,
-                'flag_meanings': flagSec_flag_meanings})
-            temperature_flagSec.setncatts(dup_flagatts)
+                    temperature = dep.createVariable('temperature', 'f4', ('time'), zlib=True)
+                    temperature.setncatts({
+                        'long_name':'sea water temperature',
+                        'standard_name':'sea_water_temperature',
+                        'units':'celsius',
+                        'instrument': 'instrument'+''})
+                    temperature.setncatts(self.qc_meta('temperature', self.instrDict[i]['qc']['temperature']))
+                    temperature.setncatts(dup_varatts)
+                    temperature_flagPrim = dep.createVariable(
+                        'temperature_flagPrimary', 'B', ('time'), zlib=True)
+                    temperature_flagPrim.setncatts({
+                        'long_name':'sea water temperature, qc primary flag',
+                        'standard_name':"sea_water_temperature status_flag",
+                        'flag_values':flagPrim_flag_values,
+                        'flag_meanings':flagPrim_flag_meanings})
+                    temperature_flagPrim.setncatts(dup_flagatts)
+                    temperature_flagSec = dep.createVariable(
+                        'temperature_flagSecondary', 'B', ('time'), zlib=True)
+                    temperature_flagSec.setncatts({
+                        'long_name': 'sea water temperature, qc secondary flag',
+                        'standard_name':"sea_water_temperature status_flag",
+                        'flag_values': flagSec_flag_values,
+                        'flag_meanings': flagSec_flag_meanings})
+                    temperature_flagSec.setncatts(dup_flagatts)
 
-            salinity = dep.createVariable('salinity', 'f4', ('time'), zlib=True)
-            salinity.setncatts({
-                'standard_name':'sea_water_salinity',
-                'long_name':'sea water salinity',
-                'units':'psu'}) #?
-            # salinity.setncatts(self.qc_meta('salinity'))
-            salinity.setncatts(dup_varatts)
-            salinity_flagPrim = dep.createVariable(
-                'salinity_flagPrimary', 'B', ('time'), zlib=True)
-            salinity_flagPrim.setncatts({
-                'long_name':'sea water salinity, qc primary flag',
-                'standard_name':"sea_water_practical_salinity status_flag",
-                'flag_values':flagPrim_flag_values,
-                'flag_meanings':flagPrim_flag_meanings})
-            salinity_flagPrim.setncatts(dup_flagatts)
-            salinity_flagSec = dep.createVariable(
-                'salinity_flagSecondary', 'B', ('time'), zlib=True)
-            salinity_flagSec.setncatts({
-                'long_name':'sea water salinity, qc secondary flag',
-                'standard_name':"sea_water_practical_salinity status_flag",
-                'flag_values':flagSec_flag_values,
-                'flag_meanings':flagSec_flag_meanings})
-            salinity_flagSec.setncatts(dup_flagatts)
-
-        instrument1 = dep.createVariable('instrument1', 'i') #Licor??
-        instrument1.setncatts({
-            'make':"Sea-Bird",
-            'model':"SBE 16 SeaCat",
-            'comment':"" })
-        instrument2 = dep.createVariable('instrument2', 'i') #Licor??
-        instrument2.setncatts({
-            'make':"Sea-Bird",
-            'model':"SBE 16plus SeaCAT",
-            'comment':"" })
-        instrument3 = dep.createVariable('instrument3', 'i') #Licor??
-        instrument3.setncatts({
-            'make':"Sea-Bird",
-            'model':"SBE 37 MicroCAT",
-            'comment':"" })
+                    salinity = dep.createVariable('salinity', 'f4', ('time'), zlib=True)
+                    salinity.setncatts({
+                        'standard_name':'sea_water_salinity',
+                        'long_name':'sea water salinity',
+                        'units':'psu'}) #?
+                    temperature.setncatts(self.qc_meta('salinity', self.instrDict[i]['qc']['salinity']))
+                    salinity.setncatts(dup_varatts)
+                    salinity_flagPrim = dep.createVariable(
+                        'salinity_flagPrimary', 'B', ('time'), zlib=True)
+                    salinity_flagPrim.setncatts({
+                        'long_name':'sea water salinity, qc primary flag',
+                        'standard_name':"sea_water_practical_salinity status_flag",
+                        'flag_values':flagPrim_flag_values,
+                        'flag_meanings':flagPrim_flag_meanings})
+                    salinity_flagPrim.setncatts(dup_flagatts)
+                    salinity_flagSec = dep.createVariable(
+                        'salinity_flagSecondary', 'B', ('time'), zlib=True)
+                    salinity_flagSec.setncatts({
+                        'long_name':'sea water salinity, qc secondary flag',
+                        'standard_name':"sea_water_practical_salinity status_flag",
+                        'flag_values':flagSec_flag_values,
+                        'flag_meanings':flagSec_flag_meanings})
+                    salinity_flagSec.setncatts(dup_flagatts)
 
         platform1 = dep.createVariable('platform', 'i')
         platform1.setncatts({
@@ -457,58 +478,27 @@ class Moor(sccoos.SCCOOS):
         df['date_time'] = pd.to_datetime(df.day.astype(str)+df.mon+df.yr.astype(str)+' '+df.time, utc=None, format=format)
         return df
 
-    ##Rewrote, edited for depth
-    def dataToNC(self, ncName, d, subset, lookup):
+    ##Rewrote, edited for depthd
+    def dataToNC(self, ncName, md, subset, lookup):
         """Take dataframe and put in netCDF (new file or append).
         Assumes there's a 'time' variable in data/ncfile"""
         if not os.path.isfile(ncName):
             self.createNCshell(ncName, lookup)
         ncfile = Dataset(ncName, 'a', format='NETCDF4')
-        # timeDepArr = ncfile.variables['time'][dI]
-        ncDep = ncfile.groups[str(d)]
+        # ncGrp = str(self.instrDict[i]['m'])+'m'+str(self.instrDict[i]['d'])+'d'
+        # ncDep = ncfile.groups[ncGrp] #!
+        ncDep = ncfile.groups[md]
         dLen = len(ncDep.variables['time'][:])
-
         exist = subset.epoch.isin(ncDep.variables['time'][:])
         # exist = subset.index.isin(timeDepArr.values)
         appDF = subset[-exist]
-        print d, 'EXIST before len:', len(subset), 'after:', len(appDF)
-        # appDF = subset
-        # print d, "df len", len(subset), "appDF", len(appDF)
-        # print 'add subset index', dI, 'LEN:', len(appDF), 'to:', dLen, type(timeDepArr)
-
-        # ncfile.variables['time'][dI, y:] = np.array([appDF.index.astype('int64') // 10**9])
+        print md, 'EXIST before len:', len(subset), 'after:', len(appDF)
         ncDep.variables['time'][dLen:] = np.array(appDF.epoch)
-        # ncfile.variables['test'][dI, y:] = np.array([np.arange(len(appDF.index))])
-        # ncDep.variables['test'][dLen:] = np.array(appDF['test'])
         for attr in self.attrArr:
             # print '\tappending', attr
             ncDep.variables[attr][dLen:] = np.array(appDF[attr])
-            # print "\tBEFORE: attr\n", ncfile.variables[attr][dI, :]
-            # print 'DF', appDF[attr]
-            # ncfile.variables[attr][dI, y:] = np.array([appDF[attr].astype(float)])
-            # print 'types:', type(ncfile.variables[attr][dI][0]), type(appDF[attr][0])
-            # ncfile.variables[attr][dI, y:] = np.array([appDF.temperature.astype('float32')])
-            # ncfile.variables[attr][dI, y:] = np.array([appDF.temperature.astype(float)])
-            # print "\tAFTER: attr\n", ncfile.variables[attr][dI, :]
-
-            # print '\tappended', ncfile.variables[attr][dI]
-        # print "POST APPEND:\n", ncDep.variables['time'][:]
-
-        # print "CLOSED. SIZE (5):", gup.heap().size
-        # print "POST array", ncfile.variables['time'][dI]
-        # print 'pre NC CLOSE'
         ncfile.close()
         print 'post NC CLOSE'
-
-        # if (dI == 7): #== 7 bad, 1 good
-        #     print "CHECK and EXIT"
-        #     print subset
-        #     print
-        #     ncfile = Dataset(ncName, 'r', format='NETCDF4')
-        #     print ncfile.variables['time'][:]
-        #     ncfile.close()
-        #     sys.exit()
-        # del ncfile
 
 
     def text2nc(self, filename):
@@ -543,14 +533,14 @@ class Moor(sccoos.SCCOOS):
                 # print '++++++++++++++++++++++++++++++++++++++++++++++++++++++'
                 # print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
                 print '*********************************************'
-                print 'Group dep:', repr(dep), '-', str(fDict['depths'][dep]['m'])+'m'
+                print 'Group dep:', repr(dep), '-', str(self.instrDict[dep]['m'])+'m'
                 dfDep = depGrouped.get_group(dep)
                 dfDep.set_index('date_time', inplace=True)
                 # print 'dep shape', dfDep.shape
                 # print dfDep.head(4)
-                for attr in fDict['depths'][dep]['qc']:
+                for attr in self.instrDict[dep]['qc']:
                     # print 'QCing', dep, attr
-                    qcIn = fDict['depths'][dep]['qc'][attr]
+                    qcIn = self.instrDict[dep]['qc'][attr]
                     print 'QC input:', qcIn
                     dfDep = self.qc_tests(dfDep, attr,
                         sensor_span=qcIn['sensor_span'], user_span=qcIn['user_span'],
@@ -561,22 +551,12 @@ class Moor(sccoos.SCCOOS):
                 for grpYr in groupedYr.indices:
                     ncfilename = self.ncFnPre + str(grpYr) + '.nc'
                     filepath = os.path.join(self.ncpath, ncfilename)
-                    self.dataToNC(filepath, fDict['depths'][dep]['m'], groupedYr.get_group(grpYr), '')
+                    ncGrp = str(self.instrDict[dep]['m'])+'m'+str(self.instrDict[dep]['d'])+'d'
+                    # self.dataToNC(filepath, self.instrDict[dep]['m'], groupedYr.get_group(grpYr), '')
+                    self.dataToNC(filepath, ncGrp, groupedYr.get_group(grpYr), '')
                     # print 'pre fileSizeChecker'
                     self.fileSizeChecker(filepath)
                     # print 'end for: grpYr', grpYr
-
-                #!!! can drop sn in dfDep
-                # print dfDep.head(2)
-                # print 'end dep:', dep
-                # print "SIZE (2):", gup.heap().size
-                # del groupedYr, dfDep
-                # print "SIZE (3):", gup.heap().size
-                # print depGrp.describe()
-
-                #!!! Rewrite getLastNC to look at depth dimension
-                # lastNC = self.getLastNC('delmar_mooring-')
-                # print "lastNC", lastNC
                 print 'end for: dep', dep
             # del depGrouped
             dfMax = df['epoch'].max()
