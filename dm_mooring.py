@@ -31,14 +31,14 @@ class Moor(sccoos.SCCOOS):
 
         super(Moor, self).__init__()
         print "init moor. start time: ", self.tupToISO(time.gmtime())
-        self.logsdir = r'/home/scheim/NCobj/delmar_moor'
+        self.logsdir = r'/home/scheim/NCobj/delmar_moor' # TEMP!!!!!
         # self.ncpath = '/data/InSitu/Moor/netcdf'
-        self.ncpath = '/home/scheim/NCobj/DM_Moor'
+        self.ncpath = '/home/scheim/NCobj/DM_Moor' # TEMP!!!!!
         self.extsDictFn = 'delmar_mooring_extensions.json'
         print "USING JSON", self.extsDictFn
         # self.txtFnPre = 'CAF_RTproc_' !!!!!
         self.ncFnPre = 'Moor-'
-        self.crontab = False
+        self.crontab = False # TEMP!!!!!
         self.txtFnDatePattern = '%Y%m%d%H%M'
         self.attrArr = ['temperature', 'temperature_flagPrimary', 'temperature_flagSecondary',
         'salinity', 'salinity_flagPrimary', 'salinity_flagSecondary']
@@ -492,13 +492,12 @@ class Moor(sccoos.SCCOOS):
         exist = subset.epoch.isin(ncDep.variables['time'][:])
         # exist = subset.index.isin(timeDepArr.values)
         appDF = subset[-exist]
-        print md, 'EXIST before len:', len(subset), 'after:', len(appDF)
+        # print md, 'EXIST before len:', len(subset), 'after:', len(appDF)
         ncDep.variables['time'][dLen:] = np.array(appDF.epoch)
         for attr in self.attrArr:
             # print '\tappending', attr
             ncDep.variables[attr][dLen:] = np.array(appDF[attr])
         ncfile.close()
-        print 'post NC CLOSE'
 
 
     def text2nc(self, filename):
@@ -532,8 +531,8 @@ class Moor(sccoos.SCCOOS):
             for dep in depGrouped.indices:
                 # print '++++++++++++++++++++++++++++++++++++++++++++++++++++++'
                 # print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-                print '*********************************************'
-                print 'Group dep:', repr(dep), '-', str(self.instrDict[dep]['m'])+'m'
+                # print '*********************************************'
+                # print 'Group dep:', repr(dep), '-', str(self.instrDict[dep]['m'])+'m'
                 dfDep = depGrouped.get_group(dep)
                 dfDep.set_index('date_time', inplace=True)
                 # print 'dep shape', dfDep.shape
@@ -541,7 +540,7 @@ class Moor(sccoos.SCCOOS):
                 for attr in self.instrDict[dep]['qc']:
                     # print 'QCing', dep, attr
                     qcIn = self.instrDict[dep]['qc'][attr]
-                    print 'QC input:', qcIn
+                    # print 'QC input:', qcIn
                     dfDep = self.qc_tests(dfDep, attr,
                         sensor_span=qcIn['sensor_span'], user_span=qcIn['user_span'],
                         low_reps=qcIn['low_reps'], high_reps=qcIn['high_reps'], eps=qcIn['eps'],
@@ -557,7 +556,7 @@ class Moor(sccoos.SCCOOS):
                     # print 'pre fileSizeChecker'
                     self.fileSizeChecker(filepath)
                     # print 'end for: grpYr', grpYr
-                print 'end for: dep', dep
+                # print 'end for: dep', dep
             # del depGrouped
             dfMax = df['epoch'].max()
             extDict[fnEnd]['latest_file'] = filename
@@ -567,6 +566,7 @@ class Moor(sccoos.SCCOOS):
             with open(self.extsDictFn, 'w') as json_file:
                 json.dump(extDict, json_file, indent=4)
             print 'file done:', filename
+            print '*********************************************'
         else:
             print 'ignoring file:', filename
 
@@ -622,14 +622,3 @@ class Moor(sccoos.SCCOOS):
             #Or increment from latest_file/ if lates_file is before today
             #What if
         print "DONE! Appending"
-
-print '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
-print '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
-m = Moor()
-print "ncpath", m.ncpath
-print "logsdir", m.logsdir
-# m.createNCshell('test.nc', '')
-# m.text2nc('CT1169100u_11691_20160506.002c.mc1')
-# m.text2nc('')
-m.text2nc_all()
-# m.text2nc_append()
