@@ -23,6 +23,7 @@ class NC(object):
     #set some initial metadata
     @abstractmethod
     def __init__(self):
+        ''' .. note: default metadata values CAN be overwritten in inherited children!'''
         #super(NC, self).__init__()
         #print "init nc"
         self.dateformat = "%Y-%m-%dT%H:%M:%SZ"
@@ -32,7 +33,7 @@ class NC(object):
             'ncei_template_version':"NCEI_NetCDF_TimeSeries_Orthogonal_Template_v2.0",
             'featureType':"timeSeries",
             'Metadata_Conventions':'Unidata Dataset Discovery v1.0',
-            'Conventions':'CF-1.6',
+            'Conventions':'CF-1.6, ACDD-1.3',
             'keywords':'EARTH SCIENCE, OCEANS',
             'keywords_vocabulary':'Global Change Master Directory (GCMD) Earth Science Keywords',
             'standard_name_vocabulary':'CF Standard Name Table (v28, 07 January 2015)',
@@ -41,7 +42,7 @@ class NC(object):
             'geospatial_lon_units':'degrees_east',
             'geospatial_lat_units':'degrees_north',
             'time_coverage_units':'seconds since 1970-01-01 00:00:00 UTC',
-            'time_coverage_resolution':'1'
+            'time_coverage_resolution': 'P1S' #prev '1'
             }
         self.meta_lat = {
         # lat = ncfile.createVariable('lat', 'f4')
@@ -214,8 +215,9 @@ class NC(object):
         "time_coverage_end": self.tupToISO(maxTimeT),
         "time_coverage_duration": self.ISOduration(minTimeS, maxTimeS),
         "date_modified": self.tupToISO(time.gmtime()), #time.ctime(time.time()),
+        "date_metadata_modified": self.tupToISO(time.gmtime()), #time.ctime(time.time()),
         "date_issued": self.tupToISO(time.gmtime()), #time.ctime(time.time()),
-        "uuid": str(uuid.uuid4())
+        "uuid": uuid.uuid4()
         })
 
     def fileSizeChecker(self, ncfilepath):
@@ -246,6 +248,12 @@ class NC(object):
                 subprocess.call(['mv', tmpfilepath, ncfilepath])
                 print 'RESIZED FILE: prev:', origSz, os.path.getsize(ncfilepath)
 
+    def attrMinMax(self, rt, attr)
+        if 'flag' not in attr:
+            dMin = rt.variables[attr][:].min()
+            dMax = rt.variables[attr][:].max()
+            # print 'dataToNC attr min/max:',attr, dMin, dMax
+            rt.variables[attr].setncatts({'data_min':dMin, 'data_max': dMax})
 
     def dataToNC(self, ncName, subset, lookup):
         """Take dataframe and put in netCDF (new file or append).
@@ -259,6 +267,7 @@ class NC(object):
             for attr in self.attrArr:
                 #             ncfile.variables['temperature'][:] = subset['temperature'].values
                 ncfile.variables[attr][:] = subset[attr].values
+                self.attrMinMax(ncfile, attr)
 
         else:
             ncfile = Dataset(ncName, 'a', format='NETCDF4')
@@ -269,6 +278,8 @@ class NC(object):
             for attr in self.attrArr:
                 #atLen = len(ncfile.variables[attr][:])
                 ncfile.variables[attr][timeLen:] = subset[attr].values
+                self.attrMinMax(ncfile, attr)
+
         self.NCtimeMeta(ncfile)
         ncfile.close()
 

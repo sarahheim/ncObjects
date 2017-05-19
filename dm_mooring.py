@@ -79,6 +79,7 @@ class Moor(sccoos.SCCOOS):
             ' at Scripps Institution of Oceanography (SIO)',
             'keywords':'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY, TEMPERATURE,',##!!!
             'metadata_link':'http://mooring.ucsd.edu/index.html?/projects/delmar/delmar_intro.html',
+            'reference':'http://mooring.ucsd.edu/index.html?/projects/delmar/delmar_intro.html',
             'processing_level':'temporary QA/QC has been performed.', ##!!!
             'project':'Del Mar, Mooring',
             'references':'http://www.sccoos.org/data/, http://mooring.ucsd.edu/index.html?/projects/delmar/delmar_intro.html, https://scripps.ucsd.edu/hlab, https://github.com/ioos/qartod',
@@ -417,7 +418,7 @@ class Moor(sccoos.SCCOOS):
                         'flag_meanings':flagSec_flag_meanings})
                     salinity_flagSec.setncatts(dup_flagatts)
 
-        platform1 = dep.createVariable('platform', 'i')
+        platform1 = ncfile.createVariable('platform', 'i')
         platform1.setncatts({
         'long_name':'CCE-2 Mooring',
         'comment': 'CCE-2 (California Current Ecosystem)',
@@ -497,11 +498,7 @@ class Moor(sccoos.SCCOOS):
         for attr in self.attrArr:
             # print '\tappending', attr
             ncDep.variables[attr][dLen:] = np.array(appDF[attr])
-            if 'flag' not in attr:
-                dMin = ncDep.variables[attr][:].min()
-                dMax = ncDep.variables[attr][:].max()
-                # print 'dataToNC attr min/max:',attr, dMin, dMax
-                ncDep.variables[attr].setncatts({'data_min':dMin, 'data_max': dMax})
+            self.attrMinMax(ncDep, attr)
         ncfile.close()
 
 
