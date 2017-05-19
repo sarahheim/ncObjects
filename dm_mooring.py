@@ -497,6 +497,11 @@ class Moor(sccoos.SCCOOS):
         for attr in self.attrArr:
             # print '\tappending', attr
             ncDep.variables[attr][dLen:] = np.array(appDF[attr])
+            if 'flag' not in attr:
+                dMin = ncDep.variables[attr][:].min()
+                dMax = ncDep.variables[attr][:].max()
+                # print 'dataToNC attr min/max:',attr, dMin, dMax
+                ncDep.variables[attr].setncatts({'data_min':dMin, 'data_max': dMax})
         ncfile.close()
 
 

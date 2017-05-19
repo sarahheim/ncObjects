@@ -97,10 +97,10 @@ class SCCOOS(nc.NC):
         qcDict = {'references':'https://github.com/ioos/qartod'}
         comment = 'The following QC tests were done on '+attr+'.'
         if 'user_span' in qcDict:
-            qcDict.update({
-                'data_min': qcDict['user_span'][0],
-                'data_max': qcDict['user_span'][1]
-            })
+            # qcDict.update({
+            #     'data_min': qcDict['user_span'][0],
+            #     'data_max': qcDict['user_span'][1]
+            # })
             comment += ' Range Check - Suspect: '+str(qcDict['user_span'])
 
         if 'sensor_span' in qcDict:
