@@ -297,7 +297,7 @@ class Moor(sccoos.SCCOOS):
             }
         }
 
-    def createNCshell(self, ncName, ignore):
+    def createNCshell(self, ncName, sn):
         #NOT using: 'pH_aux', 'O2', 'O2sat'
         print "CAF createNCshell"
         ncfile = Dataset(ncName, 'w', format='NETCDF4')
@@ -325,98 +325,99 @@ class Moor(sccoos.SCCOOS):
         }
 
         # for dI, d in enumerate(self.depArr):
-        for m in self.depArr:
-            for i in self.instrDict:
-                # a depth could change instruments
-                if self.instrDict[i]['m'] == m:
-                    ncGrp = str(self.instrDict[i]['m'])+'m'+str(self.instrDict[i]['d'])+'d'
-                    #instrument variables are in the root group
-                    inst = ncfile.createVariable('instrument'+ncGrp, 'i')
-                    inst.setncatts(self.instrDict[i]['meta'])
-                    inst.setncatts({
-                        "geospatial_vertical_min": self.instrDict[i]['m'],
-                        "geospatial_vertical_max": self.instrDict[i]['m'],
-                    })
+        # for m in self.depArr: #for ~~groups~~
+        #     for i in self.instrDict:
+        # a depth could change instruments
+        # if self.instrDict[sn]['m'] == m:
+        ncGrp = str(int(self.instrDict[sn]['m']))+'m'+str(self.instrDict[sn]['d'])+'d'
+        #instrument variables are in the root group
+        inst = ncfile.createVariable('instrument'+ncGrp, 'i')
+        inst.setncatts(self.instrDict[sn]['meta'])
+        inst.setncatts({
+            "geospatial_vertical_min": self.instrDict[sn]['m'],
+            "geospatial_vertical_max": self.instrDict[sn]['m'],
+        })
 
-                    #Create group for each depth/deployment
-                    dep = ncfile.createGroup(ncGrp)
+        # #Create group for each depth/deployment
+        # dep = ncfile.createGroup(ncGrp)
 
-                    # Create Dimensions
-                    # unlimited axis (can be appended to).
-                    time_dim = dep.createDimension('time', None)
-
-
-                    # #Create Variables
-                    # dep = ncfile.createVariable('depth', 'f4', ('dep',), zlib=True)
-                    # dep.setncatts(self.meta_dep)
-                    # dep[:] = self.depArr
-                    # # lat.setncatts({
-                    # #     'valid_min':self.staMeta['depth'],
-                    # #     'valid_max':self.staMeta['depth']
-                    # # })
+        # Create Dimensions
+        # unlimited axis (can be appended to).
+        time_dim = ncfile.createDimension('time', None)
 
 
-                    time_var = dep.createVariable(
-                        'time', np.int32, ('time'), zlib=True)  # int64? Gives error
-                    time_var.setncatts({
-                        'axis':"T",
-                        'calendar':'julian',
-                        'comment':'also known as Epoch or Unix time',
-                        'long_name':'time',
-                        'standard_name':'time',
-                        'units':'seconds since 1970-01-01 00:00:00 UTC'})
+        # #Create Variables
+        # dep = ncfile.createVariable('depth', 'f4', ('dep',), zlib=True)
+        # dep.setncatts(self.meta_dep)
+        # # dep[:] = self.depArr
+        # lat.setncatts({
+        #     'valid_min':self.staMeta['depth'],
+        #     'valid_max':self.staMeta['depth']
+        # })
 
-                    # test = dep.createVariable(
-                    #     'test', np.int32, ('time'), zlib=True)  # np.int32
 
-                    temperature = dep.createVariable('temperature', 'f4', ('time'), zlib=True)
-                    temperature.setncatts({
-                        'long_name':'sea water temperature',
-                        'standard_name':'sea_water_temperature',
-                        'units':'celsius',
-                        'instrument': 'instrument'+''})
-                    temperature.setncatts(self.qc_meta('temperature', self.instrDict[i]['qc']['temperature']))
-                    temperature.setncatts(dup_varatts)
-                    temperature_flagPrim = dep.createVariable(
-                        'temperature_flagPrimary', 'B', ('time'), zlib=True)
-                    temperature_flagPrim.setncatts({
-                        'long_name':'sea water temperature, qc primary flag',
-                        'standard_name':"sea_water_temperature status_flag",
-                        'flag_values':flagPrim_flag_values,
-                        'flag_meanings':flagPrim_flag_meanings})
-                    temperature_flagPrim.setncatts(dup_flagatts)
-                    temperature_flagSec = dep.createVariable(
-                        'temperature_flagSecondary', 'B', ('time'), zlib=True)
-                    temperature_flagSec.setncatts({
-                        'long_name': 'sea water temperature, qc secondary flag',
-                        'standard_name':"sea_water_temperature status_flag",
-                        'flag_values': flagSec_flag_values,
-                        'flag_meanings': flagSec_flag_meanings})
-                    temperature_flagSec.setncatts(dup_flagatts)
+        time_var = ncfile.createVariable(
+            'time', np.int32, ('time'), zlib=True)  # int64? Gives error
+        time_var.setncatts({
+            'axis':"T",
+            'calendar':'julian',
+            'comment':'also known as Epoch or Unix time',
+            'long_name':'time',
+            'standard_name':'time',
+            'units':'seconds since 1970-01-01 00:00:00 UTC'})
 
-                    salinity = dep.createVariable('salinity', 'f4', ('time'), zlib=True)
-                    salinity.setncatts({
-                        'standard_name':'sea_water_salinity',
-                        'long_name':'sea water salinity',
-                        'units':'psu'}) #?
-                    temperature.setncatts(self.qc_meta('salinity', self.instrDict[i]['qc']['salinity']))
-                    salinity.setncatts(dup_varatts)
-                    salinity_flagPrim = dep.createVariable(
-                        'salinity_flagPrimary', 'B', ('time'), zlib=True)
-                    salinity_flagPrim.setncatts({
-                        'long_name':'sea water salinity, qc primary flag',
-                        'standard_name':"sea_water_practical_salinity status_flag",
-                        'flag_values':flagPrim_flag_values,
-                        'flag_meanings':flagPrim_flag_meanings})
-                    salinity_flagPrim.setncatts(dup_flagatts)
-                    salinity_flagSec = dep.createVariable(
-                        'salinity_flagSecondary', 'B', ('time'), zlib=True)
-                    salinity_flagSec.setncatts({
-                        'long_name':'sea water salinity, qc secondary flag',
-                        'standard_name':"sea_water_practical_salinity status_flag",
-                        'flag_values':flagSec_flag_values,
-                        'flag_meanings':flagSec_flag_meanings})
-                    salinity_flagSec.setncatts(dup_flagatts)
+        # test = dep.createVariable(
+        #     'test', np.int32, ('time'), zlib=True)  # np.int32
+
+        temperature = ncfile.createVariable('temperature', 'f4', ('time'), zlib=True)
+        temperature.setncatts({
+            'long_name':'sea water temperature',
+            'standard_name':'sea_water_temperature',
+            'units':'celsius',
+            'instrument': 'instrument'+ncGrp})
+        temperature.setncatts(self.qc_meta('temperature', self.instrDict[sn]['qc']['temperature']))
+        temperature.setncatts(dup_varatts)
+        temperature_flagPrim = ncfile.createVariable(
+            'temperature_flagPrimary', 'B', ('time'), zlib=True)
+        temperature_flagPrim.setncatts({
+            'long_name':'sea water temperature, qc primary flag',
+            'standard_name':"sea_water_temperature status_flag",
+            'flag_values':flagPrim_flag_values,
+            'flag_meanings':flagPrim_flag_meanings})
+        temperature_flagPrim.setncatts(dup_flagatts)
+        temperature_flagSec = ncfile.createVariable(
+            'temperature_flagSecondary', 'B', ('time'), zlib=True)
+        temperature_flagSec.setncatts({
+            'long_name': 'sea water temperature, qc secondary flag',
+            'standard_name':"sea_water_temperature status_flag",
+            'flag_values': flagSec_flag_values,
+            'flag_meanings': flagSec_flag_meanings})
+        temperature_flagSec.setncatts(dup_flagatts)
+
+        salinity = ncfile.createVariable('salinity', 'f4', ('time'), zlib=True)
+        salinity.setncatts({
+            'standard_name':'sea_water_salinity',
+            'long_name':'sea water salinity',
+            'units':'psu',
+            'instrument': 'instrument'+ncGrp}) #?
+        temperature.setncatts(self.qc_meta('salinity', self.instrDict[sn]['qc']['salinity']))
+        salinity.setncatts(dup_varatts)
+        salinity_flagPrim = ncfile.createVariable(
+            'salinity_flagPrimary', 'B', ('time'), zlib=True)
+        salinity_flagPrim.setncatts({
+            'long_name':'sea water salinity, qc primary flag',
+            'standard_name':"sea_water_practical_salinity status_flag",
+            'flag_values':flagPrim_flag_values,
+            'flag_meanings':flagPrim_flag_meanings})
+        salinity_flagPrim.setncatts(dup_flagatts)
+        salinity_flagSec = ncfile.createVariable(
+            'salinity_flagSecondary', 'B', ('time'), zlib=True)
+        salinity_flagSec.setncatts({
+            'long_name':'sea water salinity, qc secondary flag',
+            'standard_name':"sea_water_practical_salinity status_flag",
+            'flag_values':flagSec_flag_values,
+            'flag_meanings':flagSec_flag_meanings})
+        salinity_flagSec.setncatts(dup_flagatts)
 
         platform1 = ncfile.createVariable('platform', 'i')
         platform1.setncatts({
@@ -479,27 +480,27 @@ class Moor(sccoos.SCCOOS):
         df['date_time'] = pd.to_datetime(df.day.astype(str)+df.mon+df.yr.astype(str)+' '+df.time, utc=None, format=format)
         return df
 
-    ##Rewrote, edited for depthd
-    def dataToNC(self, ncName, md, subset, lookup):
-        """Take dataframe and put in netCDF (new file or append).
-        Assumes there's a 'time' variable in data/ncfile"""
-        if not os.path.isfile(ncName):
-            self.createNCshell(ncName, lookup)
-        ncfile = Dataset(ncName, 'a', format='NETCDF4')
-        # ncGrp = str(self.instrDict[i]['m'])+'m'+str(self.instrDict[i]['d'])+'d'
-        # ncDep = ncfile.groups[ncGrp] #!
-        ncDep = ncfile.groups[md]
-        dLen = len(ncDep.variables['time'][:])
-        exist = subset.epoch.isin(ncDep.variables['time'][:])
-        # exist = subset.index.isin(timeDepArr.values)
-        appDF = subset[-exist]
-        # print md, 'EXIST before len:', len(subset), 'after:', len(appDF)
-        ncDep.variables['time'][dLen:] = np.array(appDF.epoch)
-        for attr in self.attrArr:
-            # print '\tappending', attr
-            ncDep.variables[attr][dLen:] = np.array(appDF[attr])
-            self.attrMinMax(ncDep, attr)
-        ncfile.close()
+    # ##Rewrote, edited for depthd
+    # def dataToNC(self, ncName, md, subset, lookup):
+    #     """Take dataframe and put in netCDF (new file or append).
+    #     Assumes there's a 'time' variable in data/ncfile"""
+    #     if not os.path.isfile(ncName):
+    #         self.createNCshell(ncName, lookup)
+    #     ncfile = Dataset(ncName, 'a', format='NETCDF4')
+    #     # ncGrp = str(self.instrDict[sn]['m'])+'m'+str(self.instrDict[sn]['d'])+'d'
+    #     # ncDep = ncfile.groups[ncGrp] #!
+    #     ncDep = ncfile.groups[md]
+    #     dLen = len(ncDep.variables['time'][:])
+    #     exist = subset.epoch.isin(ncDep.variables['time'][:])
+    #     # exist = subset.index.isin(timeDepArr.values)
+    #     appDF = subset[-exist]
+    #     # print md, 'EXIST before len:', len(subset), 'after:', len(appDF)
+    #     ncDep.variables['time'][dLen:] = np.array(appDF.epoch)
+    #     for attr in self.attrArr:
+    #         # print '\tappending', attr
+    #         ncDep.variables[attr][dLen:] = np.array(appDF[attr])
+    #         self.attrMinMax(ncDep, attr)
+    #     ncfile.close()
 
 
     def text2nc(self, filename):
@@ -519,7 +520,7 @@ class Moor(sccoos.SCCOOS):
             df = eval('self.'+reader)(filepath, fDict['hdr_cols'])
             df['sn'] = df['sn'].str.strip()
             df = df[['sn','date_time','temperature','salinity']]
-            df['epoch'] = df.date_time.astype(np.int64) // 10**9
+            # df['epoch'] = df.date_time.astype(np.int64) // 10**9
             df = df.dropna()
             # print df.dtypes
             # print 'pre astype', df.dtypes
@@ -537,6 +538,7 @@ class Moor(sccoos.SCCOOS):
                 # print 'Group dep:', repr(dep), '-', str(self.instrDict[dep]['m'])+'m'
                 dfDep = depGrouped.get_group(dep)
                 dfDep.set_index('date_time', inplace=True)
+                # dfDep.set_index('epoch', inplace=True)
                 # print 'dep shape', dfDep.shape
                 # print dfDep.head(4)
                 for attr in self.instrDict[dep]['qc']:
@@ -550,17 +552,19 @@ class Moor(sccoos.SCCOOS):
                 # print dfDep.head(2)
                 groupedYr = dfDep.groupby(dfDep.index.year)
                 for grpYr in groupedYr.indices:
-                    ncfilename = self.ncFnPre + str(grpYr) + '.nc'
+                    ncGrp = str(int(self.instrDict[dep]['m']))+'m'+str(self.instrDict[dep]['d'])+'d'
+                    ncfilename = self.ncFnPre + ncGrp + '-' + str(grpYr) + '.nc'
                     filepath = os.path.join(self.ncpath, ncfilename)
-                    ncGrp = str(self.instrDict[dep]['m'])+'m'+str(self.instrDict[dep]['d'])+'d'
-                    # self.dataToNC(filepath, self.instrDict[dep]['m'], groupedYr.get_group(grpYr), '')
-                    self.dataToNC(filepath, ncGrp, groupedYr.get_group(grpYr), '')
+                    # self.dataToNC(filepath, groupedYr.get_group(grpYr), dep) # right??
+                    self.dataToNC(filepath, dfDep, dep)
                     # print 'pre fileSizeChecker'
                     self.fileSizeChecker(filepath)
                     # print 'end for: grpYr', grpYr
                 # print 'end for: dep', dep
             # del depGrouped
-            dfMax = df['epoch'].max()
+            # dfMax = df['epoch'].max()
+            # dfMax = df.index.max()
+            dfMax = (df.date_time.astype(np.int64) // 10**9).max()
             extDict[fnEnd]['latest_file'] = filename
             extDict[fnEnd]['latest_epoch'] = dfMax
             extDict[fnEnd]['latest_file_size'] = fnSz

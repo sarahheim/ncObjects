@@ -7,6 +7,7 @@
 import os, time, subprocess, uuid
 from netCDF4 import Dataset
 from abc import ABCMeta, abstractmethod
+import numpy as np
 
 class NC(object):
     """
@@ -217,7 +218,7 @@ class NC(object):
         "date_modified": self.tupToISO(time.gmtime()), #time.ctime(time.time()),
         "date_metadata_modified": self.tupToISO(time.gmtime()), #time.ctime(time.time()),
         "date_issued": self.tupToISO(time.gmtime()), #time.ctime(time.time()),
-        "uuid": uuid.uuid4()
+        "uuid": str(uuid.uuid4())
         })
 
     def fileSizeChecker(self, ncfilepath):
@@ -248,7 +249,8 @@ class NC(object):
                 subprocess.call(['mv', tmpfilepath, ncfilepath])
                 print 'RESIZED FILE: prev:', origSz, os.path.getsize(ncfilepath)
 
-    def attrMinMax(self, rt, attr)
+    def attrMinMax(self, rt, attr):
+        """get variables' min and max and put values into the metadata"""
         if 'flag' not in attr:
             dMin = rt.variables[attr][:].min()
             dMax = rt.variables[attr][:].max()
@@ -259,26 +261,22 @@ class NC(object):
         """Take dataframe and put in netCDF (new file or append).
         Assumes there's a 'time' variable in data/ncfile"""
         if not os.path.isfile(ncName):
-            # ncfile = Dataset(ncName, 'w', format='NETCDF4')
-            # ^ moved to createNCshell
-            # ncfile = self.createNCshell(ncfile, lookup)
             ncfile = self.createNCshell(ncName, lookup)
-            ncfile.variables['time'][:] = subset.index.astype('int64') // 10**9
-            for attr in self.attrArr:
-                #             ncfile.variables['temperature'][:] = subset['temperature'].values
-                ncfile.variables[attr][:] = subset[attr].values
-                self.attrMinMax(ncfile, attr)
+        ncfile = Dataset(ncName, 'a', format='NETCDF4')
+        timeLen = len(ncfile.variables['time'][:])
 
-        else:
-            ncfile = Dataset(ncName, 'a', format='NETCDF4')
-            timeLen = len(ncfile.variables['time'][:])
-            # length should be the same for time & all attributes
-            ncfile.variables['time'][
-                timeLen:] = subset.index.astype('int64') // 10**9
-            for attr in self.attrArr:
-                #atLen = len(ncfile.variables[attr][:])
-                ncfile.variables[attr][timeLen:] = subset[attr].values
-                self.attrMinMax(ncfile, attr)
+        ## Add the following: remove any entries from the subset that already exist!!!!!!!
+        # exist = subset.epoch.isin(ncDep.variables['time'][:]) #
+        # # exist = subset.index.isin(timeDepArr.values)
+        # appDF = subset[-exist]
+
+        # length should be the same for time & all attributes
+        ncfile.variables['time'][timeLen:] = subset.index.values.astype('int64') // 10**9
+        # ncfile.variables['time'][timeLen:] = subset.index.values.astype(np.int64) // 10**9
+        for attr in self.attrArr:
+            #atLen = len(ncfile.variables[attr][:])
+            ncfile.variables[attr][timeLen:] = subset[attr].values
+            self.attrMinMax(ncfile, attr)
 
         self.NCtimeMeta(ncfile)
         ncfile.close()
