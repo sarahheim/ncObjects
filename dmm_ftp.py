@@ -40,6 +40,7 @@ def syncFtpLogs():
         if os.path.isfile(filename):
             # print 'HAVE:', fn
             #check if file size is different
+            # WHAT IF FILE NEEDS TO BE EDITED !!!!!!!?!?!??!?!???????
             if (fnSz != os.path.getsize(filename)):
                 # print '\tDIFF SIZE'
                 copyFTPfile(log, ftp, fn, filename, fnModEp)

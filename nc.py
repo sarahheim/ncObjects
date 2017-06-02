@@ -265,13 +265,15 @@ class NC(object):
         ncfile = Dataset(ncName, 'a', format='NETCDF4')
         timeLen = len(ncfile.variables['time'][:])
 
+
         ## Add the following: remove any entries from the subset that already exist!!!!!!!
         # exist = subset.epoch.isin(ncDep.variables['time'][:]) #
-        # # exist = subset.index.isin(timeDepArr.values)
-        # appDF = subset[-exist]
+        epochs = subset.index.values.astype('int64') // 10**9
+        exist  = subset.index.isin(epochs)
+        appDF = subset[-exist]
 
         # length should be the same for time & all attributes
-        ncfile.variables['time'][timeLen:] = subset.index.values.astype('int64') // 10**9
+        ncfile.variables['time'][timeLen:] = epochs
         # ncfile.variables['time'][timeLen:] = subset.index.values.astype(np.int64) // 10**9
         for attr in self.attrArr:
             #atLen = len(ncfile.variables[attr][:])
