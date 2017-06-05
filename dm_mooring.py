@@ -45,10 +45,14 @@ class Moor(sccoos.SCCOOS):
         # self.attrArr = ['temperature', 'salinity']
 
         self.staMeta = {
-            # 'depth': ,!!!
-            'lat': 0,
-            'lon': 0,
-            #lat lon createVariable?!!!
+            '11': {
+                'lat': 1111.1,
+                'lon': 2222.2
+            },
+            '12': {
+                'lat': 3333.3,
+                'lon': 4444.4
+            }
         }
 
         self.metaDict.update({
@@ -65,13 +69,11 @@ class Moor(sccoos.SCCOOS):
             'featureType':"timeSeriesProfile",
             'geospatial_bounds_crs': 'EPSG:4326',
             'geospatial_bounds_vertical_crs': 'EPSG:5829',
-            # 'geospatial_bounds': 'POINT(', self.staMeta['lon'],' ',self.staMeta['lat'],')'
-            # "geospatial_lat_min": self.staMeta['lat'],
-            # "geospatial_lat_max": self.staMeta['lat'],
-            # "geospatial_lon_min": self.staMeta['lon'],
-            # "geospatial_lon_max": self.staMeta['lon'],
-            # "geospatial_vertical_min": self.staMeta['depth'],
-            # "geospatial_vertical_max": self.staMeta['depth'],
+            # 'geospatial_bounds': 'POINT(', self.staMeta[dpmt]['lon'],' ',self.staMeta[dpmt]['lat'],')'
+            # "geospatial_lat_min": self.staMeta[dpmt]['lat'],
+            # "geospatial_lat_max": self.staMeta[dpmt]['lat'],
+            # "geospatial_lon_min": self.staMeta[dpmt]['lon'],
+            # "geospatial_lon_max": self.staMeta[dpmt]['lon'],
             "geospatial_vertical_units": 'm',
             'geospatial_vertical_positive': 'down',
             'history':'',
@@ -99,7 +101,7 @@ class Moor(sccoos.SCCOOS):
                 'instrument': 'Earth Science > Oceans > Ocean Temperature > Water Temperature, Earth Science > Oceans > Salinity/Density > Salinity,',
         })
 
-        self.depArr = [0,7.5,16,25,35,47.5,60,75,90]
+        # self.depArr = [0,7.5,16,25,35,47.5,60,75,90] <-- used with groups
         #'SN' --> 'deployment'; m = meters;
         self.defaultQC = {
             'temp1':{
@@ -121,76 +123,161 @@ class Moor(sccoos.SCCOOS):
         self.instrDict = {
             '6109':{
                 'meta': {'make':"Sea-Bird", 'model':"SBE 16plus-IM V2 SeaCAT C-T (P) Recorder with  Inductive Modem interface"},
-                'm': 0,
-                'qc':{
-                    'temperature':dict(self.defaultQC['temp1'].items()+[('user_span', (8,25))]),
-                    'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,34))])
+                '11': {
+                    'm': 0,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp1'].items()+[('user_span', (8,25))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,34))])
+                    }
+                },
+                '12': {
+                    'm': 1,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp1'].items()+[('user_span', (8,25))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,34))])
+                    }
                 }
             },
             '05259':{
                 'meta': {'make':"Sea-Bird", 'model':"SBE 37-IM MicroCAT C-T (P) Recorder"},
-                'm': 7.5,
-                'qc':{
-                    'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (8,25))]),
-                    'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,34))])
+                '11': {
+                    'm': 8,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (8,25))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,34))])
+                    }
+                },
+                '12': {
+                    'm': 8,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (8,25))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,34))])
+                    }
                 }
             },
             '2751':{
                 'meta': {'make':"Sea-Bird", 'model':"SBE 16plus SeaCAT C-T (P) Recorder"},
-                'm': 16,
-                'qc':{
-                    'temperature':dict(self.defaultQC['temp1'].items()+[('user_span', (8,25))]),
-                    'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,34))])
+                '11': {
+                    'm': 16,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp1'].items()+[('user_span', (8,25))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,34))])
+                    }
+                }
+            },
+            '05128':{
+                'meta': {'make':"Sea-Bird",'model':"SBE 37-IM MicroCAT C-T (P) Recorder"},
+                '12': {
+                    'm': 18,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (8,25))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,34))])
+                    }
                 }
             },
             '05357':{
                 'meta': {'make':"Sea-Bird",'model':"SBE 37-IM MicroCAT C-T (P) Recorder"},
-                'm': 25,
-                'qc':{
-                    'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (5,25))]),
-                    'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,35))])
+                '11': {
+                    'm': 25,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (5,25))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,35))])
+                    }
+                },
+                '12': {
+                    'm': 24,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (5,25))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,35))])
+                    }
                 }
             },
             '06432':{
                 'meta': {'make':"Sea-Bird", 'model':"SBE 16plus-IM V2 SeaCAT C-T (P) Recorder with  Inductive Modem interface"},
-                'm': 35,
-                'qc':{
-                    'temperature':dict(self.defaultQC['temp1'].items()+[('user_span', (5,25))]),
-                    'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,35))])
+                '11': {
+                    'm': 35,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp1'].items()+[('user_span', (5,25))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,35))])
+                    }
+                },
+                '12': {
+                    'm': 35,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp1'].items()+[('user_span', (5,25))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,35))])
+                    }
                 }
             },
             '05358':{
                 'meta': {'make':"Sea-Bird", 'model':"SBE 37-IM MicroCAT C-T (P) Recorder"},
-                # '11': {
-                'm': 47.5,
-                'qc':{
-                    'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (5,25))]),
-                    'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,35))])
+                '11': {
+                    'm': 48,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (5,25))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,35))])
+                    }
+                },
+                '12': {
+                    'm': 48,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (5,25))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,35))])
+                    }
                 }
-                # }
             },
             '05949':{
                 'meta': {'make':"Sea-Bird",'model':"SBE 37-IM MicroCAT C-T (P) Recorder"},
-                'm': 60,
-                'qc':{
-                    'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (5,17))]),
-                    'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (32,35))])
+                '11': {
+                    'm': 60,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (5,17))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (32,35))])
+                    }
+                },
+                '12': {
+                    'm': 60,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (5,17))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (32,35))])
+                    }
                 }
             },
             '06984':{
                 'meta': {'make':"Sea-Bird", 'model':"SBE 37-IM MicroCAT C-T (P) Recorder"},
-                'm': 75,
-                'qc':{
-                    'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (5,17))]),
-                    'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (32,35))])
+                '11': {
+                    'm': 75,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (5,17))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (32,35))])
+                    }
+                },
+                '12': {
+                    'm': 75,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp2'].items()+[('user_span', (5,17))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (32,35))])
+                    }
+                }
+            },
+            '4401':{
+                'meta': {'make':"Sea-Bird",'model':"SBE 16plus-IM V2 SeaCAT C-T (P) Recorder with  Inductive Modem interface"},
+                '12': {
+                    'm': 90,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp1'].items()+[('user_span', (5,15))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (32,35))])
+                    }
                 }
             },
             '4402':{
                 'meta': {'make':"Sea-Bird",'model':"SBE 16plus-IM V2 SeaCAT C-T (P) Recorder with  Inductive Modem interface"},
-                'm': 90,
-                'qc':{
-                    'temperature':dict(self.defaultQC['temp1'].items()+[('user_span', (5,15))]),
-                    'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (32,35))])
+                '11': {
+                    'm': 90,
+                    'qc':{
+                        'temperature':dict(self.defaultQC['temp1'].items()+[('user_span', (5,15))]),
+                        'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (32,35))])
+                    }
                 }
             }
         }
@@ -217,7 +304,9 @@ class Moor(sccoos.SCCOOS):
             }
         }
 
-    def createNCshell(self, ncName, sn):
+    def createNCshell(self, ncName, lookup):
+        sn = lookup['sn']
+        dpmt = lookup['dpmt']
         #NOT using: 'pH_aux', 'O2', 'O2sat'
         print "CAF createNCshell"
         ncfile = Dataset(ncName, 'w', format='NETCDF4')
@@ -249,14 +338,14 @@ class Moor(sccoos.SCCOOS):
         #     for i in self.instrDict:
         # a depth could change instruments
         # if self.instrDict[sn]['m'] == m:
-        ncGrp = str(int(self.instrDict[sn]['m']))+'m'#+str(self.instrDict[sn]['d'])+'d'
+        ncGrp = str(int(self.instrDict[sn][dpmt]['m']))+'m'#+str(self.instrDict[sn]['d'])+'d'
         #instrument variables are in the root group
         inst = ncfile.createVariable('instrument1', 'i')
         inst.setncatts(self.instrDict[sn]['meta'])
         inst.setncatts({
             "comment": "serial number: "+str(sn), #What if this changes???
-            "geospatial_vertical_min": self.instrDict[sn]['m'],
-            "geospatial_vertical_max": self.instrDict[sn]['m'],
+            "geospatial_vertical_min": self.instrDict[sn][dpmt]['m'],
+            "geospatial_vertical_max": self.instrDict[sn][dpmt]['m'],
         })
 
         # #Create group for each depth/deployment
@@ -295,7 +384,7 @@ class Moor(sccoos.SCCOOS):
             'long_name':'sea water temperature',
             'standard_name':'sea_water_temperature',
             'units':'celsius'})
-        temperature.setncatts(self.qc_meta('temperature', self.instrDict[sn]['qc']['temperature']))
+        temperature.setncatts(self.qc_meta('temperature', self.instrDict[sn][dpmt]['qc']['temperature']))
         temperature.setncatts(dup_varatts)
         temperature_flagPrim = ncfile.createVariable(
             'temperature_flagPrimary', 'B', ('time'), zlib=True)
@@ -319,7 +408,7 @@ class Moor(sccoos.SCCOOS):
             'standard_name':'sea_water_salinity',
             'long_name':'sea water salinity',
             'units':'psu'}) #?
-        temperature.setncatts(self.qc_meta('salinity', self.instrDict[sn]['qc']['salinity']))
+        temperature.setncatts(self.qc_meta('salinity', self.instrDict[sn][dpmt]['qc']['salinity']))
         salinity.setncatts(dup_varatts)
         salinity_flagPrim = ncfile.createVariable(
             'salinity_flagPrimary', 'B', ('time'), zlib=True)
@@ -349,17 +438,17 @@ class Moor(sccoos.SCCOOS):
         lat = ncfile.createVariable('lat', 'f4')
         lat.setncatts(self.meta_lat)
         lat.setncatts({
-            'valid_min':self.staMeta['lat'],
-            'valid_max':self.staMeta['lat']
+            'valid_min':self.staMeta[dpmt]['lat'],
+            'valid_max':self.staMeta[dpmt]['lat']
         })
-        ncfile.variables['lat'][0] = self.staMeta['lat']
+        ncfile.variables['lat'][0] = self.staMeta[dpmt]['lat']
         lon = ncfile.createVariable('lon', 'f4')
         lon.setncatts(self.meta_lon)
         lon.setncatts({
-            'valid_min':self.staMeta['lon'],
-            'valid_max':self.staMeta['lon']
+            'valid_min':self.staMeta[dpmt]['lon'],
+            'valid_max':self.staMeta[dpmt]['lon']
         })
-        ncfile.variables['lon'][0] = self.staMeta['lon']
+        ncfile.variables['lon'][0] = self.staMeta[dpmt]['lon']
 
         # return ncfile
         ncfile.close()
@@ -411,10 +500,10 @@ class Moor(sccoos.SCCOOS):
     #     ncfile.close()
 
 
-    def text2nc(self, filename):
+    def text2nc(self, filename, dpmt):
         fnEnd = filename.split('.', 1)[-1]
         print 'text2nc', filename, fnEnd
-        filepath = os.path.join(self.logsdir, filename)
+        filepath = os.path.join(self.logsdir, dpmt, filename)
         fnSz = os.path.getsize(filepath)
         with open(self.extsDictFn) as json_file:
             extDict = json.load(json_file)
@@ -433,40 +522,37 @@ class Moor(sccoos.SCCOOS):
             # df['salinity'] = df['salinity'].astype(float)
             # print 'post astype', df.dtypes
             # print 'all shape',  df.shape
-            depGrouped = df.groupby('sn')
+            snGrouped = df.groupby('sn')
             # del df
-            # print "Grouped", depGrouped.indices #, json.dumps(depGrouped.indices)
-            for dep in depGrouped.indices:
+            # print "Grouped", snGrouped.indices #, json.dumps(snGrouped.indices)
+            for sn in snGrouped.indices:
                 # print '++++++++++++++++++++++++++++++++++++++++++++++++++++++'
                 # print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
                 # print '*********************************************'
-                # print 'Group dep:', repr(dep), '-', str(self.instrDict[dep]['m'])+'m'
-                dfDep = depGrouped.get_group(dep)
-                dfDep.set_index('date_time', inplace=True)
-                # dfDep.set_index('epoch', inplace=True)
-                # print 'dep shape', dfDep.shape
-                # print dfDep.head(4)
-                for attr in self.instrDict[dep]['qc']:
-                    # print 'QCing', dep, attr
-                    qcIn = self.instrDict[dep]['qc'][attr]
+                # print 'Group sn:', repr(sn), '-', str(self.instrDict[sn]['m'])+'m'
+                dfSn = snGrouped.get_group(sn)
+                dfSn.set_index('date_time', inplace=True)
+                for attr in self.instrDict[sn][dpmt]['qc']:
+                    # print 'QCing', sn, attr
+                    qcIn = self.instrDict[sn][dpmt]['qc'][attr]
                     # print 'QC input:', qcIn
-                    dfDep = self.qc_tests(dfDep, attr,
+                    dfSn = self.qc_tests(dfSn, attr,
                         sensor_span=qcIn['sensor_span'], user_span=qcIn['user_span'],
                         low_reps=qcIn['low_reps'], high_reps=qcIn['high_reps'], eps=qcIn['eps'],
                         low_thresh=qcIn['low_thresh'], high_thresh=qcIn['high_thresh'])
-                # print dfDep.head(2)
-                groupedYr = dfDep.groupby(dfDep.index.year)
+                # print dfSn.head(2)
+                groupedYr = dfSn.groupby(dfSn.index.year)
                 for grpYr in groupedYr.indices:
-                    ncGrp = str(int(self.instrDict[dep]['m']))+'m'#+str(self.instrDict[dep]['d'])+'d'
+                    ncGrp = str(int(self.instrDict[sn][dpmt]['m']))+'m'#+str(self.instrDict[sn]['d'])+'d'
                     ncfilename = self.ncFnPre + ncGrp + '-' + str(grpYr) + '.nc'
                     filepath = os.path.join(self.ncpath, ncfilename)
-                    self.dataToNC(filepath, groupedYr.get_group(grpYr), dep)
-                    # self.dataToNC(filepath, dfDep, dep)
+                    self.dataToNC(filepath, groupedYr.get_group(grpYr), {'sn': sn, 'dpmt':dpmt})
+                    # self.dataToNC(filepath, dfSn, sn)
                     # print 'pre fileSizeChecker'
                     self.fileSizeChecker(filepath)
                     # print 'end for: grpYr', grpYr
-                # print 'end for: dep', dep
-            # del depGrouped
+                # print 'end for: sn', sn
+            # del snGrouped
             # dfMax = df['epoch'].max()
             dfMax = df.index.max()
             print 'df index max:', type(dfMax), dfMax
@@ -480,12 +566,12 @@ class Moor(sccoos.SCCOOS):
         else:
             print 'ignoring file:', filename
 
-    def text2nc_all(self):
+    def text2nc_all(self, dpmt):
         start = time.time()
-        filesArr = os.listdir(self.logsdir)
+        filesArr = os.listdir(os.path.join(self.logsdir, dpmt))
         filesArr.sort()
         for fn in filesArr:
-            self.text2nc(fn)
+            self.text2nc(fn, dpmt)
         print "DONE! ALL files. Runtime:", time.time()-start
 
 #     def text2nc_append(self):
@@ -521,7 +607,7 @@ class Moor(sccoos.SCCOOS):
     #         LRdt = datetime.datetime.utcfromtimestamp(latestDict[d])
     #         print d, instr, ext, LRdt.timetuple()[0:3]
 
-    def text2nc_append(self):
+    def text2nc_append(self, dpmt):
         with open(self.extsDictFn) as json_file:
             extDict = json.load(json_file)
         print extDict
@@ -534,17 +620,17 @@ class Moor(sccoos.SCCOOS):
             fnDate = filename.split('.', 1)[0].split('_')[-1]
             print 'filename date:', fnDate
             prevFnSz = extDict[ext]['latest_file_size']
-            nowFnSz = os.path.getsize(os.path.join(os.path.join(self.logsdir, filename)))
+            nowFnSz = os.path.getsize(os.path.join(self.logsdir, dpmt, filename))
             print 'last sizes', prevFnSz, nowFnSz
             # if the size of the last file recorded has changed, append it
-            if (prevFnSz != nowFnSz): self.text2nc(filename)
+            if (prevFnSz != nowFnSz): self.text2nc(filename, dpmt)
             # if the last file
             if (fnDate != todayStr): loopFlag +=1
 
         print 'flag', loopFlag
         if loopFlag > 0:
             #Opt 1
-            filesArr = os.listdir(self.logsdir)
+            filesArr = os.listdir(os.path.join(self.logsdir, dpmt))
             filesArr.sort()
             # loop through all the files
             for fn in filesArr:
@@ -561,7 +647,7 @@ class Moor(sccoos.SCCOOS):
                     lastDate = time.strptime(lastFile.split('.', 1)[0].split('_')[-1], '%Y%m%d')
                     # if files are newer than last recorded
                     if fileDate > lastDate:
-                        self.text2nc(fn)
+                        self.text2nc(fn, dpmt)
                     # now = time.gmtime()
 
             #Opt 2

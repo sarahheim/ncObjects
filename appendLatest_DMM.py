@@ -3,9 +3,9 @@ start = time.time()
 import dm_mooring as dmm
 import dmm_ftp
 
-dmm_ftp.syncFtpLogs()
+deployment = '12'
+dmm_ftp.syncFtpLogs(deployment)
 d = dmm.Moor()
-d.text2nc_append()
+d.text2nc_append(deployment)
 
 print "Done!", time.asctime(),"Runtime:", time.time()-start
-

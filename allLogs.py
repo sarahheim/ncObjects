@@ -13,7 +13,8 @@ print d.logsdir
 d.ncpath = '/home/scheim/NCobj/DM_Moor'
 d.crontab = False
 print d.ncpath
-d.text2nc_all()
+# d.text2nc_all('11')
+d.text2nc_all('12')
 
 #import caf
 #c = caf.CAF()

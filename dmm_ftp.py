@@ -3,7 +3,6 @@ import time, os, calendar
 
 logsdir = r'/home/scheim/NCobj/delmar_moor'
 ftp = ftplib.FTP('geo.ucsd.edu', 'anonymous', 'anonymous')
-ftp.cwd('/pub/songnian/delmar/dmar1_11/002cal')
 ftp_log = r'ftp_log.txt'
 # print ftp.retrlines('LIST')
 
@@ -24,7 +23,8 @@ def copyFTPfile(log, ftp, fn, filename, fnModEp):
         if os.path.isfile(filename):
             os.remove(filename)
 
-def syncFtpLogs():
+def syncFtpLogs(dpmt):
+    ftp.cwd('/pub/songnian/delmar/dmar1_'+dpmt+'/002cal')
     filesArr = ftp.nlst()
     filesArr.sort()
     log = open(ftp_log, 'w')
@@ -35,7 +35,7 @@ def syncFtpLogs():
         fnModEp = calendar.timegm(fnMod) #epoch of datetime file was modified
         fnSz = ftp.size(fn)
         #local filename
-        filename = os.path.join(logsdir, fn)
+        filename = os.path.join(logsdir, dpmt, fn)
         #see if local file already exists
         if os.path.isfile(filename):
             # print 'HAVE:', fn
