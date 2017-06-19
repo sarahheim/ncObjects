@@ -23,10 +23,8 @@ class Moor(sccoos.SCCOOS):
     def __init__(self):
         """Setting up Moor variables
 
-        .. todo: add more metadata to metaDict
-
-        .. warning::
-            - inital creation
+        .. todo:
+            - lat,lon,dep variables could be recorded. And/or valid_min/valid_max could be exact.
         """
 
         super(Moor, self).__init__()
@@ -46,12 +44,12 @@ class Moor(sccoos.SCCOOS):
 
         self.staMeta = {
             '11': {
-                'lat': 1111.1,
-                'lon': 2222.2
+                'lat': 32.929,
+                'lon': -117.3265
             },
             '12': {
-                'lat': 3333.3,
-                'lon': 4444.4
+                'lat': 32.93,
+                'lon': -117.317
             }
         }
 
@@ -124,7 +122,7 @@ class Moor(sccoos.SCCOOS):
             '6109':{
                 'meta': {'make':"Sea-Bird", 'model':"SBE 16plus-IM V2 SeaCAT C-T (P) Recorder with  Inductive Modem interface"},
                 '11': {
-                    'm': 0,
+                    'm': 1,
                     'qc':{
                         'temperature':dict(self.defaultQC['temp1'].items()+[('user_span', (8,25))]),
                         'salinity':dict(self.defaultQC['sal1'].items()+[('user_span', (31,34))])
@@ -312,7 +310,9 @@ class Moor(sccoos.SCCOOS):
         ncfile = Dataset(ncName, 'w', format='NETCDF4')
         self.metaDict.update({
             'id':ncName.split('/')[-1], #filename
-            'date_created': self.tupToISO(time.gmtime())
+            'date_created': self.tupToISO(time.gmtime()),
+            "geospatial_vertical_min": self.instrDict[sn][dpmt]['m'],
+            "geospatial_vertical_max": self.instrDict[sn][dpmt]['m']
         })
         ncfile.setncatts(self.metaDict)
         #Move to NC/SCCOOS class???
@@ -342,11 +342,11 @@ class Moor(sccoos.SCCOOS):
         #instrument variables are in the root group
         inst = ncfile.createVariable('instrument1', 'i')
         inst.setncatts(self.instrDict[sn]['meta'])
-        inst.setncatts({
-            "comment": "serial number: "+str(sn), #What if this changes???
-            "geospatial_vertical_min": self.instrDict[sn][dpmt]['m'],
-            "geospatial_vertical_max": self.instrDict[sn][dpmt]['m'],
-        })
+        # inst.setncatts({
+        #     "comment": "serial number: "+str(sn), #What if this changes???
+        #     "geospatial_vertical_min": self.instrDict[sn][dpmt]['m'],
+        #     "geospatial_vertical_max": self.instrDict[sn][dpmt]['m'],
+        # })
 
         # #Create group for each depth/deployment
         # dep = ncfile.createGroup(ncGrp)
@@ -355,17 +355,7 @@ class Moor(sccoos.SCCOOS):
         # unlimited axis (can be appended to).
         time_dim = ncfile.createDimension('time', None)
 
-
-        # #Create Variables
-        # dep = ncfile.createVariable('depth', 'f4', ('dep',), zlib=True)
-        # dep.setncatts(self.meta_dep)
-        # # dep[:] = self.depArr
-        # lat.setncatts({
-        #     'valid_min':self.staMeta['depth'],
-        #     'valid_max':self.staMeta['depth']
-        # })
-
-
+        #Create Variables
         time_var = ncfile.createVariable(
             'time', np.int32, ('time'), zlib=True)  # int64? Gives error
         time_var.setncatts({
@@ -449,6 +439,14 @@ class Moor(sccoos.SCCOOS):
             'valid_max':self.staMeta[dpmt]['lon']
         })
         ncfile.variables['lon'][0] = self.staMeta[dpmt]['lon']
+
+        dep = ncfile.createVariable('depth', 'f4')
+        dep.setncatts(self.meta_dep)
+        lat.setncatts({
+            'valid_min':self.instrDict[sn][dpmt]['m'],
+            'valid_max':self.instrDict[sn][dpmt]['m']
+        })
+        ncfile.variables['depth'][0] = self.instrDict[sn][dpmt]['m']
 
         # return ncfile
         ncfile.close()
