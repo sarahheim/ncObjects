@@ -1,7 +1,8 @@
 import ftplib
 import time, os, calendar
 
-logsdir = r'/home/scheim/NCobj/delmar_moor'
+# logsdir = r'/home/scheim/NCobj/delmar_moor'
+logsdir = r'/data/InSitu/DelMar/data'
 ftp = ftplib.FTP('geo.ucsd.edu', 'anonymous', 'anonymous')
 ftp_log = r'ftp_log.txt'
 # print ftp.retrlines('LIST')

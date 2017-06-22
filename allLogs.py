@@ -7,10 +7,7 @@ import dm_mooring as dmm
 # import dmm_ftp
 # dmm_ftp.syncFtpLogs()
 d = dmm.Moor()
-#d.logsdir = r'/data/InSitu/'#!!!!!Move to here
-d.logsdir = r'/home/scheim/NCobj/delmar_moor'
 print d.logsdir
-d.ncpath = '/home/scheim/NCobj/DM_Moor'
 d.crontab = False
 print d.ncpath
 d.text2nc_all('11')

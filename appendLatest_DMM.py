@@ -4,7 +4,8 @@ import dm_mooring as dmm
 import dmm_ftp
 
 deployment = '12'
-dmm_ftp.syncFtpLogs(deployment)
+# deployment = '11'
+# dmm_ftp.syncFtpLogs(deployment)
 d = dmm.Moor()
 d.text2nc_append(deployment)
 

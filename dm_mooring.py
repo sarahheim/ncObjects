@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 from netCDF4 import Dataset
 # from abc import ABCMeta, abstractmethod
+# json.dump writes to a file or file-like object, whereas json.dumps returns a string
 
 import sccoos
 
@@ -28,14 +29,16 @@ class Moor(sccoos.SCCOOS):
         """
 
         super(Moor, self).__init__()
-        print "init moor. start time: ", self.tupToISO(time.gmtime())
-        self.logsdir = r'/home/scheim/NCobj/delmar_moor' # TEMP!!!!!
-        # self.ncpath = '/data/InSitu/Moor/netcdf'
-        self.ncpath = '/home/scheim/NCobj/DM_Moor' # TEMP!!!!!
+        print "init dm_mooring. start time: ", self.tupToISO(time.gmtime())
+        # self.logsdir = r'/home/scheim/NCobj/delmar_moor/' # TEMP!!!!!
+        # self.ncpath = '/home/scheim/NCobj/DM_Moor' # TEMP!!!!!
+
+        self.logsdir = r'/data/InSitu/DelMar/data'
+        self.ncpath = '/data/InSitu/DelMar/netcdf'
         self.extsDictFn = 'delmar_mooring_extensions.json'
         print "USING JSON", self.extsDictFn
         # self.txtFnPre = 'CAF_RTproc_' !!!!!
-        self.ncFnPre = 'Moor-'
+        self.ncFnPre = ''
         self.crontab = False # TEMP!!!!!
         self.txtFnDatePattern = '%Y%m%d%H%M'
         self.attrArr = ['temperature', 'temperature_flagPrimary', 'temperature_flagSecondary',
@@ -321,7 +324,6 @@ class Moor(sccoos.SCCOOS):
         flagSec_flag_values = bytearray([0, 1, 2, 3]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
         flagSec_flag_meanings = 'UNSPECIFIED RANGE FLAT_LINE SPIKE'
         dup_varatts = {
-            'cell_methods': 'time: point longitude: point latitude: point',
             'source':'insitu observations',
             'grid_mapping':'crs',
             'coordinates':'time lat lon depth',
@@ -455,7 +457,7 @@ class Moor(sccoos.SCCOOS):
         # df = pd.read_csv(fn, names=col_names, header=0, index_col=False, dtype={'sn': str})
         # df = pd.read_csv(fn, names=col_names, comment='%', index_col=False, dtype={'sn': str})
         df = pd.read_csv(fn, names=col_names, comment='%', index_col=False,
-            engine='python', converters={'sn': str})
+            converters={'sn': str}, skipinitialspace=True) #engine='python'
         df['date_time'] = pd.to_datetime(df.datetime_str, utc=None)
         return df
 
@@ -463,7 +465,7 @@ class Moor(sccoos.SCCOOS):
         # df = pd.read_csv(fn, names=col_names, header=0, index_col=False, dtype={'sn': str})
         # df = pd.read_csv(fn, names=col_names, comment='%', index_col=False, dtype={'sn': str})
         df = pd.read_csv(fn, names=col_names, comment='%', index_col=False,
-            engine='python', converters={'sn': str}) #'temperature':np.float32, 'salinity':np.float32
+            converters={'sn': str}) #'temperature':np.float32, 'salinity':np.float32
         df['date_time'] = pd.to_datetime(df.date+' '+df.time, utc=None)
         return df
 
@@ -474,6 +476,32 @@ class Moor(sccoos.SCCOOS):
         format = '%d%b%Y %H:%M:%S'
         df['date_time'] = pd.to_datetime(df.day.astype(str)+df.mon+df.yr.astype(str)+' '+df.time, utc=None, format=format)
         return df
+
+    # def getExtDict(dpmt, fnEnd):
+    #     with open(self.extsDictFn) as json_file:
+    #         extDict = json.load(json_file)
+    #     if (dpmt in extDict) and (fnEnd in extDict[dpmt]):
+    #         return extsDict[dpmt][fnEnd]
+    #     else:
+    #         empty = {
+    #             "latest_file": "",
+    #             "latest_epoch": 0,
+    #             "latest_file_size": 0
+    #         }
+    #         return empty
+
+    def setExtDict(self, dpmt, fnEnd, fnDict):
+        """fnDict should contain 'latest_file', 'latest_epoch' and 'latest_file_size' """
+        # extDict[fnEnd]['latest_file'] = filename
+        # extDict[fnEnd]['latest_epoch'] = dfMaxEp
+        # extDict[fnEnd]['latest_file_size'] = fnSz
+        ## extDict[fnEnd]['latest_file_mod'] = fnMod
+        with open(self.extsDictFn) as json_file:
+            extDict = json.load(json_file)
+        if dpmt not in extDict: extDict[dpmt] = {}
+        extDict[dpmt][fnEnd] = fnDict
+        with open(self.extsDictFn, 'w') as json_file:
+            json.dump(extDict, json_file, indent=4)
 
     # ##Rewrote, edited for depthd
     # def dataToNC(self, ncName, md, subset, lookup):
@@ -503,8 +531,8 @@ class Moor(sccoos.SCCOOS):
         print 'text2nc', filename, fnEnd
         filepath = os.path.join(self.logsdir, dpmt, filename)
         fnSz = os.path.getsize(filepath)
-        with open(self.extsDictFn) as json_file:
-            extDict = json.load(json_file)
+        # with open(self.extsDictFn) as json_file:
+        #     extDict = json.load(json_file)
         if (fnEnd in self.filesDict) and ('reader' in self.filesDict[fnEnd]):
             fDict = self.filesDict[fnEnd]
             reader = 'read_csv'+str(fDict['reader'])
@@ -552,20 +580,49 @@ class Moor(sccoos.SCCOOS):
                 # print 'end for: sn', sn
             # del snGrouped
             # dfMax = df['epoch'].max()
-            dfMax = df.index.max()
-            print 'df index max:', type(dfMax), dfMax
-            dfMaxEp = 0 if np.isnan(dfMax) else dfMax.astype(np.int64) // 10**9
-            extDict[fnEnd]['latest_file'] = filename
-            extDict[fnEnd]['latest_epoch'] = dfMaxEp
-            extDict[fnEnd]['latest_file_size'] = fnSz
-            # extDict[fnEnd]['latest_file_mod'] = fnMod
-            with open(self.extsDictFn, 'w') as json_file:
-                json.dump(extDict, json_file, indent=4)
+            dfMax = df.date_time.max()
+            # print 'df.empty:', df.empty, 'df date_time max:', type(dfMax), dfMax
+            # dfMaxEp = 0 if np.isnan(dfMax) else dfMax.astype(np.int64) // 10**9
+            dfMaxEp = 0 if df.empty else dfMax.value // 10**9
+            fnDict = {}
+            fnDict['latest_file'] = filename
+            fnDict['latest_epoch'] = dfMaxEp
+            fnDict['latest_file_size'] = fnSz
+            self.setExtDict(dpmt, fnEnd, fnDict)
+            # extDict[fnEnd]['latest_file'] = filename
+            # extDict[fnEnd]['latest_epoch'] = dfMaxEp
+            # extDict[fnEnd]['latest_file_size'] = fnSz
+            # # extDict[fnEnd]['latest_file_mod'] = fnMod
+            # with open(self.extsDictFn, 'w') as json_file:
+            #     json.dump(extDict, json_file, indent=4)
+
         else:
             print 'ignoring file:', filename
 
     def text2nc_all(self, dpmt):
+        """If starting with all new text files:
+        CT1169100u_11691_20160515.002c.sc1 line 31 was a problem line. If taken out,
+        the rest run smoothly. """
         start = time.time()
+        #reset all the extensions' latest recorded meta for this deployment
+        if os.path.isfile(self.extsDictFn):
+            with open(self.extsDictFn) as json_file:
+                extDict = json.load(json_file)
+        else:
+            print 'NO JSON FILE'
+            extDict = {}
+        extDict[dpmt] = {}
+        for ext in self.filesDict:
+            # self.setExtDict(dpmt, ext, empty)
+            extDict[dpmt][ext] = {
+                "latest_file": "",
+                "latest_epoch": 0,
+                "latest_file_size": 0
+            }
+        with open(self.extsDictFn, 'w') as json_file:
+            json.dump(extDict, json_file, indent=4)
+        print 'REWROTE json for deployment', dpmt
+
         filesArr = os.listdir(os.path.join(self.logsdir, dpmt))
         filesArr.sort()
         for fn in filesArr:
@@ -612,12 +669,12 @@ class Moor(sccoos.SCCOOS):
         loopFlag = 0
         todayStr = time.strftime('%Y%m%d',time.gmtime())
         print todayStr
-        for ext in extDict:
-            filename = extDict[ext]['latest_file']
+        for ext in extDict[dpmt]:
+            filename = extDict[dpmt][ext]['latest_file']
             fnEnd = filename.split('.', 1)[-1]
             fnDate = filename.split('.', 1)[0].split('_')[-1]
             print 'filename date:', fnDate
-            prevFnSz = extDict[ext]['latest_file_size']
+            prevFnSz = extDict[dpmt][ext]['latest_file_size']
             nowFnSz = os.path.getsize(os.path.join(self.logsdir, dpmt, filename))
             print 'last sizes', prevFnSz, nowFnSz
             # if the size of the last file recorded has changed, append it
@@ -640,13 +697,16 @@ class Moor(sccoos.SCCOOS):
                         extDict = json.load(json_file)
                     print 'fileDate:', fn.split('.', 1)[0].split('_')[-1]
                     fileDate = time.strptime(fn.split('.', 1)[0].split('_')[-1], '%Y%m%d')
-                    lastFile = extDict[fnEnd]['latest_file'] ##asuming dictionary contains filename & isfile
-                    print 'lastDate:', lastFile.split('.', 1)[0].split('_')[-1]
-                    lastDate = time.strptime(lastFile.split('.', 1)[0].split('_')[-1], '%Y%m%d')
-                    # if files are newer than last recorded
-                    if fileDate > lastDate:
+                    lastFile = extDict[dpmt][fnEnd]['latest_file'] ##asuming dictionary contains filename & isfile
+                    if os.path.isfile(lastFile):
+                        print 'lastDate:', lastFile.split('.', 1)[0].split('_')[-1]
+                        lastDate = time.strptime(lastFile.split('.', 1)[0].split('_')[-1], '%Y%m%d')
+                        # if files are newer than last recorded
+                        if fileDate > lastDate:
+                            self.text2nc(fn, dpmt)
+                        # now = time.gmtime()
+                    else:
                         self.text2nc(fn, dpmt)
-                    # now = time.gmtime()
 
             #Opt 2
             #Or increment from latest_file/ if lates_file is before today
