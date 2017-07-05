@@ -218,7 +218,7 @@ class SASS(sccoos.SCCOOS):
 
         o2 = ncfile.createVariable('O2thermistor', 'f4', ('time'), zlib=True)
         # o2.standard_name = ''
-        o2.long_name = 'O2 thermistor'
+        o2.long_name = 'O2 thermistor' #???
         o2.units = 'V' #not psu??
         o2.coordinates = 'time lat lon depth'
         o2.instrument = "instrument3"
@@ -236,7 +236,7 @@ class SASS(sccoos.SCCOOS):
 
         conv = ncfile.createVariable('convertedOxygen', 'f4', ('time'), zlib=True)
         # conv.standard_name = 'mass_concentration_of_oxygen_in_sea_water'
-        conv.long_name = 'converted_oxygen'
+        conv.long_name = 'converted_oxygen' #'dissolved oxygen (raw)'???
         conv.units = 'mL/L' #not psu??
         conv.coordinates = 'time lat lon depth'
         conv.instrument = "instrument3"
