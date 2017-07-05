@@ -10,6 +10,7 @@ d = dmm.Moor()
 print d.logsdir
 d.crontab = False
 print d.ncpath
+#CT1169100u_11691_20160515.002c.sc1 line 31 needs to be removed first!
 d.text2nc_all('11')
 d.text2nc_all('12')
 
