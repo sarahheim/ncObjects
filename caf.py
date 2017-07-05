@@ -129,7 +129,6 @@ class CAF(sccoos.SCCOOS):
         flagSec_flag_values = bytearray([0, 1, 2, 3]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
         flagSec_flag_meanings = 'UNSPECIFIED RANGE FLAT_LINE SPIKE'
         dup_varatts = {
-            'cell_methods': 'time: point longitude: point latitude: point',
             'source':'insitu observations',
             'grid_mapping':'crs',
             'coordinates':'time lat lon depth',
@@ -268,7 +267,7 @@ class CAF(sccoos.SCCOOS):
         crs.semi_major_axis = 6378137.0
         crs.inverse_flattening = 298.257223563
 
-        instrument1 = ncfile.createVariable('instrument1', 'i') #Licor??
+        instrument1 = ncfile.createVariable('instrument1', 'c')
         instrument1.setncatts({
             'long_name': "Burkolator",
             'comment':"Burkolator",
@@ -276,7 +275,7 @@ class CAF(sccoos.SCCOOS):
             'model':"LI-840"
         })
 
-        instrument2 = ncfile.createVariable('instrument2', 'i') #Licor??
+        instrument2 = ncfile.createVariable('instrument2', 'c')
         instrument2.setncatts({
             'long_name': "DirectLine DL423 Sensor Module",
             # 'comment':"DirectLine DL423 Sensor Module",
@@ -284,7 +283,7 @@ class CAF(sccoos.SCCOOS):
             'model':"DL423"
         })
 
-        platform1 = ncfile.createVariable('platform1', 'i')
+        platform1 = ncfile.createVariable('platform1', 'c')
         platform1.setncatts({
         'long_name':self.metaDict['project'],
         'ioos_code':"urn:ioos:sensor:sccoos:carlsbad" })
@@ -361,7 +360,7 @@ class CAF(sccoos.SCCOOS):
                 # Check file size, nccopy to bring size down, replace original file
                 ncfilename = self.ncFnPre + str(grpYr) + '.nc'
                 filepath = os.path.join(self.ncpath, ncfilename)
-                self.dataToNC(filepath, df, '')
+                self.dataToNC(filepath, df, '') # <-- should df be grpYr???
                 self.fileSizeChecker(filepath)
 
     def text2nc_all(self):

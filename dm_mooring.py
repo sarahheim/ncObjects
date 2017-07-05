@@ -86,8 +86,7 @@ class Moor(sccoos.SCCOOS):
             'processing_level':'temporary QA/QC has been performed.', ##!!!
             'project':'Del Mar, Mooring',
             'references':'http://www.sccoos.org/data/, http://mooring.ucsd.edu/index.html?/projects/delmar/delmar_intro.html, https://scripps.ucsd.edu/hlab, https://github.com/ioos/qartod',
-            'summary': 'With funding from.. ' + \
-            ' From February 2006 on, a mooring with a surface buoy has been maintained at a location on the 100-m isobath approximately three miles off Del Mar, CA. Instrumentation on the buoy includes a suite of meteorological sensors, sensors for surface water temperature, salinity, oxygen concentration, fluorescence, nutrients and currents. Further sensors on the mooring wire extend the measurements down into the water column, and much of the data is telemetered to shore in real-time through a radio or cell phone link.' + \
+            'summary': 'From February 2006 on, a mooring with a surface buoy has been maintained at a location on the 100-m isobath approximately three miles off Del Mar, CA. Instrumentation on the buoy includes a suite of meteorological sensors, sensors for surface water temperature, salinity, oxygen concentration, fluorescence, nutrients and currents. Further sensors on the mooring wire extend the measurements down into the water column, and much of the data is telemetered to shore in real-time through a radio or cell phone link.' + \
             ' Originally, the platform was developed in collaboration with the Hydraulics Laboratory as a part of the Southern California Coastal Ocean Observing System (SCCOOS). It has since developed into a testbed for instrument development, like for the first GEOCE mooring deployed in August 2008 until November 2009.' + \
             ' The mooring is operational, delivering real-time data, and being serviced annually. Recent servicing trips were incorporated into a university class, where students of the marine sciences and engineering could get hands-on experience with instrumentation, ship operations, and data acquisition.'+ \
             ' at the Scripps Institution of Oceanography.',
@@ -361,7 +360,7 @@ class Moor(sccoos.SCCOOS):
         # if self.instrDict[sn]['m'] == m:
         ncGrp = str(int(self.instrDict[sn][dpmt]['m']))+'m'#+str(self.instrDict[sn]['d'])+'d'
         #instrument variables are in the root group
-        inst = ncfile.createVariable('instrument1', 'i')
+        inst = ncfile.createVariable('instrument1', 'c')
         inst.setncatts(self.instrDict[sn]['meta'])
         # inst.setncatts({
         #     "comment": "serial number: "+str(sn), #What if this changes???
@@ -394,7 +393,8 @@ class Moor(sccoos.SCCOOS):
         temperature.setncatts({
             'long_name':'sea water temperature',
             'standard_name':'sea_water_temperature',
-            'units':'celsius'})
+            'units':'celsius',
+            'instrument':'instrument1'})
         temperature.setncatts(self.qc_meta('temperature', self.instrDict[sn][dpmt]['qc']['temperature']))
         temperature.setncatts(dup_varatts)
         temperature_flagPrim = ncfile.createVariable(
@@ -418,7 +418,8 @@ class Moor(sccoos.SCCOOS):
         salinity.setncatts({
             'standard_name':'sea_water_salinity',
             'long_name':'sea water salinity',
-            'units':'psu'}) #?
+            'units':'psu',
+            'instrument':'instrument1'})
         temperature.setncatts(self.qc_meta('salinity', self.instrDict[sn][dpmt]['qc']['salinity']))
         salinity.setncatts(dup_varatts)
         salinity_flagPrim = ncfile.createVariable(
@@ -438,7 +439,7 @@ class Moor(sccoos.SCCOOS):
             'flag_meanings':flagSec_flag_meanings})
         salinity_flagSec.setncatts(dup_flagatts)
 
-        platform1 = ncfile.createVariable('platform', 'i')
+        platform1 = ncfile.createVariable('platform', 'c')
         platform1.setncatts({
         'long_name':'CCE-2 Mooring',
         'comment': 'CCE-2 (California Current Ecosystem)',

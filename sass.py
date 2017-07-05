@@ -104,7 +104,7 @@ class SASS(sccoos.SCCOOS):
             'processing_level':'QA/QC have been performed',
             'summary':'Automated shore station with a suite of sensors that are' +\
             ' attached to piers along the nearshore California coast.' + \
-            ' These automated sensors measure temperature, salinity, chlorophyll, turbidity' + \
+            ' These automated sensors measure temperature, salinity, chlorophyll' + \
             ' and water level at frequent intervals in the nearshore coastal ocean.' +\
             ' This data can provide local and regional information on mixing and upwelling,' +\
             ' land run-off, and algal blooms.'
@@ -222,7 +222,7 @@ class SASS(sccoos.SCCOOS):
         chl.long_name = 'sea water chlorophyll'
         chl.units = 'ug/L'  # which CF name??
         chl.coordinates = 'time lat lon depth'
-        chl.instrument = "instrument1"
+        chl.instrument = "instrument2"
         chl_flagPrim = ncfile.createVariable(
             'chlorophyll_flagPrimary', 'B', ('time'), zlib=True)
         chl_flagPrim.long_name = 'sea water chlorophyll, qc primary flag'
@@ -283,20 +283,20 @@ class SASS(sccoos.SCCOOS):
         crs.semi_major_axis = 6378137.0
         crs.inverse_flattening = 298.257223563
 
-        instrument1 = ncfile.createVariable('instrument1', 'i')
+        instrument1 = ncfile.createVariable('instrument1', 'c')
         instrument1.make = "Seabird"
         instrument1.model = "SBE 16plus SEACAT"
         instrument1.comment = "Seabird SBE 16plus SEACAT Conductivity, Temperature," + \
         " and Pressure recorder. Derived output Salinity."
         instrument1.ioos_code = "urn:ioos:sensor:sccoos:"+self.staMeta[sta]['loc']+":conductivity_temperature_pressure"
 
-        instrument2 = ncfile.createVariable('instrument2', 'i')
+        instrument2 = ncfile.createVariable('instrument2', 'c')
         instrument2.make = "Seapoint"
         instrument2.model = "Chlorophyll Fluorometer"
         instrument2.comment = "Seapoint Chlorophyll Fluorometer with a 0-50 ug/L gain setting."
         instrument2.ioos_code = "urn:ioos:sensor:sccoos:"+self.staMeta[sta]['loc']+":chlorophyll"
 
-        platform1 = ncfile.createVariable('platform1', 'i')
+        platform1 = ncfile.createVariable('platform1', 'c')
         platform1.long_name = self.staMeta[sta]['loc_name']
         platform1.ioos_code = "urn:ioos:sensor:sccoos:"+self.staMeta[sta]['loc']
 
@@ -450,7 +450,7 @@ class SASS(sccoos.SCCOOS):
                         # Check file size, nccopy to bring size down, replace original file
                         ncfilename = loc + "-" + str(grpYr) + '.nc'
                         filepath = os.path.join(self.ncpath, ncfilename)
-                        self.dataToNC(filepath, df3, loc)
+                        self.dataToNC(filepath, df3, loc) # <-- should df be grpYr???
                         self.fileSizeChecker(filepath)
 
     def text2nc_all(self):
