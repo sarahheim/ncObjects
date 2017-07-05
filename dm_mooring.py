@@ -283,25 +283,44 @@ class Moor(sccoos.SCCOOS):
             }
         }
         self.filesDict = {
-            '002c.sc0': {
-                'hdr_cols': ['sn', 'temperature', 'conductivity', 'ign1', 'ign2', 'ign3', 'datetime_str', 'salinity'],
-                'instruments': ['6109'],
-                'reader': 1
-            },
-            '002c': {
-                'hdr_cols': ['sn', 'temperature', 'conductivity', 'pressure', 'date', 'time', 'ign1', 'salinity'],
-                'instruments': ['2751'],
-                'reader': 2
-            },
-            '002c.mc1': {
-                'hdr_cols': ['sn', 'temperature', 'conductivity', 'date', 'time', 'ign1', 'salinity'],
-                'instruments': ['05259','05357','05358','05949','06984'],
-                'reader': 2
-            },
-            '002c.sc1': {
-                'hdr_cols': ['sn', 'temperature', 'conductivity', 'ign1', 'ign2', 'day', 'mon', 'yr', 'time', 'ign3', 'salinity'],
-                'instruments': ['06432','4402'],
-                'reader': 3
+            '11' :{
+                '002c.sc0': {
+                    'hdr_cols': ['sn', 'temperature', 'conductivity', 'ign1', 'ign2', 'ign3', 'datetime_str', 'salinity'],
+                    'instruments': ['6109'],
+                    'reader': 1
+                },
+                '002c': {
+                    'hdr_cols': ['sn', 'temperature', 'conductivity', 'pressure', 'date', 'time', 'ign1', 'salinity'],
+                    'instruments': ['2751'],
+                    'reader': 2
+                },
+                '002c.mc1': {
+                    'hdr_cols': ['sn', 'temperature', 'conductivity', 'date', 'time', 'ign1', 'salinity'],
+                    'instruments': ['05259','05357','05358','05949','06984'],
+                    'reader': 2
+                },
+                '002c.sc1': {
+                    'hdr_cols': ['sn', 'temperature', 'conductivity', 'ign1', 'ign2', 'day', 'mon', 'yr', 'time', 'ign3', 'salinity'],
+                    'instruments': ['06432','4402'],
+                    'reader': 3
+                }
+
+            }, '12': {
+                '002c.sc0': {
+                    'hdr_cols': ['sn', 'temperature', 'conductivity', 'ign1', 'ign2', 'ign3', 'datetime_str', 'dunno', 'salinity'],
+                    'instruments': ['6109'],
+                    'reader': 1
+                },
+                '002c.mc1': {
+                    'hdr_cols': ['sn', 'temperature', 'conductivity', 'date', 'time', 'ign1', 'salinity'],
+                    'instruments': ['05259', '05128', '05357','05358','05949','06984'],
+                    'reader': 2
+                },
+                '002c.sc1': {
+                    'hdr_cols': ['sn', 'temperature', 'conductivity', 'ign1', 'ign2', 'day', 'mon', 'yr', 'time', 'ign3', 'salinity'],
+                    'instruments': ['06432','4401'], #check 4401
+                    'reader': 3
+                }
             }
         }
 
@@ -536,8 +555,8 @@ class Moor(sccoos.SCCOOS):
         fnSz = os.path.getsize(log)
         # with open(self.extsDictFn) as json_file:
         #     extDict = json.load(json_file)
-        if (fnEnd in self.filesDict) and ('reader' in self.filesDict[fnEnd]):
-            fDict = self.filesDict[fnEnd]
+        if (fnEnd in self.filesDict[dpmt]) and ('reader' in self.filesDict[dpmt][fnEnd]):
+            fDict = self.filesDict[dpmt][fnEnd]
             reader = 'read_csv'+str(fDict['reader'])
             # print 'reader:', reader
             df = eval('self.'+reader)(log, fDict['hdr_cols'])
@@ -615,7 +634,7 @@ class Moor(sccoos.SCCOOS):
             print 'NO JSON FILE'
             extDict = {}
         extDict[dpmt] = {}
-        for ext in self.filesDict:
+        for ext in self.filesDict[dpmt]:
             # self.setExtDict(dpmt, ext, empty)
             extDict[dpmt][ext] = {
                 "latest_file": "",
