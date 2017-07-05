@@ -32,14 +32,14 @@ class Moor(sccoos.SCCOOS):
         print "init dm_mooring. start time: ", self.tupToISO(time.gmtime())
         # self.logsdir = r'/home/scheim/NCobj/delmar_moor/' # TEMP!!!!!
         # self.ncpath = '/home/scheim/NCobj/DM_Moor' # TEMP!!!!!
-
+        # self.crontab = False # TEMP!!!!!
         self.logsdir = r'/data/InSitu/DelMar/data'
-        self.ncpath = '/data/InSitu/DelMar/netcdf'
-        self.extsDictFn = 'delmar_mooring_extensions.json'
+        self.ncpath = r'/data/InSitu/DelMar/netcdf'
+        self.crontab = True
+        self.extsDictFn = os.path.join(r'/data/InSitu/DelMar/code', r'delmar_mooring_extensions.json')
         print "USING JSON", self.extsDictFn
         # self.txtFnPre = 'CAF_RTproc_' !!!!!
         self.ncFnPre = ''
-        self.crontab = False # TEMP!!!!!
         self.txtFnDatePattern = '%Y%m%d%H%M'
         self.attrArr = ['temperature', 'temperature_flagPrimary', 'temperature_flagSecondary',
         'salinity', 'salinity_flagPrimary', 'salinity_flagSecondary']
@@ -503,6 +503,9 @@ class Moor(sccoos.SCCOOS):
         with open(self.extsDictFn, 'w') as json_file:
             json.dump(extDict, json_file, indent=4)
 
+    def logFilepath(self, dpmt, fn):
+        return os.path.join(self.logsdir, dpmt, fn)
+
     # ##Rewrote, edited for depthd
     # def dataToNC(self, ncName, md, subset, lookup):
     #     """Take dataframe and put in netCDF (new file or append).
@@ -529,15 +532,15 @@ class Moor(sccoos.SCCOOS):
     def text2nc(self, filename, dpmt):
         fnEnd = filename.split('.', 1)[-1]
         print 'text2nc', filename, fnEnd
-        filepath = os.path.join(self.logsdir, dpmt, filename)
-        fnSz = os.path.getsize(filepath)
+        log = self.logFilepath(dpmt, filename)
+        fnSz = os.path.getsize(log)
         # with open(self.extsDictFn) as json_file:
         #     extDict = json.load(json_file)
         if (fnEnd in self.filesDict) and ('reader' in self.filesDict[fnEnd]):
             fDict = self.filesDict[fnEnd]
             reader = 'read_csv'+str(fDict['reader'])
-            print 'reader:', reader
-            df = eval('self.'+reader)(filepath, fDict['hdr_cols'])
+            # print 'reader:', reader
+            df = eval('self.'+reader)(log, fDict['hdr_cols'])
             df['sn'] = df['sn'].str.strip()
             df = df[['sn','date_time','temperature','salinity']]
             # df['epoch'] = df.date_time.astype(np.int64) // 10**9
@@ -571,11 +574,11 @@ class Moor(sccoos.SCCOOS):
                 for grpYr in groupedYr.indices:
                     ncGrp = str(int(self.instrDict[sn][dpmt]['m']))+'m'#+str(self.instrDict[sn]['d'])+'d'
                     ncfilename = self.ncFnPre + ncGrp + '-' + str(grpYr) + '.nc'
-                    filepath = os.path.join(self.ncpath, ncfilename)
-                    self.dataToNC(filepath, groupedYr.get_group(grpYr), {'sn': sn, 'dpmt':dpmt})
+                    ncFilepath = os.path.join(self.ncpath, ncfilename)
+                    self.dataToNC(ncFilepath, groupedYr.get_group(grpYr), {'sn': sn, 'dpmt':dpmt})
                     # self.dataToNC(filepath, dfSn, sn)
                     # print 'pre fileSizeChecker'
-                    self.fileSizeChecker(filepath)
+                    self.fileSizeChecker(ncFilepath)
                     # print 'end for: grpYr', grpYr
                 # print 'end for: sn', sn
             # del snGrouped
@@ -668,20 +671,25 @@ class Moor(sccoos.SCCOOS):
         print extDict
         loopFlag = 0
         todayStr = time.strftime('%Y%m%d',time.gmtime())
-        print todayStr
+        print 'todayStr:', todayStr
         for ext in extDict[dpmt]:
             filename = extDict[dpmt][ext]['latest_file']
-            fnEnd = filename.split('.', 1)[-1]
-            fnDate = filename.split('.', 1)[0].split('_')[-1]
-            print 'filename date:', fnDate
-            prevFnSz = extDict[dpmt][ext]['latest_file_size']
-            nowFnSz = os.path.getsize(os.path.join(self.logsdir, dpmt, filename))
-            print 'last sizes', prevFnSz, nowFnSz
-            # if the size of the last file recorded has changed, append it
-            if (prevFnSz != nowFnSz): self.text2nc(filename, dpmt)
-            # if the last file
-            if (fnDate != todayStr): loopFlag +=1
+            log = self.logFilepath(dpmt, filename)
+            if os.path.isfile(log):
+                # fnEnd = filename.split('.', 1)[-1]
+                fnDate = filename.split('.', 1)[0].split('_')[-1]
+                print 'filename date:', fnDate
+                prevFnSz = extDict[dpmt][ext]['latest_file_size']
+                nowFnSz = os.path.getsize(log)
+                print 'last sizes', prevFnSz, nowFnSz
+                # if the size of the last file recorded has changed, append it
+                if (prevFnSz != nowFnSz): self.text2nc(filename, dpmt)
+                # if the last file
+                if (fnDate != todayStr): loopFlag +=1
+            else:
+                loopFlag +=1
 
+        #Only loop through directory if the flag counter > 0
         print 'flag', loopFlag
         if loopFlag > 0:
             #Opt 1
@@ -691,13 +699,12 @@ class Moor(sccoos.SCCOOS):
             for fn in filesArr:
                 print fn
                 fnEnd = fn.split('.', 1)[-1]
-                print 'fnEnd:', fnEnd
                 if (fnEnd in self.filesDict):
                     with open(self.extsDictFn) as json_file:
                         extDict = json.load(json_file)
                     print 'fileDate:', fn.split('.', 1)[0].split('_')[-1]
                     fileDate = time.strptime(fn.split('.', 1)[0].split('_')[-1], '%Y%m%d')
-                    lastFile = extDict[dpmt][fnEnd]['latest_file'] ##asuming dictionary contains filename & isfile
+                    lastFile = self.logFilepath(dpmt, extDict[dpmt][fnEnd]['latest_file']) ##asuming dictionary contains filename & isfile
                     if os.path.isfile(lastFile):
                         print 'lastDate:', lastFile.split('.', 1)[0].split('_')[-1]
                         lastDate = time.strptime(lastFile.split('.', 1)[0].split('_')[-1], '%Y%m%d')
