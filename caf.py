@@ -91,7 +91,7 @@ class CAF(sccoos.SCCOOS):
             'ip':"132.239.92.62",
             'institution': 'Southern California Coastal Ocean Observing System (SCCOOS)' + \
             ' at Scripps Institution of Oceanography (SIO)', #or Carlsbad Aquafarm?
-            'keywords':'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY, OCEAN CHEMISTRY,',##!!!
+            'keywords':'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY, OCEAN CHEMISTRY, CARBON DIOXIDE, OCEAN TEMPERATURE, WATER TEMPERATURE',
             'metadata_link':'http://www.sccoos.org/data/oa/',
             'processing_level':'QA/QC has been performed', ##!!!
             'project':'Burkolator, Carlsbad Aquafarm',
@@ -106,7 +106,7 @@ class CAF(sccoos.SCCOOS):
             'platform_vocabulary': 'GCMD Earth Science Keywords. Version 5.3.3',
             'platform': 'In Situ Land-based Platforms > Ocean Platform/Ocean Stations > Coastal Stations',
             'instrument_vocabulary': 'GCMD Earth Science Keywords. Version 5.3.3',
-            'instrument': 'Earth Science > Oceans > Ocean Chemistry > Chlorophyll, Earth Science > Oceans > Ocean Optics > Turbidity, Earth Science > Oceans > Ocean Pressure > Water Pressure, Earth Science > Oceans > Ocean Temperature > Water Temperature, Earth Science > Oceans > Salinity/Density > Conductivity, Earth Science > Oceans > Salinity/Density > Salinity, Earth Science > Oceans > Water Quality, Earth Science>Oceans>Ocean Chemistry>pH, Earth Science>Oceans>Ocean Chemistry>Carbon Dioxide',
+            'instrument':'Data was collected with Honeywell and LI-COR instruments.',
 
             # 'comment':'', !!!
             # 'geospatial_lat_resolution':'',  # ?

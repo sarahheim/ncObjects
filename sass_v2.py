@@ -96,6 +96,7 @@ class SASS(sccoos.SCCOOS):
         ' instrument package includes a Seabird SBE 16plus SEACAT Conductivity,' + \
         ' Temperature, and Pressure recorder, and a Seapoint Chlorophyll Fluorometer' + \
         ' with a 0-50 ug/L gain setting.',
+        'instrument':'Data was collected with Seabird and Seapoint instruments.',
         'contributor_name': self.staMeta['abbr']+'/SCCOOS, SCCOOS/IOOS/NOAA, SCCOOS',
         'creator_name': self.staMeta['inst'],
         'creator_url': self.staMeta['url'],

@@ -102,6 +102,7 @@ class SASS(sccoos.SCCOOS):
             'metadata_link':'www.sccoos.org.progress/data-products/automateed-shore-stations/',
             'project':'Automated Shore Stations',
             'processing_level':'QA/QC have been performed',
+            'instrument':'Data was collected with Seabird and Seapoint instruments.',
             'summary':'Automated shore station with a suite of sensors that are' +\
             ' attached to piers along the nearshore California coast.' + \
             ' These automated sensors measure temperature, salinity, chlorophyll' + \

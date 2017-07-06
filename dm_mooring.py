@@ -83,7 +83,7 @@ class Moor(sccoos.SCCOOS):
             'keywords':'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY, TEMPERATURE,',##!!!
             'metadata_link':'http://mooring.ucsd.edu/index.html?/projects/delmar/delmar_intro.html',
             'reference':'http://mooring.ucsd.edu/index.html?/projects/delmar/delmar_intro.html',
-            'processing_level':'temporary QA/QC has been performed.', ##!!!
+            'processing_level':'QA/QC has been performed.',
             'project':'Del Mar, Mooring',
             'references':'http://www.sccoos.org/data/, http://mooring.ucsd.edu/index.html?/projects/delmar/delmar_intro.html, https://scripps.ucsd.edu/hlab, https://github.com/ioos/qartod',
             'summary': 'From February 2006 on, a mooring with a surface buoy has been maintained at a location on the 100-m isobath approximately three miles off Del Mar, CA. Instrumentation on the buoy includes a suite of meteorological sensors, sensors for surface water temperature, salinity, oxygen concentration, fluorescence, nutrients and currents. Further sensors on the mooring wire extend the measurements down into the water column, and much of the data is telemetered to shore in real-time through a radio or cell phone link.' + \
@@ -95,10 +95,10 @@ class Moor(sccoos.SCCOOS):
             # 'geospatial_lon_resolution':'',  # ?
             # 'geospatial_vertical_resolution':'',  # ???
 
-                'platform_vocabulary': 'GCMD Earth Science Keywords. Version 5.3.3',
-                'platform': '', #???
-                'instrument_vocabulary': 'GCMD Earth Science Keywords. Version 5.3.3',
-                'instrument': 'Earth Science > Oceans > Ocean Temperature > Water Temperature, Earth Science > Oceans > Salinity/Density > Salinity,',
+            'platform_vocabulary': 'GCMD Earth Science Keywords. Version 5.3.3',
+            'platform': 'mooring with a surface buoy',
+            'instrument_vocabulary': 'GCMD Earth Science Keywords. Version 5.3.3',
+            'instrument':'Data was collected with Sea-Bird: MicroCAT and SeaCAT instruments.',
         })
 
         # self.depArr = [0,7.5,16,25,35,47.5,60,75,90] <-- used with groups
