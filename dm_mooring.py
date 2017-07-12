@@ -717,9 +717,9 @@ class Moor(sccoos.SCCOOS):
             filesArr.sort()
             # loop through all the files
             for fn in filesArr:
-                print fn
                 fnEnd = fn.split('.', 1)[-1]
-                if (fnEnd in self.filesDict):
+                print fn, fnEnd
+                if (fnEnd in self.filesDict[dpmt]):
                     with open(self.extsDictFn) as json_file:
                         extDict = json.load(json_file)
                     print 'fileDate:', fn.split('.', 1)[0].split('_')[-1]
