@@ -294,7 +294,7 @@ class SASS(sccoos.SCCOOS):
             }
         }
 
-    def timeDimCreateVariable(self, ncfile, name, dict):
+    def createVariableTimeDim(self, ncfile, name, dict):
         if '_flag' in name:
             ncVar = ncfile.createVariable(name, 'B', ('time'), zlib=True)
         else:
@@ -316,14 +316,16 @@ class SASS(sccoos.SCCOOS):
                 'source':'QC results',
                 'comment': "Quality Control test are based on IOOS's Quality Control of Real-Time Ocean Data (QARTOD))"
             });
-        else:
+        elif name != 'time':
+            ncVar.setncatts({
+                'source':'insitu observations',
+                'grid_mapping':'crs',
+                'coordinates':'time lat lon depth'
+            })
 
-        ncVar.setncatts({
-            'source':'insitu observations',
-            'grid_mapping':'crs',
-            'coordinates':'time lat lon depth'
-        })
-
+    def createVariableCharNoDim(self, ncfile, name, dict):
+        ncVar = ncfile.createVariable(name, 'S1')
+        ncVar.setncatts(dict);
 
     def createNCshell(self, ncfile, sta):
         """
@@ -353,152 +355,6 @@ class SASS(sccoos.SCCOOS):
         "title":self.metaDict["project"]+": "+self.staMeta[sta]['loc_name'],
         })
         ncfile.setncatts(self.metaDict)
-        #Move to NC/SCCOOS class???
-        flagPrim_flag_values = bytearray([1, 2, 3, 4, 9]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
-        flagPrim_flag_meanings = 'GOOD_DATA UNKNOWN SUSPECT BAD_DATA MISSING'
-        flagSec_flag_values = bytearray([0, 1, 2, 3]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
-        flagSec_flag_meanings = 'UNSPECIFIED RANGE FLAT_LINE SPIKE'
-
-        # Create Dimensions
-        # unlimited axis (can be appended to).
-        time_dim = ncfile.createDimension('time', None)
-        name_dim = ncfile.createDimension('name_strlen', size=25)
-
-        #Create Variables
-        time_var = ncfile.createVariable(
-            'time', np.int32, ('time'), zlib=True)  # int64? Gives error
-        time_var.setncattr({
-            'axis':"T",
-            'calendar':'julian',
-            'comment':'also known as Epoch or Unix time',
-            'long_name':'time',
-            'standard_name':'time',
-            'units':'seconds since 1970-01-01 00:00:00 UTC'})
-        temperature = ncfile.createVariable('temperature', 'f4', ('time'), zlib=True)
-        temperature.setncatts({
-            'standard_name' : 'sea_water_temperature',
-            'long_name' : 'sea water temperature',
-            'units' : 'celsius',
-            'coordinates' : 'time lat lon depth',
-            'instrument' : "instrument1"})
-        temperature_flagPrim = ncfile.createVariable('temperature_flagPrimary', 'B', ('time'), zlib=True)
-        temperature_flagPrim.setncatts({
-            'long_name' : 'sea water temperature, qc primary flag',
-            'standard_name' : "sea_water_temperature status_flag",
-            'flag_values' : flagPrim_flag_values,
-            'flag_meanings' : flagPrim_flag_meanings})
-        temperature_flagSec = ncfile.createVariable('temperature_flagSecondary', 'B', ('time'), zlib=True)
-        temperature_flagSec.setncatts({
-            'long_name' : 'sea water temperature, qc secondary flag',
-            'standard_name' : "sea_water_temperature status_flag",
-            'flag_values' : flagSec_flag_values,
-            'flag_meanings' : flagSec_flag_meanings})
-        con = ncfile.createVariable('conductivity', 'f4', ('time'), zlib=True)
-        con.setncatts({
-            'standard_name' : 'sea_water_electrical_conductivity',
-            'long_name' : 'sea water electrical conductivity',
-            'units' : 'S/m',
-            'coordinates' : 'time lat lon depth',
-            'instrument' : "instrument1"})
-        con_flagPrim = ncfile.createVariable('conductivity_flagPrimary', 'B', ('time'), zlib=True)
-        con_flagPrim.setncatts({
-            'long_name' : 'sea water electrical conductivity, qc primary flag',
-            'standard_name' : "sea_water_electrical_conductivity status_flag",
-            'flag_values' : flagPrim_flag_values,
-            'flag_meanings' : flagPrim_flag_meanings})
-        con_flagSec = ncfile.createVariable('conductivity_flagSecondary', 'B', ('time'), zlib=True)
-        con_flagSec.setncatts({
-            'long_name' : 'sea water electrical condu`ctivity, qc secondary flag',
-            'standard_name' : "sea_water_electrical_conductivity status_flag",
-            'flag_values' : flagSec_flag_values,
-            'flag_meanings' : flagSec_flag_meanings})
-        pres = ncfile.createVariable('pressure', 'f4', ('time'), zlib=True)
-        pres.setncatts({
-            'standard_name' : 'sea_water_pressure',
-            'long_name' : 'sea water pressure',
-            'units' : 'dbar',
-            'coordinates' : 'time lat lon depth',
-            'instrument' : "instrument1" })
-        pres_flagPrim = ncfile.createVariable('pressure_flagPrimary', 'B', ('time'), zlib=True)
-        pres_flagPrim.setncatts({
-            'long_name' : 'sea water pressure, qc primary flag',
-            'standard_name' : "sea_water_pressure status_flag",
-            'flag_values' : flagPrim_flag_values,
-            'flag_meanings' : flagPrim_flag_meanings })
-        pres_flagSec = ncfile.createVariable('pressure_flagSecondary', 'B', ('time'), zlib=True)
-        pres_flagSec.setncatts({
-            'long_name' : 'sea water pressure, qc secondary flag',
-            'standard_name' : "sea_water_pressure status_flag",
-            'flag_values' : flagSec_flag_values,
-            'flag_meanings' : flagSec_flag_meanings})
-        a1 = ncfile.createVariable('aux1', 'f4', ('time'), zlib=True)
-        a1.setncatts({
-            'long_name' : 'Auxiliary 1',
-            'units' : 'V',
-            'coordinates' : 'time lat lon depth'})
-        a3 = ncfile.createVariable('aux3', 'f4', ('time'), zlib=True)
-        a3.setncatts({
-            'long_name' : 'Auxiliary 3',
-            'units' : 'V',
-            'coordinates' : 'time lat lon depth' })
-        chl = ncfile.createVariable('chlorophyll', 'f4', ('time'), zlib=True)
-        chl.setncatts({
-            'standard_name' : 'mass_concentration_of_chlorophyll_a_in_sea_water',
-            'long_name' : 'sea water chlorophyll',
-            'units' : 'ug/L',
-            'coordinates' : 'time lat lon depth',
-            'instrument' : "instrument2"})
-        chl_flagPrim = ncfile.createVariable('chlorophyll_flagPrimary', 'B', ('time'), zlib=True)
-        chl_flagPrim.setncatts({
-            'long_name' : 'sea water chlorophyll, qc primary flag',
-            'standard_name' : "mass_concentration_of_chlorophyll_a_in_sea_water status_flag",
-            'flag_values' : flagPrim_flag_values,
-            'flag_meanings' : flagPrim_flag_meanings})
-        chl_flagSec = ncfile.createVariable('chlorophyll_flagSecondary', 'B', ('time'), zlib=True)
-        chl_flagSec.setncatts({
-            'long_name' : 'sea water chlorophyll, qc secondary flag',
-            'flag_values' : flagSec_flag_values,
-            'flag_meanings' : flagSec_flag_meanings})
-        a4 = ncfile.createVariable('aux4', 'f4', ('time'), zlib=True)
-        a4.setncatts({
-            'long_name' : 'Auxiliary 4',
-            'units' : 'V',
-            'coordinates' : 'time lat lon depth'})
-        sal = ncfile.createVariable('salinity', 'f4', ('time'), zlib=True)
-        sal.setncatts({
-            'standard_name' : 'sea_water_salinity',
-            'long_name' : 'sea water salinity',
-            'units' : '1e-3', #not psu??
-            'coordinates' : 'time lat lon depth',
-            'instrument' : "instrument1"})
-        sal_flagPrim = ncfile.createVariable('salinity_flagPrimary', 'B', ('time'), zlib=True)
-        sal_flagPrim.setncatts({
-            'long_name' : 'sea water salinity, qc primary flag',
-            'standard_name' : "sea_water_practical_salinity status_flag",
-            'flag_values' : flagPrim_flag_values,
-            'flag_meanings' : flagPrim_flag_meanings})
-        sal_flagSec = ncfile.createVariable('salinity_flagSecondary', 'B', ('time'), zlib=True)
-        sal_flagSec.setncatts({
-            'long_name' : 'sea water salinity, qc secondary flag',
-            'standard_name' : "sea_water_practical_salinity status_flag",
-            'flag_values' : flagSec_flag_values,
-            'flag_meanings' : flagSec_flag_meanings})
-        sig = ncfile.createVariable('sigmat', 'f4', ('time'), zlib=True)
-        sig.setncatts({
-            'standard_name' : 'sea_water_density',
-            'long_name' : 'sea water density',
-            'units' : 'kg/m^3',
-            'coordinates' : 'time lat lon depth'})
-        dV = ncfile.createVariable('diagnosticVoltage', 'f4', ('time'), zlib=True)
-        dV.setncatts({
-            'long_name' : 'diagnostic voltage'  # NO standard name???
-            'units' : 'V',
-            'coordinates' : 'time lat lon depth'}),
-        cDr = ncfile.createVariable('currentDraw', 'f4', ('time'), zlib=True)
-        cDr.setncatts({
-            'long_name' : 'current draw'  # NO standard name???,
-            'units' : 'mA',
-            'coordinates' : 'time lat lon depth'})
 
         #What is this for???
         nm = ncfile.createVariable('station', 'S1', 'name_strlen')
