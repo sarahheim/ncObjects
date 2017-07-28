@@ -77,16 +77,21 @@ class SASS(sccoos.SCCOOS):
         """Setting up SASS
 
         .. todo::
-            - Add creator_institution. 'inst' is creator_name (change?).
+            - (meta) Add creator_institution. 'inst' is creator_name (change?).
+
+        :param str filename: filename, including directory location
         """
         super(SASS, self).__init__()
         #print "init sass"
 
+        #test locations
         self.codedir = '/home/scheim/NCobj/'
         self.ncpath = '/home/scheim/NCobj/SASS'
 
     #     self.codedir = '/data/InSitu/SASS/code/NCobj'
     #    self.ncpath = '/data/InSitu/SASS/netcdfs/'
+        self.ncsnip = ''
+        # self.dateformat = '%Y-%m-%dT%H:%M:%S.%fZ'
         self.crontab = True
 
         self.metaDict.update({
@@ -424,7 +429,7 @@ class SASS(sccoos.SCCOOS):
         name_dim = ncfile.createDimension('stationNameLength', size=25)
 
         self.createVariableTimeDim(ncfile, self.attr_time)
-        for tv in self.attrArr:
+        for tv in self.attrObjArr:
             self.createVariableTimeDim(ncfile, tv)
 
         for v in self.otherArr:
@@ -527,7 +532,10 @@ class SASS(sccoos.SCCOOS):
         .. todo:
             - columns if multiple, could be better. If change of column names
                 happens in a dataset, it only applies one set of column names
+            - qc_test for Spike Test should be done on NC after appending?
+            - qc_test for gap in Time
             - rewrite sccoos.qc_tests to just take df and object
+            - rewrite nc.dataToNC for createNCshell?, not passing 'lookup'
 
         :param str filename: filename, including directory location
         :param str regex: regular expression used in pandas's read_csv/extract
@@ -568,7 +576,6 @@ class SASS(sccoos.SCCOOS):
         print self.sta.ips
         df = df[df['ip'].isin(self.sta.ips)]
         print 'step 5:', df.shape
-        print df.dtypes
         print len(df)
 
         #set dataframe types, do calculations
@@ -576,37 +583,51 @@ class SASS(sccoos.SCCOOS):
             if col not in ['server_date', 'ip']:
                 #ALL might not be float in the future?
                 df.loc[:,col] = df.loc[:,col].astype(float)
+                #Check if column name has calculations
                 if col in extDict['calcs']:
                     df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
                     dates = extDict['calcs'][col].keys()
                     dates.sort()
                     #loop through dates and set appropriate date
                     for calcDtStr in dates:
-                        calcDt = pd.to_datetime(calcDtStr, format=self.dateformat) #format?
+                        calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%S.%fZ') #format?
                         df['calcDate'] = [calcDtStr if i > calcDt else df['calcDate'][i] for i in df.index]
                     df[col+'_calc'] = df.apply(self.doCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
                     # df[col+'_calcStr'] = df.apply(self.printCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
                     df.rename(columns={col: col+'_raw'}, inplace=True)
                     df.drop('calcDate', axis=1, inplace=True)
         print 'step 6:', df.shape
-        print df.dtypes
+        print df.columns
 
-        for a in self.attrArr:
+        self.attrArr = [] # dataToNC uses an attrArr which use to contain str names, not objects
+        for a in self.attrObjArr:
+            print a.name
             # print 'HASATTR', hasattr(a, 'miss_val')
-            # if the attribute has any of the qc attributes, run it through qc_tests
+            # if the attribute has ANY of the qc attributes, run it through qc_tests
             for qcv in MainAttr.qc_vars:
-                if qcv in a.__dict__.keys():
-                    qc_tests(df, a.name, miss_val=a.miss_val,
+                if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
+                    print 'DO QC on', a.name
+                    df = self.qc_tests(df, a.name, miss_val=a.miss_val,
                         sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
                         high_reps=a.high_reps, eps=a.eps,
                         low_thresh=a.low_thresh, high_thresh=a.high_thresh)
                     break
-        print 'step 6:', df.shape
-        print df.head(3)
+            self.attrArr.append(a.name)
+        print 'step 7:', df.shape
+        print df.columns
+        print df.head(1)
 
-        #groupby Yr
-        #addToNC
 
+        #groupby year. Since newyear text file can contain data from last year.
+        groupedYr = df.groupby(df.index.year)
+        for yr in groupedYr.indices:
+            # Check file size, nccopy to bring size down, replace original file
+            grpYr = groupedYr.get_group(yr)
+            print 'step 8:', yr, grpYr.shape
+            ncfilename = self.sta.code_name + self.ncsnip+"-"+ str(yr) + '.nc'
+            filepath = os.path.join(self.ncpath, ncfilename)
+            self.dataToNC(filepath, grpYr, '')
+            self.fileSizeChecker(filepath) #<-- move to dataToNC?
 
     def text2nc_all(self):
         mnArr = os.listdir(self.logsdir)
@@ -718,13 +739,32 @@ class SASS_Basic(SASS):
             ' land run-off, and algal blooms.'
             })
 
+        self.metaDict['keywords'] += self.metaDict['keywords']+', ' #Add keywords
 
-        # self.createNCshell(os.path.join(self.ncpath, 'test.nc'))
+
+       # NOT INCLUDING 'time'
+        self.attrObjArr = [
+            self.attr_temp, self.attr_con, self.attr_pres, self.attr_sal,
+            self.attr_chl1, self.attr_chl2,
+            self.attr_tempF1, self.attr_tempF2,
+            self.attr_conF1, self.attr_conF2,
+            self.attr_presF1, self.attr_presF2,
+            self.attr_salF1, self.attr_salF2,
+            self.attr_chlF1, self.attr_chlF2,
+            self.attr_sigmat, self.attr_dVolt, self.attr_cDr,
+            self.attr_a1, self.attr_a3, self.attr_a4]
+
+        self.otherArr = [ self.ch_i1, self.ch_i2, self.ch_p1 ]
+
+        r = Regex()
+        self.regex = r'^'+r.re_serverdate+r.re_s+r.re_ip+r.re_s+r.concatRegex(8)+r.re_s+r.re_date+r.re_s+r.re_time+r.re_s+r.concatRegex(3)+r'$'
+
 
 class SASS_NPd2(SASS):
     def __init__(self, sta):
         super(SASS_NPd2, self).__init__(sta)
-        self.logsdir = r'/data/InSitu/SASS/raw_data/'
+        self.logsdir = r'/data/InSitu/SASS/raw_data/newport_pier/'
+        self.ncsnip = '-d02'
 
         self.metaDict.update({
             'instrument':'Data was collected with Seabird, Seapoint, and _____ instruments.',
@@ -739,7 +779,7 @@ class SASS_NPd2(SASS):
         self.metaDict['keywords'] += self.metaDict['keywords']+', ' #Add Oxygen keywords
 
        # NOT INCLUDING 'time'
-        self.attrArr = [
+        self.attrObjArr = [
             self.attr_temp, self.attr_con, self.attr_pres, self.attr_sal,
             self.attr_chl1, self.attr_chl2,
             self.attr_o2th, self.attr_convOxy,
