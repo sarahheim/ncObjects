@@ -90,7 +90,8 @@ class SASS(sccoos.SCCOOS):
 
     #     self.codedir = '/data/InSitu/SASS/code/NCobj'
     #    self.ncpath = '/data/InSitu/SASS/netcdfs/'
-        self.ncsnip = ''
+        self.ncPostName = ''
+        self.prefix = self.sta.code_name + self.ncPostName+"-"
         # self.dateformat = '%Y-%m-%dT%H:%M:%S.%fZ'
         self.crontab = True
 
@@ -602,7 +603,7 @@ class SASS(sccoos.SCCOOS):
         for yr in groupedYr.indices:
             # Check file size, nccopy to bring size down, replace original file
             grpYr = groupedYr.get_group(yr)
-            ncfilename = self.sta.code_name + self.ncsnip+"-"+ str(yr) + '.nc'
+            ncfilename = self.prefix+ str(yr) + '.nc'
             filepath = os.path.join(self.ncpath, ncfilename)
             self.dataToNC(filepath, grpYr, '')
             self.fileSizeChecker(filepath) #<-- move to dataToNC?
@@ -622,10 +623,14 @@ class SASS(sccoos.SCCOOS):
                     self.text2nc(filename)
 
     def text2nc_append(self):
-        """SASS log files are organized by server date (when recorded)"""
+        """SASS log files are organized by server date (when recorded)
+        .. todo: re-write? With every run, the latest file will always be gone
+            through (columns, calcs, qc), even if no new data will be appended
+            (exist in nc.dataToNC)
+        """
         looplimit = 100
         loopCount = 1
-        lastNC = self.getLastNC(self.sta.code_name + '-d'+dpmt.dpmt+'-') #<-- dpmt!!!!!!!!!!!!
+        lastNC = self.getLastNC(self.prefix)
         latest = self.getLastDateNC(lastNC)
         LRdt = datetime.datetime.utcfromtimestamp(latest)
         print 'MAX, last recorded', LRdt
@@ -741,7 +746,7 @@ class SASS_NPd2(SASS):
     def __init__(self, sta):
         super(SASS_NPd2, self).__init__(sta)
         self.logsdir = r'/data/InSitu/SASS/raw_data/newport_pier/'
-        self.ncsnip = '-d02'
+        self.ncPostName = '-d02'
 
         self.metaDict.update({
             'instrument':'Data was collected with Seabird, Seapoint, and _____ instruments.',
