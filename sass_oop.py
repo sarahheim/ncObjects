@@ -481,15 +481,11 @@ class SASS(sccoos.SCCOOS):
             #Use first Serverdate in dataframe to set whole dataset to only one set of columns, fix better later!!!
             dates = colsDict.keys()
             dates.sort()
-            print 'dates', dates
             firstServerdateDt = pd.to_datetime(serverdate)
-            print 'to_datetime:', firstServerdateDt
             useKey = ''
             for colKey in dates:
                 colDt = pd.to_datetime(colKey)
-                print colKey, 'greater', firstServerdateDt>=colDt
                 if firstServerdateDt>=colDt: useKey = colKey
-            print 'using:', useKey
             return colsDict[useKey]
             #Check that the list is equal to # of columns?!!!
 
@@ -549,16 +545,12 @@ class SASS(sccoos.SCCOOS):
 
         print os.path.isfile(filename), filename
         df = pd.read_csv(filename, sep='^', header=None, prefix='X',error_bad_lines=False)
-        print 'step 1:', df.shape
         # Split data into proper columns
         df = df.X0.str.extract(self.regex)
         # Drop any rows with NaN
         df = df.dropna()
-        print 'STEP 2:', df.shape
 
         df.columns = self.get_cols(extDict["cols"], df.iloc[0,0])
-        print 'step 3:', df.shape
-
         # Set date_time to pandas datetime format
         dateformat = "%d %b %Y %H:%M:%S"
         # to_datetime (utc=None) --default-- and True results are the same
@@ -570,13 +562,8 @@ class SASS(sccoos.SCCOOS):
         df.drop('date', axis=1, inplace=True)
         df.drop('time', axis=1, inplace=True)
 
-        print 'step 4:', df.shape
-
         #only look at IPs for station
-        print self.sta.ips
         df = df[df['ip'].isin(self.sta.ips)]
-        print 'step 5:', df.shape
-        print len(df)
 
         #set dataframe types, do calculations
         for col in df.columns:
@@ -596,34 +583,25 @@ class SASS(sccoos.SCCOOS):
                     # df[col+'_calcStr'] = df.apply(self.printCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
                     df.rename(columns={col: col+'_raw'}, inplace=True)
                     df.drop('calcDate', axis=1, inplace=True)
-        print 'step 6:', df.shape
-        print df.columns
 
         self.attrArr = [] # dataToNC uses an attrArr which use to contain str names, not objects
         for a in self.attrObjArr:
-            print a.name
             # print 'HASATTR', hasattr(a, 'miss_val')
             # if the attribute has ANY of the qc attributes, run it through qc_tests
             for qcv in MainAttr.qc_vars:
                 if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
-                    print 'DO QC on', a.name
                     df = self.qc_tests(df, a.name, miss_val=a.miss_val,
                         sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
                         high_reps=a.high_reps, eps=a.eps,
                         low_thresh=a.low_thresh, high_thresh=a.high_thresh)
                     break
             self.attrArr.append(a.name)
-        print 'step 7:', df.shape
-        print df.columns
-        print df.head(1)
-
 
         #groupby year. Since newyear text file can contain data from last year.
         groupedYr = df.groupby(df.index.year)
         for yr in groupedYr.indices:
             # Check file size, nccopy to bring size down, replace original file
             grpYr = groupedYr.get_group(yr)
-            print 'step 8:', yr, grpYr.shape
             ncfilename = self.sta.code_name + self.ncsnip+"-"+ str(yr) + '.nc'
             filepath = os.path.join(self.ncpath, ncfilename)
             self.dataToNC(filepath, grpYr, '')
@@ -637,7 +615,6 @@ class SASS(sccoos.SCCOOS):
             if os.path.isdir(mnpath):
                 filesArr = os.listdir(mnpath)
                 filesArr.sort()
-                ##print "\n" + time.strftime("%c")
                 for fn in filesArr:
                     startfld = time.time() # time each folder
                     filename = os.path.join(mnpath, fn)
