@@ -196,7 +196,25 @@ class SASS(sccoos.SCCOOS):
                 'long_name' : 'sea water salinity, qc secondary flag',
                 'standard_name' : "sea_water_practical_salinity status_flag"
         })
-        self.attr_chl= MainAttr('chlorophyll',
+        # self.attr_chl= MainAttr('chlorophyll',
+        #     dtype= 'f4',
+        #     atts={
+        #         'standard_name' : 'mass_concentration_of_chlorophyll_a_in_sea_water',
+        #         'long_name' : 'sea water chlorophyll',
+        #         'units' : 'ug/L',
+        #         'instrument' : "instrument2"
+        #     },
+        #     sensor_span=(0.02,50), user_span=(0.02,50),
+        #     low_reps=2, high_reps=5, eps=0.001, low_thresh=0.8, high_thresh=1.0)
+        self.attr_chl1= MainAttr('chlorophyll_raw',
+            dtype= 'f4',
+            atts={
+                'standard_name' : 'mass_concentration_of_chlorophyll_a_in_sea_water',
+                'long_name' : 'sea water chlorophyll',
+                'units' : 'ug/L',
+                'instrument' : "instrument2"
+            })
+        self.attr_chl2= MainAttr('chlorophyll_calc',
             dtype= 'f4',
             atts={
                 'standard_name' : 'mass_concentration_of_chlorophyll_a_in_sea_water',
@@ -206,11 +224,11 @@ class SASS(sccoos.SCCOOS):
             },
             sensor_span=(0.02,50), user_span=(0.02,50),
             low_reps=2, high_reps=5, eps=0.001, low_thresh=0.8, high_thresh=1.0)
-        self.attr_chlF1 = FlagAttr('chlorophyll_flagPrimary',
+        self.attr_chlF1 = FlagAttr('chlorophyll_calc_flagPrimary',
             atts={
                 'long_name' : 'sea water chlorophyll, qc primary flag',
                 'standard_name' : "mass_concentration_of_chlorophyll_a_in_sea_water status_flag"})
-        self.attr_chlF2 = FlagAttr('chlorophyll_flagSecondary',
+        self.attr_chlF2 = FlagAttr('chlorophyll_calc_flagSecondary',
             atts={
                 'long_name' : 'sea water chlorophyll, qc secondary flag',
                 'standard_name' : "mass_concentration_of_chlorophyll_a_in_sea_water status_flag"})
@@ -281,7 +299,7 @@ class SASS(sccoos.SCCOOS):
             atts={
                 'standard_name' : 'mass_concentration_of_oxygen_in_sea_water',
                 'long_name' : 'converted_oxygen', #'dissolved oxygen (raw)'???
-                'units' : 'mL/L', #not psu??
+                'units' : 'mL/L',
                 'instrument' : "instrument3"
             }
             #qc
@@ -327,8 +345,8 @@ class SASS(sccoos.SCCOOS):
             })
         self.ch_i3 = CharVariable('instrument3', sta,
             atts={
-                # 'make' : "",
-                # 'model' : "",
+                'make' : "Seabird",
+                'model' : "SBE 63 Optical Dissolved Oxygen (DO) Sensor",
                 # 'comment' : "",
                 'ioos_code' : "urn:ioos:sensor:sccoos:"+self.sta.code_name+":oxygen"
             })
@@ -372,7 +390,7 @@ class SASS(sccoos.SCCOOS):
         ncVar = ncfile.createVariable(v.name, 'S1')
         ncVar.setncatts(v.atts);
 
-    def createNCshell(self, ncName): #dpmt??
+    def createNCshell(self, ncName, ignore): #dpmt??
         """Create netCDF shell: set global attributes/metadata
 
         .. todo::
@@ -398,8 +416,7 @@ class SASS(sccoos.SCCOOS):
             "geospatial_vertical_min": self.sta.depth,
             "geospatial_vertical_max": self.sta.depth,
             "history": "Created: "+ self.tupToISO(time.gmtime()), #time.ctime(time.time()),
-            "title":self.metaDict["project"]+": "+self.sta.long_name, #Not working?!!!
-            # "title": self.sta.long_name,
+            "title":self.metaDict["project"]+": "+self.sta.long_name,
             })
         ncfile.setncatts(self.metaDict)
 
@@ -478,6 +495,28 @@ class SASS(sccoos.SCCOOS):
         :returns: x times Factor plus Offset
         """
         return x*input[0]+input[1]
+        # return str(x)+str(type(input[0]))+repr(input[0])+str(type(input[1]))+repr(input[1])
+
+    def doCalc(self, row, **kwargs):
+        """
+        :param object row: row, with columns as attributes
+        :param str col: column name/attribute/variable to have function applied to
+        :param dictionary calcsDict:
+        :returns: output from calculation function
+        """
+        calcsDict = kwargs['calcsDict']
+        col = kwargs['col']
+        func = calcsDict[row.calcDate]['function']
+        input = calcsDict[row.calcDate]['input']
+        return eval('self.'+func)(row[col], input=input)
+
+    def printCalc(self, row, **kwargs):
+        """This is just for testing, to check the function/input being used on a value"""
+        calcsDict = kwargs['calcsDict']
+        col = kwargs['col']
+        func = calcsDict[row.calcDate]['function']
+        input = calcsDict[row.calcDate]['input']
+        return func+"()"+str(row[col])+")"+str(input[0])+'+'+str(input[1])
 
     def text2nc(self, filename):
         """#previously dataframe2nc
@@ -485,12 +524,14 @@ class SASS(sccoos.SCCOOS):
         - Does a series of regular expressions (a.k.a. regex)
         - Uses QC methods from **sassqc**
 
-        .. todo: columns if multiple, could be better. If change of column names
+        .. todo:
+            - columns if multiple, could be better. If change of column names
                 happens in a dataset, it only applies one set of column names
+            - rewrite sccoos.qc_tests to just take df and object
 
         :param str filename: filename, including directory location
         :param str regex: regular expression used in pandas's read_csv/extract
-        :param array? columns: columns should contain: 'date', 'time', 'ip'
+        :param array? columns: columns should contain: 'date', 'time', 'ip'; 'server_date'?
         """
 
         jsonFn = os.path.join(self.codedir, 'sass_'+self.sta.code_name+'_archive.json')
@@ -522,7 +563,50 @@ class SASS(sccoos.SCCOOS):
         df.drop('time', axis=1, inplace=True)
 
         print 'step 4:', df.shape
+
+        #only look at IPs for station
+        print self.sta.ips
+        df = df[df['ip'].isin(self.sta.ips)]
+        print 'step 5:', df.shape
+        print df.dtypes
+        print len(df)
+
+        #set dataframe types, do calculations
+        for col in df.columns:
+            if col not in ['server_date', 'ip']:
+                #ALL might not be float in the future?
+                df.loc[:,col] = df.loc[:,col].astype(float)
+                if col in extDict['calcs']:
+                    df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
+                    dates = extDict['calcs'][col].keys()
+                    dates.sort()
+                    #loop through dates and set appropriate date
+                    for calcDtStr in dates:
+                        calcDt = pd.to_datetime(calcDtStr, format=self.dateformat) #format?
+                        df['calcDate'] = [calcDtStr if i > calcDt else df['calcDate'][i] for i in df.index]
+                    df[col+'_calc'] = df.apply(self.doCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
+                    # df[col+'_calcStr'] = df.apply(self.printCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
+                    df.rename(columns={col: col+'_raw'}, inplace=True)
+                    df.drop('calcDate', axis=1, inplace=True)
+        print 'step 6:', df.shape
+        print df.dtypes
+
+        for a in self.attrArr:
+            # print 'HASATTR', hasattr(a, 'miss_val')
+            # if the attribute has any of the qc attributes, run it through qc_tests
+            for qcv in MainAttr.qc_vars:
+                if qcv in a.__dict__.keys():
+                    qc_tests(df, a.name, miss_val=a.miss_val,
+                        sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
+                        high_reps=a.high_reps, eps=a.eps,
+                        low_thresh=a.low_thresh, high_thresh=a.high_thresh)
+                    break
+        print 'step 6:', df.shape
         print df.head(3)
+
+        #groupby Yr
+        #addToNC
+
 
     def text2nc_all(self):
         mnArr = os.listdir(self.logsdir)
@@ -573,14 +657,15 @@ class Attr(object):
         self.name = name
 
 class MainAttr(Attr):
+    qc_vars = ['miss_val','sensor_span','user_span','low_reps','high_reps',
+            'eps','low_thresh','high_thresh']
+
     def __init__(self, name, **kwargs):
         super(MainAttr, self).__init__(name)
         # self.sensor_span = kwargs['sensor_span']
-        allowed_keys = set(['dtype','atts',
-            'sensor_span','user_span','low_reps','high_reps',
-            'eps','low_thresh','high_thresh'])
+        allowed_keys = set(['dtype','atts']+self.qc_vars)
         # initialize all allowed keys to false
-        self.__dict__.update((key, False) for key in allowed_keys)
+        self.__dict__.update((key, None) for key in allowed_keys) #None or False?
         # and update the given keys by their given values
         self.__dict__.update((key, value) for key, value in kwargs.items() if key in allowed_keys)
         # self.atts.update({'coordinates' : 'time lat lon depth'}) #<-- Not for 'time'!!
@@ -633,21 +718,6 @@ class SASS_Basic(SASS):
             ' land run-off, and algal blooms.'
             })
 
-       # NOT INCLUDING 'time'
-        self.attrArr = [
-            self.attr_temp, self.attr_con, self.attr_pres, self.attr_sal, self.attr_chl,
-            self.attr_tempF1, self.attr_tempF2,
-            self.attr_conF1, self.attr_conF2,
-            self.attr_presF1, self.attr_presF2,
-            self.attr_salF1, self.attr_salF2,
-            self.attr_chlF1, self.attr_chlF2,
-            self.attr_sigmat, self.attr_dVolt, self.attr_cDr,
-            self.attr_a1, self.attr_a3, self.attr_a4]
-
-        self.otherArr = [ self.ch_i1, self.ch_i2, self.ch_p1 ]
-
-        r = Regex()
-        self.regex = r'^'+r.re_serverdate+r.re_s+r.re_ip+r.re_s+r.concatRegex(8)+r.re_s+r.re_date+r.re_s+r.re_time+r.re_s+r.concatRegex(3)+r'$'
 
         # self.createNCshell(os.path.join(self.ncpath, 'test.nc'))
 
@@ -670,7 +740,8 @@ class SASS_NPd2(SASS):
 
        # NOT INCLUDING 'time'
         self.attrArr = [
-            self.attr_temp, self.attr_con, self.attr_pres, self.attr_sal, self.attr_chl,
+            self.attr_temp, self.attr_con, self.attr_pres, self.attr_sal,
+            self.attr_chl1, self.attr_chl2,
             self.attr_o2th, self.attr_convOxy,
             self.attr_tempF1, self.attr_tempF2,
             self.attr_conF1, self.attr_conF2,

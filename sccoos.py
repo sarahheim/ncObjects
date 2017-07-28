@@ -132,9 +132,11 @@ class SCCOOS(nc.NC):
             - add _FillValue attribute
             - add tests done to 'processing_level' metaDict
             - add qc input into metadata
+            - miss_val as input? change if statement?
 
         :param df: dataframe
         :param attr: attribute, qa is being applied to
+        :param boo miss_val: T/F; uses isnan
         :param sensor_span: for Range Test; tuple of low and high of good values (sensor)
         :param user_span: for Range Test; tuple of low and high of good values (expected/location appropriate)
         :param low_reps: for Flat Line check; number of repeating to be considered suspect
@@ -149,10 +151,9 @@ class SCCOOS(nc.NC):
         qc2flags = np.zeros_like(df[attr].values, dtype='uint8')
 
         # Missing check
+        # if miss_val:
         if miss_val is not None:
             qcflagsMiss = qc.check_nulls(df[attr].values)
-            #nothing for secondary flag if missing?
-
         else:
             qcflagsMiss = np.ones_like(df[attr].values, dtype='uint8')
 
