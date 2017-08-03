@@ -49,7 +49,7 @@ uci = Station(code_name = 'newport_pier',
                 url= 'http://uci.edu/',
                 inst= 'University of California, Irvine')
 ucla = Station(code_name= 'santa_monica_pier',
-                loc_name= 'Santa Monica Pier',
+                long_name= 'Santa Monica Pier',
                 ips= ['166.241.175.135'],
                 lat= 34.008,
                 lon= -118.499,
@@ -90,8 +90,7 @@ class SASS(sccoos.SCCOOS):
 
     #     self.codedir = '/data/InSitu/SASS/code/NCobj'
     #    self.ncpath = '/data/InSitu/SASS/netcdfs/'
-        self.ncPostName = ''
-        self.prefix = self.sta.code_name + self.ncPostName+"-"
+
         # self.dateformat = '%Y-%m-%dT%H:%M:%S.%fZ'
         self.crontab = True
 
@@ -407,7 +406,7 @@ class SASS(sccoos.SCCOOS):
         self.metaDict.update({
             'comment': 'The '+self.sta.long_name+' automated shore station operated' + \
             ' by ' + self.sta.inst + \
-            ' is mounted at a nominal depth of '+ self.sta.depth +' meters MLLW. The' + \
+            ' is mounted at a nominal depth of '+ str(self.sta.depth) +' meters MLLW. The' + \
             ' instrument package includes a Seabird SBE 16plus SEACAT Conductivity,' + \
             ' Temperature, and Pressure recorder, and a Seapoint Chlorophyll Fluorometer' + \
             ' with a 0-50 ug/L gain setting.',
@@ -563,50 +562,51 @@ class SASS(sccoos.SCCOOS):
         df.drop('date', axis=1, inplace=True)
         df.drop('time', axis=1, inplace=True)
 
-        #only look at IPs for station
+        #only look at IPs for station (strip out other ips)
         df = df[df['ip'].isin(self.sta.ips)]
 
-        #set dataframe types, do calculations
-        for col in df.columns:
-            if col not in ['server_date', 'ip']:
-                #ALL might not be float in the future?
-                df.loc[:,col] = df.loc[:,col].astype(float)
-                #Check if column name has calculations
-                if col in extDict['calcs']:
-                    df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
-                    dates = extDict['calcs'][col].keys()
-                    dates.sort()
-                    #loop through dates and set appropriate date
-                    for calcDtStr in dates:
-                        calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%S.%fZ') #format?
-                        df['calcDate'] = [calcDtStr if i > calcDt else df['calcDate'][i] for i in df.index]
-                    df[col+'_calc'] = df.apply(self.doCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
-                    # df[col+'_calcStr'] = df.apply(self.printCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
-                    df.rename(columns={col: col+'_raw'}, inplace=True)
-                    df.drop('calcDate', axis=1, inplace=True)
+        if len(df) > 0:
+            #set dataframe types, do calculations
+            for col in df.columns:
+                if col not in ['server_date', 'ip']:
+                    #ALL might not be float in the future?
+                    df.loc[:,col] = df.loc[:,col].astype(float)
+                    #Check if column name has calculations
+                    if col in extDict['calcs']:
+                        df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
+                        dates = extDict['calcs'][col].keys()
+                        dates.sort()
+                        #loop through dates and set appropriate date
+                        for calcDtStr in dates:
+                            calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
+                            df['calcDate'] = [calcDtStr if i > calcDt else df['calcDate'][i] for i in df.index]
+                        df[col+'_calc'] = df.apply(self.doCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
+                        # df[col+'_calcStr'] = df.apply(self.printCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
+                        df.rename(columns={col: col+'_raw'}, inplace=True)
+                        df.drop('calcDate', axis=1, inplace=True)
 
-        self.attrArr = [] # dataToNC uses an attrArr which use to contain str names, not objects
-        for a in self.attrObjArr:
-            # print 'HASATTR', hasattr(a, 'miss_val')
-            # if the attribute has ANY of the qc attributes, run it through qc_tests
-            for qcv in MainAttr.qc_vars:
-                if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
-                    df = self.qc_tests(df, a.name, miss_val=a.miss_val,
-                        sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
-                        high_reps=a.high_reps, eps=a.eps,
-                        low_thresh=a.low_thresh, high_thresh=a.high_thresh)
-                    break
-            self.attrArr.append(a.name)
+            self.attrArr = [] # dataToNC uses an attrArr which use to contain str names, not objects
+            for a in self.attrObjArr:
+                # print 'HASATTR', hasattr(a, 'miss_val')
+                # if the attribute has ANY of the qc attributes, run it through qc_tests
+                for qcv in MainAttr.qc_vars:
+                    if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
+                        df = self.qc_tests(df, a.name, miss_val=a.miss_val,
+                            sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
+                            high_reps=a.high_reps, eps=a.eps,
+                            low_thresh=a.low_thresh, high_thresh=a.high_thresh)
+                        break
+                self.attrArr.append(a.name)
 
-        #groupby year. Since newyear text file can contain data from last year.
-        groupedYr = df.groupby(df.index.year)
-        for yr in groupedYr.indices:
-            # Check file size, nccopy to bring size down, replace original file
-            grpYr = groupedYr.get_group(yr)
-            ncfilename = self.prefix+ str(yr) + '.nc'
-            filepath = os.path.join(self.ncpath, ncfilename)
-            self.dataToNC(filepath, grpYr, '')
-            self.fileSizeChecker(filepath) #<-- move to dataToNC?
+            #groupby year. Since newyear text file can contain data from last year.
+            groupedYr = df.groupby(df.index.year)
+            for yr in groupedYr.indices:
+                # Check file size, nccopy to bring size down, replace original file
+                grpYr = groupedYr.get_group(yr)
+                ncfilename = self.prefix+ str(yr) + '.nc'
+                filepath = os.path.join(self.ncpath, ncfilename)
+                self.dataToNC(filepath, grpYr, '')
+                self.fileSizeChecker(filepath) #<-- move to dataToNC?
 
     def text2nc_all(self):
         mnArr = os.listdir(self.logsdir)
@@ -710,6 +710,9 @@ class SASS_Basic(SASS):
         super(SASS_Basic, self).__init__(sta)
         print "init SASS_Basic"
         self.logsdir = r'/data/InSitu/SASS/data/'
+        self.ncPostName = ''
+        self.prefix = self.sta.code_name + self.ncPostName+"-"
+        print "ncPostName: ", self.ncPostName, '. prefix:', self.prefix
 
         self.metaDict.update({
             'instrument':'Data was collected with Seabird and Seapoint instruments.',
@@ -745,8 +748,15 @@ class SASS_Basic(SASS):
 class SASS_NPd2(SASS):
     def __init__(self, sta):
         super(SASS_NPd2, self).__init__(sta)
+        """Setting up SASS Newport Pier new sensor
+
+        .. todo::
+            - QCs parameters for: O2thermistor and convertedOxygen (then add flags back for these)
+        """
+        print "init SASS_NPd2"
         self.logsdir = r'/data/InSitu/SASS/raw_data/newport_pier/'
         self.ncPostName = '-d02'
+        self.prefix = self.sta.code_name + self.ncPostName+"-"
 
         self.metaDict.update({
             'instrument':'Data was collected with Seabird, Seapoint, and _____ instruments.',
@@ -770,8 +780,8 @@ class SASS_NPd2(SASS):
             self.attr_presF1, self.attr_presF2,
             self.attr_salF1, self.attr_salF2,
             self.attr_chlF1, self.attr_chlF2,
-            self.attr_o2thF1, self.attr_o2thF2,
-            self.attr_convOxyF1, self.attr_convOxyF2,
+            # self.attr_o2thF1, self.attr_o2thF2,
+            # self.attr_convOxyF1, self.attr_convOxyF2,
             self.attr_sigmat, self.attr_dVolt, self.attr_cDr]
 
         self.otherArr = [ self.ch_i1, self.ch_i2, self.ch_i3, self.ch_p1 ]
