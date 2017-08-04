@@ -1,0 +1,67 @@
+{
+  "calcs": {
+    "chlorophyll": {
+      "2002-05-06T00:00:00Z": {
+        "function": "calc_factorOffset1", 
+        "input": [
+          10.0, 
+          0.0
+        ]
+      }, 
+      "2014-03-04T19:21:56Z": {
+        "function": "calc_factorOffset1", 
+        "input": [
+          16.1, 
+          0.049
+        ]
+      }, 
+      "2014-05-14T21:54:00Z": {
+        "function": "calc_factorOffset1", 
+        "input": [
+          15.1, 
+          0.068
+        ]
+      }, 
+      "2015-12-16T22:34:00Z": {
+        "function": "calc_factorOffset1", 
+        "input": [
+          14.3, 
+          0.062
+        ]
+      }, 
+      "2016-07-14T20:54:00Z": {
+        "function": "calc_factorOffset1", 
+        "input": [
+          15.8, 
+          0.068
+        ]
+      }, 
+      "2017-02-02T00:01:36Z": {
+        "function": "calc_factorOffset1", 
+        "input": [
+          20.1, 
+          0.082
+        ]
+      }
+    }
+  }, 
+  "cols": {
+    "2013-01-01-00:00:00Z": [
+      "server_date", 
+      "ip", 
+      "temperature", 
+      "conductivity", 
+      "pressure", 
+      "aux1", 
+      "aux3", 
+      "chlorophyll", 
+      "aux4", 
+      "salinity", 
+      "date", 
+      "time", 
+      "sigmat", 
+      "diagnosticVoltage", 
+      "currentDraw"
+    ]
+  }
+}
