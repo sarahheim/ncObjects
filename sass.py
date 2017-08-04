@@ -111,6 +111,222 @@ class SASS(sccoos.SCCOOS):
             ' land run-off, and algal blooms.'
             })
 
+        self.ncVars = {
+            'time': {
+                'dtype': np.int32,
+                'atts':{
+                    'axis':"T",
+                    'calendar':'julian',
+                    'comment':'also known as Epoch or Unix time',
+                    'long_name':'time',
+                    'standard_name':'time',
+                    'units':'seconds since 1970-01-01 00:00:00 UTC'
+                }
+            }, 'temperature': {
+                'dtype': 'f4',
+                'atts':{
+                    'standard_name' : 'sea_water_temperature',
+                    'long_name' : 'sea water temperature',
+                    'units' : 'celsius',
+                    'coordinates' : 'time lat lon depth',
+                    'instrument' : "instrument1"
+                }
+            }, 'temperature_flagPrimary': {
+                'atts':{
+                    'long_name' : 'sea water temperature, qc primary flag',
+                    'standard_name' : "sea_water_temperature status_flag"
+                }
+            }, 'temperature_flagSecondary': {
+                'atts':{
+                    'long_name' : 'sea water temperature, qc secondary flag',
+                    'standard_name' : "sea_water_temperature status_flag"
+                }
+            'conductivity': {
+                'dtype': 'f4',
+                'atts':{
+                    'standard_name' : 'sea_water_electrical_conductivity',
+                    'long_name' : 'sea water electrical conductivity',
+                    'units' : 'S/m',
+                    'coordinates' : 'time lat lon depth',
+                    'instrument' : "instrument1"
+                }
+            },'conductivity_flagPrimary': {
+                'atts':{
+                    'long_name' : 'sea water electrical conductivity, qc primary flag',
+                    'standard_name' : "sea_water_electrical_conductivity status_flag"
+                }
+            }, 'conductivity_flagSecondary': {
+                'atts':{
+                    'long_name' : 'sea water electrical condu`ctivity, qc secondary flag',
+                    'standard_name' : "sea_water_electrical_conductivity status_flag"
+                }
+            'pressure': {
+                'dtype': 'f4',
+                'atts':{
+                    'standard_name' : 'sea_water_pressure',
+                    'long_name' : 'sea water pressure',
+                    'units' : 'dbar',
+                    'instrument' : "instrument1"
+                }
+            }, 'pressure_flagPrimary': {
+                'atts':{
+                    'long_name' : 'sea water pressure, qc primary flag',
+                    'standard_name' : "sea_water_pressure status_flag"
+                }
+            }, 'pressure_flagSecondary': {
+                'atts':{
+                    'long_name' : 'sea water pressure, qc secondary flag',
+                    'standard_name' : "sea_water_pressure status_flag"
+                }
+            }, 'chlorophyll': {
+                'dtype': 'f4',
+                'atts':{
+                    'standard_name' : 'mass_concentration_of_chlorophyll_a_in_sea_water',
+                    'long_name' : 'sea water chlorophyll',
+                    'units' : 'ug/L',
+                    'instrument' : "instrument2"
+                }
+            }, 'chlorophyll_flagPrimary': {
+                'atts':{
+                    'long_name' : 'sea water chlorophyll, qc primary flag',
+                    'standard_name' : "mass_concentration_of_chlorophyll_a_in_sea_water status_flag"
+                }
+            }, 'chlorophyll_flagSecondary': {
+                'atts':{
+                    'long_name' : 'sea water chlorophyll, qc secondary flag',
+                    'standard_name' : "mass_concentration_of_chlorophyll_a_in_sea_water status_flag"
+                }
+            }, 'salinity': {
+                'dtype': 'f4',
+                'atts':{
+                    'standard_name' : 'sea_water_salinity',
+                    'long_name' : 'sea water salinity',
+                    'units' : '1e-3', #not psu??
+                    'coordinates' : 'time lat lon depth',
+                    'instrument' : "instrument1"
+                }
+            }, 'salinity_flagPrimary': {
+                'atts':{
+                    'long_name' : 'sea water salinity, qc primary flag',
+                    'standard_name' : "sea_water_practical_salinity status_flag"
+                }
+            }, 'salinity_flagSecondary': {
+                'atts':{
+                    'long_name' : 'sea water salinity, qc secondary flag',
+                    'standard_name' : "sea_water_practical_salinity status_flag"
+                }
+            }, 'sigmat': {
+                'dtype': 'f4',
+                'atts':{
+                    'standard_name' : 'sea_water_density',
+                    'long_name' : 'sea water density',
+                    'units' : 'kg/m^3'
+                }
+            }, 'diagnosticVoltage': {
+                'dtype': 'f4',
+                'atts':{
+                    'long_name' : 'diagnostic voltage',  # NO standard name???
+                    'units' : 'V'
+                }
+            }, 'currentDraw': {
+                'dtype': 'f4',
+                'atts':{
+                    'long_name' : 'current draw',  # NO standard name???,
+                    'units' : 'mA'
+                }
+
+            }, 'aux1': {
+                'dtype': 'f4',
+                'atts':{
+                    'long_name' : 'Auxiliary 1',
+                    'units' : 'V',
+                    'coordinates' : 'time lat lon depth'
+                }
+            }, 'aux3': {
+                'dtype': 'f4',
+                'atts':{
+                    'long_name' : 'Auxiliary 3',
+                    'units' : 'V',
+                }
+            }, 'aux4': {
+                'dtype': 'f4',
+                'atts':{
+                    'long_name' : 'Auxiliary 4',
+                    'units' : 'V',
+                }
+
+            }, 'O2thermistor': {
+                'dtype': 'f4',
+                'atts':{
+                    'standard_name' : '',
+                    'long_name' : 'O2 thermistor', #???
+                    'units' : 'V', #not psu??
+                    'instrument' : "instrument3"
+                    }
+            }, 'O2_flagPrimary': {
+                'atts':{
+                    'long_name' : ', qc primary flag',
+                    'standard_name' : 'status_flag'
+                }
+            }, 'O2_flagSecondary': {
+                'atts':{
+                    'long_name' : ', qc secondary flag',
+                    'standard_name' : 'status_flag'
+                }
+
+            }, 'convertedOxygen': {
+                'dtype': 'f4',
+                'atts':{
+                    'standard_name' : 'mass_concentration_of_oxygen_in_sea_water',
+                    'long_name' : 'converted_oxygen', #'dissolved oxygen (raw)'???
+                    'units' : 'mL/L', #not psu??
+                    'instrument' : "instrument3"
+            }, 'converted_oxygen_flagPrimary': {
+                'atts':{
+                    'long_name' : ', qc primary flag',
+                    'standard_name' : 'mass_concentration_of_oxygen_in_sea_water status_flag'
+                }
+            }, 'converted_oxygen_flagSecondary': {
+                'atts':{
+                    'long_name' : ', qc secondary flag',
+                    'standard_name' : 'mass_concentration_of_oxygen_in_sea_water status_flag'
+                }
+            }
+        }
+
+    def createVariableTimeDim(self, ncfile, name, dict):
+        if '_flag' in name:
+            ncVar = ncfile.createVariable(name, 'B', ('time'), zlib=True)
+        else:
+            ncVar = ncfile.createVariable(name, dict['dtype'], ('time'), zlib=True)
+
+        ncVar.setncatts(dict['atts']);
+        if '_flag' in name:
+            if '_flagPrimary' in name:
+                ncVar.setncatts({
+                    'flag_values': bytearray([1, 2, 3, 4, 9]), # 1UB, 2UB, 3UB, 4UB, 9UB ;
+                    'flag_meanings':'GOOD_DATA UNKNOWN SUSPECT BAD_DATA MISSING'
+                });
+            else:
+                ncVar.setncatts({
+                    'flag_values': bytearray([0, 1, 2, 3]), # 1UB, 2UB, 3UB, 4UB, 9UB ;
+                    'flag_meanings':'UNSPECIFIED RANGE FLAT_LINE SPIKE'
+                });
+            ncVar.setncatts({
+                'source':'QC results',
+                'comment': "Quality Control test are based on IOOS's Quality Control of Real-Time Ocean Data (QARTOD))"
+            });
+        elif name != 'time':
+            ncVar.setncatts({
+                'source':'insitu observations',
+                'grid_mapping':'crs',
+                'coordinates':'time lat lon depth'
+            })
+
+    def createVariableCharNoDim(self, ncfile, name, dict):
+        ncVar = ncfile.createVariable(name, 'S1')
+        ncVar.setncatts(dict);
+
     def createNCshell(self, ncfile, sta):
         """
         .. todo::
@@ -139,167 +355,42 @@ class SASS(sccoos.SCCOOS):
         "title":self.metaDict["project"]+": "+self.staMeta[sta]['loc_name'],
         })
         ncfile.setncatts(self.metaDict)
-        #Move to NC/SCCOOS class???
-        flagPrim_flag_values = bytearray([1, 2, 3, 4, 9]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
-        flagPrim_flag_meanings = 'GOOD_DATA UNKNOWN SUSPECT BAD_DATA MISSING'
-        flagSec_flag_values = bytearray([0, 1, 2, 3]) # 1UB, 2UB, 3UB, 4UB, 9UB ;
-        flagSec_flag_meanings = 'UNSPECIFIED RANGE FLAT_LINE SPIKE'
-
-        # Create Dimensions
-        # unlimited axis (can be appended to).
-        time_dim = ncfile.createDimension('time', None)
-        name_dim = ncfile.createDimension('name_strlen', size=25)
-
-        #Create Variables
-        time_var = ncfile.createVariable(
-            'time', np.int32, ('time'), zlib=True)  # int64? Gives error
-        # time_var.setncattr({'standard_name':'time', 'long_name': 'time', 'units':'seconds since 1970-01-01 00:00:00 UTC'})
-        time_var.standard_name = 'time'
-        time_var.units = 'seconds since 1970-01-01 00:00:00 UTC'
-        time_var.long_name = 'time'
-        time_var.calendar = 'julian'
-        time_var.axis = "T"
-        temperature = ncfile.createVariable('temperature', 'f4', ('time'), zlib=True)
-        temperature.standard_name = 'sea_water_temperature'
-        temperature.long_name = 'sea water temperature'
-        temperature.units = 'celsius'
-        temperature.coordinates = 'time lat lon depth'
-        temperature.instrument = "instrument1"
-        temperature_flagPrim = ncfile.createVariable(
-            'temperature_flagPrimary', 'B', ('time'), zlib=True)
-        temperature_flagPrim.long_name = 'sea water temperature, qc primary flag'
-        temperature_flagPrim.standard_name = "sea_water_temperature status_flag"
-        temperature_flagPrim.flag_values = flagPrim_flag_values
-        temperature_flagPrim.flag_meanings = flagPrim_flag_meanings
-        temperature_flagSec = ncfile.createVariable(
-            'temperature_flagSecondary', 'B', ('time'), zlib=True)
-        temperature_flagSec.long_name = 'sea water temperature, qc secondary flag'
-        temperature_flagSec.flag_values = flagSec_flag_values
-        temperature_flagSec.flag_meanings = flagSec_flag_meanings
-        con = ncfile.createVariable('conductivity', 'f4', ('time'), zlib=True)
-        con.standard_name = 'sea_water_electrical_conductivity'
-        con.long_name = 'sea water electrical conductivity'
-        con.units = 'S/m'
-        con.coordinates = 'time lat lon depth'
-        con.instrument = "instrument1"
-        con_flagPrim = ncfile.createVariable(
-            'conductivity_flagPrimary', 'B', ('time'), zlib=True)
-        con_flagPrim.long_name = 'sea water electrical conductivity, qc primary flag'
-        con_flagPrim.standard_name = "sea_water_electrical_conductivity status_flag"
-        con_flagPrim.flag_values = flagPrim_flag_values
-        con_flagPrim.flag_meanings = flagPrim_flag_meanings
-        con_flagSec = ncfile.createVariable(
-            'conductivity_flagSecondary', 'B', ('time'), zlib=True)
-        con_flagSec.long_name = 'sea water electrical conductivity, qc secondary flag'
-        con_flagSec.flag_values = flagSec_flag_values
-        con_flagSec.flag_meanings = flagSec_flag_meanings
-        pres = ncfile.createVariable('pressure', 'f4', ('time'), zlib=True)
-        pres.standard_name = 'sea_water_pressure'
-        pres.long_name = 'sea water pressure'
-        pres.units = 'dbar'
-        pres.coordinates = 'time lat lon depth'
-        pres.instrument = "instrument1"
-        pres_flagPrim = ncfile.createVariable(
-            'pressure_flagPrimary', 'B', ('time'), zlib=True)
-        pres_flagPrim.long_name = 'sea water pressure, qc primary flag'
-        pres_flagPrim.standard_name = "sea_water_pressure status_flag"
-        pres_flagPrim.flag_values = flagPrim_flag_values
-        pres_flagPrim.flag_meanings = flagPrim_flag_meanings
-        pres_flagSec = ncfile.createVariable(
-            'pressure_flagSecondary', 'B', ('time'), zlib=True)
-        pres_flagSec.long_name = 'sea water pressure, qc secondary flag'
-        pres_flagSec.flag_values = flagSec_flag_values
-        pres_flagSec.flag_meanings = flagSec_flag_meanings
-        a1 = ncfile.createVariable('aux1', 'f4', ('time'), zlib=True)
-        a1.long_name = 'Auxiliary 1'  # Use Standard name for 1,3,4???
-        a1.units = 'V'
-        a1.coordinates = 'time lat lon depth'
-        a3 = ncfile.createVariable('aux3', 'f4', ('time'), zlib=True)
-        a3.long_name = 'Auxiliary 3'
-        a3.units = 'V'
-        a3.coordinates = 'time lat lon depth'
-        chl = ncfile.createVariable('chlorophyll', 'f4', ('time'), zlib=True)
-        chl.standard_name = 'mass_concentration_of_chlorophyll_a_in_sea_water'
-        chl.long_name = 'sea water chlorophyll'
-        chl.units = 'ug/L'  # which CF name??
-        chl.coordinates = 'time lat lon depth'
-        chl.instrument = "instrument2"
-        chl_flagPrim = ncfile.createVariable(
-            'chlorophyll_flagPrimary', 'B', ('time'), zlib=True)
-        chl_flagPrim.long_name = 'sea water chlorophyll, qc primary flag'
-        chl_flagPrim.standard_name = "mass_concentration_of_chlorophyll_a_in_sea_water status_flag"
-        chl_flagPrim.flag_values = flagPrim_flag_values
-        chl_flagPrim.flag_meanings = flagPrim_flag_meanings
-        chl_flagSec = ncfile.createVariable(
-            'chlorophyll_flagSecondary', 'B', ('time'), zlib=True)
-        chl_flagSec.long_name = 'sea water chlorophyll, qc secondary flag'
-        chl_flagSec.flag_values = flagSec_flag_values
-        chl_flagSec.flag_meanings = flagSec_flag_meanings
-        a4 = ncfile.createVariable('aux4', 'f4', ('time'), zlib=True)
-        a4.long_name = 'Auxiliary 4'
-        a4.units = 'V'
-        a4.coordinates = 'time lat lon depth'
-        sal = ncfile.createVariable('salinity', 'f4', ('time'), zlib=True)
-        sal.standard_name = 'sea_water_salinity'
-        sal.long_name = 'sea water salinity'
-        sal.units = '1e-3' #not psu??
-        sal.coordinates = 'time lat lon depth'
-        sal.instrument = "instrument1"
-        sal_flagPrim = ncfile.createVariable(
-            'salinity_flagPrimary', 'B', ('time'), zlib=True)
-        sal_flagPrim.long_name = 'sea water salinity, qc primary flag'
-        sal_flagPrim.standard_name = "sea_water_practical_salinity status_flag"
-        sal_flagPrim.flag_values = flagPrim_flag_values
-        sal_flagPrim.flag_meanings = flagPrim_flag_meanings
-        sal_flagSec = ncfile.createVariable(
-            'salinity_flagSecondary', 'B', ('time'), zlib=True)
-        sal_flagSec.long_name = 'sea water salinity, qc secondary flag'
-        sal_flagSec.flag_values = flagSec_flag_values
-        sal_flagSec.flag_meanings = flagSec_flag_meanings
-        sig = ncfile.createVariable('sigmat', 'f4', ('time'), zlib=True)
-        sig.standard_name = 'sea_water_density'
-        sig.long_name = 'sea water density'
-        sig.units = 'kg/m^3'
-        sig.coordinates = 'time lat lon depth'
-        dV = ncfile.createVariable('diagnosticVoltage', 'f4', ('time'), zlib=True)
-        dV.long_name = 'diagnostic voltage'  # NO standard name???
-        dV.units = 'V'
-        dV.coordinates = 'time lat lon depth'
-        cDr = ncfile.createVariable('currentDraw', 'f4', ('time'), zlib=True)
-        cDr.long_name = 'current draw'  # NO standard name???
-        cDr.units = 'mA'
-        cDr.coordinates = 'time lat lon depth'
 
         #What is this for???
         nm = ncfile.createVariable('station', 'S1', 'name_strlen')
-        nm.long_name = 'station_name'
-        nm.cf_role = 'timeseries_id'
-#        ncfile.variables['station'][:len(ips[ip]['loc'])] = list(ips[ip]['loc'])
+        nm.setncatts({
+            'long_name' : 'station_name',
+            'cf_role' : 'timeseries_id'})
+
         ncfile.variables['station'][:len(self.staMeta[sta]['loc'])] = list(self.staMeta[sta]['loc'])
 
         crs = ncfile.createVariable('crs', 'd')
-        crs.grid_mapping_name = "latitude_longitude"
-        crs.longitude_of_prime_meridian = 0.0
-        crs.epsg_code = "EPSG:4326"
-        crs.semi_major_axis = 6378137.0
-        crs.inverse_flattening = 298.257223563
+        crs.setncatts({
+            'grid_mapping_name' : "latitude_longitude",
+            'longitude_of_prime_meridian' : 0.0,
+            'epsg_code' : "EPSG:4326",
+            'semi_major_axis' : 6378137.0,
+            'inverse_flattening' : 298.257223563})
 
         instrument1 = ncfile.createVariable('instrument1', 'c')
-        instrument1.make = "Seabird"
-        instrument1.model = "SBE 16plus SEACAT"
-        instrument1.comment = "Seabird SBE 16plus SEACAT Conductivity, Temperature," + \
-        " and Pressure recorder. Derived output Salinity."
-        instrument1.ioos_code = "urn:ioos:sensor:sccoos:"+self.staMeta[sta]['loc']+":conductivity_temperature_pressure"
+        instrument1.setncatts({
+            'make' : "Seabird",
+            'model' : "SBE 16plus SEACAT",
+            'comment' : "Seabird SBE 16plus SEACAT Conductivity, Temperature," + \
+            " and Pressure recorder. Derived output Salinity.",
+            'ioos_code' : "urn:ioos:sensor:sccoos:"+self.staMeta[sta]['loc']+":conductivity_temperature_pressure"})
 
         instrument2 = ncfile.createVariable('instrument2', 'c')
-        instrument2.make = "Seapoint"
-        instrument2.model = "Chlorophyll Fluorometer"
-        instrument2.comment = "Seapoint Chlorophyll Fluorometer with a 0-50 ug/L gain setting."
-        instrument2.ioos_code = "urn:ioos:sensor:sccoos:"+self.staMeta[sta]['loc']+":chlorophyll"
+        instrument2.setncatts({
+            'make' : "Seapoint",
+            'model' : "Chlorophyll Fluorometer",
+            'comment' : "Seapoint Chlorophyll Fluorometer with a 0-50 ug/L gain setting.",
+            'ioos_code' : "urn:ioos:sensor:sccoos:"+self.staMeta[sta]['loc']+":chlorophyll"})
 
         platform1 = ncfile.createVariable('platform1', 'c')
-        platform1.long_name = self.staMeta[sta]['loc_name']
-        platform1.ioos_code = "urn:ioos:sensor:sccoos:"+self.staMeta[sta]['loc']
+        platform1.setncatts({
+            'long_name' : self.staMeta[sta]['loc_name'],
+            'ioos_code' : "urn:ioos:sensor:sccoos:"+self.staMeta[sta]['loc']})
 
         self.addNCshell_SCCOOS(ncfile)
         ncfile.variables['lat'][0] = self.staMeta[sta]['lat']
