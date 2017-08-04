@@ -86,7 +86,7 @@ class SASS(sccoos.SCCOOS):
 
         #test locations
         self.codedir = '/home/scheim/NCobj/'
-        self.ncpath = '/home/scheim/NCobj/SASS'
+        self.ncpath = '/home/scheim/NCobj/SASS_new'
 
     #     self.codedir = '/data/InSitu/SASS/code/NCobj'
     #    self.ncpath = '/data/InSitu/SASS/netcdfs/'
@@ -219,7 +219,7 @@ class SASS(sccoos.SCCOOS):
                 'units' : 'ug/L',
                 'instrument' : "instrument2"
             })
-        self.attr_chl2= MainAttr('chlorophyll_calc',
+        self.attr_chl2= MainAttr('chlorophyll',
             dtype= 'f4',
             atts={
                 'standard_name' : 'mass_concentration_of_chlorophyll_a_in_sea_water',
@@ -229,11 +229,11 @@ class SASS(sccoos.SCCOOS):
             },
             sensor_span=(0.02,50), user_span=(0.02,50),
             low_reps=2, high_reps=5, eps=0.001, low_thresh=0.8, high_thresh=1.0)
-        self.attr_chlF1 = FlagAttr('chlorophyll_calc_flagPrimary',
+        self.attr_chlF1 = FlagAttr('chlorophyll_flagPrimary',
             atts={
                 'long_name' : 'sea water chlorophyll, qc primary flag',
                 'standard_name' : "mass_concentration_of_chlorophyll_a_in_sea_water status_flag"})
-        self.attr_chlF2 = FlagAttr('chlorophyll_calc_flagSecondary',
+        self.attr_chlF2 = FlagAttr('chlorophyll_flagSecondary',
             atts={
                 'long_name' : 'sea water chlorophyll, qc secondary flag',
                 'standard_name' : "mass_concentration_of_chlorophyll_a_in_sea_water status_flag"})
@@ -580,9 +580,11 @@ class SASS(sccoos.SCCOOS):
                         for calcDtStr in dates:
                             calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
                             df['calcDate'] = [calcDtStr if i > calcDt else df['calcDate'][i] for i in df.index]
-                        df[col+'_calc'] = df.apply(self.doCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
-                        # df[col+'_calcStr'] = df.apply(self.printCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
                         df.rename(columns={col: col+'_raw'}, inplace=True)
+                        df[col] = df.apply(self.doCalc, axis=1, col=col+'_raw', calcsDict=extDict['calcs'][col])
+                        # df[col+'_calc'] = df.apply(self.doCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
+                        # df[col+'_calcStr'] = df.apply(self.printCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
+
                         df.drop('calcDate', axis=1, inplace=True)
 
             self.attrArr = [] # dataToNC uses an attrArr which use to contain str names, not objects
