@@ -610,19 +610,20 @@ class SASS(sccoos.SCCOOS):
                 self.dataToNC(filepath, grpYr, '')
                 self.fileSizeChecker(filepath) #<-- move to dataToNC?
 
-    def text2nc_all(self):
+    def text2nc_all(self, qryMn):
         mnArr = os.listdir(self.logsdir)
         mnArr.sort()
         for mn in mnArr:
-            mnpath = os.path.join(self.logsdir, mn)
-            if os.path.isdir(mnpath):
-                filesArr = os.listdir(mnpath)
-                filesArr.sort()
-                for fn in filesArr:
-                    startfld = time.time() # time each folder
-                    filename = os.path.join(mnpath, fn)
-                    #print "\n" + fn,
-                    self.text2nc(filename)
+            if qryMn in mn:
+                mnpath = os.path.join(self.logsdir, mn)
+                if os.path.isdir(mnpath):
+                    filesArr = os.listdir(mnpath)
+                    filesArr.sort()
+                    for fn in filesArr:
+                        startfld = time.time() # time each folder
+                        filename = os.path.join(mnpath, fn)
+                        #print "\n" + fn,
+                        self.text2nc(filename)
 
     def text2nc_append(self):
         """SASS log files are organized by server date (when recorded)
