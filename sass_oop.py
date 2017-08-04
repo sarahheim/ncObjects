@@ -611,6 +611,9 @@ class SASS(sccoos.SCCOOS):
                 self.fileSizeChecker(filepath) #<-- move to dataToNC?
 
     def text2nc_all(self, qryMn):
+        """ For now pass '201' to do all years (2013-2017)
+        .. todo: make qryMn default to all without parameter pass.
+        :param str qryMn: if in folder name, do text2nc. i.e. '2017'"""
         mnArr = os.listdir(self.logsdir)
         mnArr.sort()
         for mn in mnArr:
