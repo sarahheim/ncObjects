@@ -45,10 +45,12 @@ start = time.time()
 
 #NEW Aug 2017
 import sass_oop
-sass_oop.SASS_Basic(sass_oop.ucsb).text2nc_all()
-sass_oop.SASS_Basic(sass_oop.uci).text2nc_all()
-sass_oop.SASS_Basic(sass_oop.ucla).text2nc_all()
+#sass_oop.SASS_Basic(sass_oop.ucsb).text2nc_all()
+#sass_oop.SASS_Basic(sass_oop.ucla).text2nc_all()
 #sass_oop.SASS_Basic(sass_oop.ucsd).text2nc_all()
+##edit sass_newport_pier_archive.json: 2016-10-12
+#sass_oop.SASS_Basic(sass_oop.uci).text2nc_all() #crashes after 2016-10-11
 
+sass_oop.SASS_NPd2(sass_oop.uci).text2nc_all()
 
 print "Done!", time.asctime(),"Runtime:", time.time()-start
