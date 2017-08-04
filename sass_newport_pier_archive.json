@@ -1,0 +1,83 @@
+{
+  "calcs": {
+    "chlorophyll": {
+      "2004-01-28T00:00:00Z": {
+        "function": "calc_factorOffset1", 
+        "input": [
+          10.0, 
+          0.0
+        ]
+      }, 
+      "2013-10-08T20:18:00Z": {
+        "function": "calc_factorOffset1", 
+        "input": [
+          16.1, 
+          0.049
+        ]
+      }, 
+      "2014-02-12T19:21:00Z": {
+        "function": "calc_factorOffset1", 
+        "input": [
+          15.5, 
+          0.084
+        ]
+      }, 
+      "2016-04-21T19:28:00Z": {
+        "function": "calc_factorOffset1", 
+        "input": [
+          15.2, 
+          0.072
+        ]
+      }, 
+      "2016-10-10T00:00:00Z": {
+        "function": "calc_factorOffset1", 
+        "input": [
+          13.6, 
+          0.049
+        ]
+      }, 
+      "2017-02-15T21:15:00Z": {
+        "function": "calc_factorOffset1", 
+        "input": [
+          17.4, 
+          0.058
+        ]
+      }
+    }
+  }, 
+  "cols": {
+    "2013-01-01-00:00:00Z": [
+      "server_date", 
+      "ip", 
+      "temperature", 
+      "conductivity", 
+      "pressure", 
+      "aux1", 
+      "aux3", 
+      "chlorophyll", 
+      "aux4", 
+      "salinity", 
+      "date", 
+      "time", 
+      "sigmat", 
+      "diagnosticVoltage", 
+      "currentDraw"
+    ], 
+    "2016-10-11-00:00:00Z": [
+      "server_date", 
+      "ip", 
+      "temperature", 
+      "conductivity", 
+      "pressure", 
+      "chlorophyll", 
+      "O2thermistor", 
+      "convertedOxygen", 
+      "salinity", 
+      "date", 
+      "time", 
+      "sigmat", 
+      "diagnosticVoltage", 
+      "currentDraw"
+    ]
+  }
+}
