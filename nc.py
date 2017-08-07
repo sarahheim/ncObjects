@@ -267,15 +267,15 @@ class NC(object):
 
         ## Add the following: remove any entries from the subset that already exist!!!!!!!
         # exist = subset.epoch.isin(ncDep.variables['time'][:]) #
-        epochs = subset.index.values.astype('int64') // 10**9
+        subset['epochs'] = subset.index.values.astype('int64') // 10**9
         # exist  = subset.index.isin(epochs) #wrong previously
         # environment numpy (1.11) didn't have 'isin' module
-        exist = np.in1d(epochs, ncfile.variables['time'][:])
+        exist = np.in1d(subset['epochs'], ncfile.variables['time'][:])
         appDF = subset[-exist]
 
         if len(appDF) > 0: # else all times are already in nc
             # length should be the same for time & all attributes
-            ncfile.variables['time'][timeLen:] = epochs
+            ncfile.variables['time'][timeLen:] = appDF['epochs'].values
             # ncfile.variables['time'][timeLen:] = subset.index.values.astype(np.int64) // 10**9
             for attr in self.attrArr:
                 #atLen = len(ncfile.variables[attr][:])

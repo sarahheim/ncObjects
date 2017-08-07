@@ -608,6 +608,7 @@ class SASS(sccoos.SCCOOS):
                 ncfilename = self.prefix+ str(yr) + '.nc'
                 filepath = os.path.join(self.ncpath, ncfilename)
                 self.dataToNC(filepath, grpYr, '')
+                print 'appending to:', filepath
                 self.fileSizeChecker(filepath) #<-- move to dataToNC?
 
     def text2nc_all(self, qryMn):
