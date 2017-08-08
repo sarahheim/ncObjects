@@ -11,3 +11,9 @@ Used to create all new netCDFs: allLogs.py
 Using to append to existing netCDFs: appendLatest_SASS.py
 
 .. image:: http://www.sccoos.org/static/img/SCCOOS-banner100.jpg
+
+USAGE
+=====
+
+#NEW SCCOOS SASS (including Newport)
+*/2 * * * * /home/uproc/anaconda/envs/log2ncEnv/bin/python /data/InSitu/SASS/code/ncobjects/appendLatest_SASS.py > ~/appendLatest_sass.out
