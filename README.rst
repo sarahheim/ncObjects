@@ -7,8 +7,8 @@ Source code can be found at https://github.com/sarahheim/ncObjects
 
 and https://bitbucket.org/sarahheim/ncobjects
 
-Used to create all new netCDFs: allLogs.py
-Using to append to existing netCDFs: appendLatest_SASS.py
+Create all new netCDFs: allLogs.py
+Append to existing netCDFs: appendLatest_SASS.py
 
 .. image:: http://www.sccoos.org/static/img/SCCOOS-banner100.jpg
 
