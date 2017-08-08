@@ -16,4 +16,4 @@ USAGE
 =====
 
 #NEW SCCOOS SASS (including Newport)
-*/2 * * * * /home/uproc/anaconda/envs/log2ncEnv/bin/python /data/InSitu/SASS/code/ncobjects/appendLatest_SASS.py > ~/appendLatest_sass.out
+*/4 * * * * /home/uproc/anaconda/envs/log2ncEnv/bin/python /data/InSitu/SASS/code/ncobjects/appendLatest_SASS.py > ~/appendLatest_sass.out
