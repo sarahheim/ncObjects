@@ -1,2 +1,0 @@
-2013-01-01-00:00:00Z, server_date, ip, temperature, conductivity, pressure, aux1, aux3, chlorophyll, aux4, salinity, date, time, sigmat, diagnosticVoltage, currentDraw
-2016-10-11-00:00:00Z, server_date, ip, temperature, conductivity, pressure, chlorophyll, O2thermistor, convertedOxygen, salinity, date, time, sigmat, diagnosticVoltage, currentDraw
