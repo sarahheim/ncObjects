@@ -67,6 +67,16 @@ ucsd = Station(code_name = 'scripps_pier',
                 url= 'http://sccoos.org/',
                 inst= 'Southern California Coastal Ocean Observing System (SCCOOS) at Scripps Institution of Oceanography (SIO)')
 
+uci2 = Station(code_name = 'newport_pier-ph',
+                long_name = 'Newport Pier pH',
+                ips= ['132.239.92.8'],
+                lat= 33.6061,
+                lon= -117.9311,
+                depth= '2',
+                abbr='UCI',
+                url= 'http://uci.edu/',
+                inst= 'University of California, Irvine')
+
 class SASS(sccoos.SCCOOS):
     """Class for SCCOOS's Automated Shore Stations. Currently, log files and netCDFs"""
     #set SASS metadata
@@ -85,11 +95,11 @@ class SASS(sccoos.SCCOOS):
         #print "init sass"
 
         # #test locations
-        # self.codedir = '/home/scheim/NCobj/'
-        # self.ncpath = '/home/scheim/NCobj/SASS_new'
+        self.codedir = '/home/scheim/NCobj/'
+        self.ncpath = '/home/scheim/NCobj/SASS_new'
 
-        self.codedir = '/data/InSitu/SASS/code/ncobjects'
-        self.ncpath = '/data/InSitu/SASS/netcdfs_new/'
+        # self.codedir = '/data/InSitu/SASS/code/ncobjects'
+        # self.ncpath = '/data/InSitu/SASS/netcdfs_new/'
 
         # self.dateformat = '%Y-%m-%dT%H:%M:%S.%fZ'
         self.crontab = True
@@ -609,7 +619,7 @@ class SASS(sccoos.SCCOOS):
                 filepath = os.path.join(self.ncpath, ncfilename)
                 self.dataToNC(filepath, grpYr, '')
                 print 'appending to:', filepath
-                self.fileSizeChecker(filepath) #<-- move to dataToNC?
+                self.fileSizeChecker(filepath)
 
     def text2nc_all(self, qryMn):
         """ For now pass '201' to do all years (2013-2017)
@@ -704,7 +714,7 @@ class Regex(object):
     re_time = r'('+re_timex+')'
     re_s = r'(?:,?#?\s+|,)' # delimiter: space with optional comma, optional pound; or comma alone
     re_serverdate = r'('+re_Y+r'-[0-1]\d-'+re_d+'T'+re_timex+'Z)' # server date
-    re_ip = r'(\d{2,3}\.\d{2,3}\.\d{2,3}\.\d{2,3})' # ip address ending in ',# '
+    re_ip = r'(\d{2,3}\.\d{2,3}\.\d{2,3}\.\d{1,3})' # ip address ending in ',# '
     re_attr = r'(-?\d+\.?\d*)' # attribute number with: optional decimal, optional negative
     re_date = '('+re_d+re_s+re_b+re_s+re_Y+')' # date with Mon spelled/abbreviated
 
@@ -795,3 +805,192 @@ class SASS_NPd2(SASS):
 
         r = Regex()
         self.regex = r'^'+r.re_serverdate+r.re_s+r.re_ip+r.re_s+r.concatRegex(7)+r.re_s+r.re_date+r.re_s+r.re_time+r.re_s+r.concatRegex(3)+r'$'
+
+
+class SASS_NPph(SASS):
+    def __init__(self, sta):
+        super(SASS_NPph, self).__init__(sta)
+        """Setting up SASS Newport Pier new sensor
+
+        .. todo::
+            - QCs parameters for: O2thermistor and convertedOxygen (then add flags back for these)
+        """
+        print "init SASS_NPd2"
+        self.logsdir = r'/data/InSitu/SASS/raw_data/newport_pier_ph/'
+        self.ncPostName = '-ph'
+        self.prefix = self.sta.code_name +"-"
+
+        self.metaDict.update({
+            'instrument':'Data was collected with _____ instruments.',
+            # 'summary':'Automated shore station with a suite of sensors that are' +\
+            # ' attached to piers along the nearshore California coast.' + \
+            # ' These automated sensors measure temperature, salinity, chlorophyll, ph' + \
+            # ' and water level at frequent intervals in the nearshore coastal ocean.' +\
+            # ' This data can provide local and regional information on mixing and upwelling,' +\
+            # ' land run-off, and algal blooms.'
+            })
+
+        self.metaDict['keywords'] += self.metaDict['keywords']+', ' #Add ph keywords
+
+        self.attr_serial = MainAttr('serial',
+            dtype= 'u1',
+            atts={
+                # 'standard_name' : '',
+                'long_name' : 'serial number',
+                # 'units' : '',
+                # 'instrument' : ""
+            })
+        self.attr_phCount = MainAttr('ph_counts',
+            dtype= 'f4',
+            atts={
+                # 'standard_name' : '',
+                'long_name' : 'ph counts',
+                # 'units' : '',
+                # 'instrument' : ""
+            })
+        self.attr_phVolt = MainAttr('ph_voltage',
+            dtype= 'f4',
+            atts={
+                # 'standard_name' : '',
+                'long_name' : 'ph voltage',
+                # 'units' : '',
+                # 'instrument' : ""
+            })
+        self.attr_phCalc = MainAttr('ph_calc',
+            dtype= 'f4',
+            atts={
+                # 'standard_name' : '',
+                'long_name' : 'ph with calculation applied',
+                # 'units' : '',
+                # 'instrument' : ""
+            })
+        self.attr_tempCount = MainAttr('temp_counts',
+            dtype= 'f4',
+            atts={
+                # 'standard_name' : '',
+                'long_name' : 'temp counts',
+                # 'units' : '',
+                # 'instrument' : ""
+            })
+        self.attr_thermVolt = MainAttr('thermistor_voltage',
+            dtype= 'f4',
+            atts={
+                # 'standard_name' : '',
+                'long_name' : 'thermistor voltage',
+                # 'units' : '',
+                # 'instrument' : ""
+            })
+        self.attr_thermCalc = MainAttr('thermistor_calc',
+            dtype= 'f4',
+            atts={
+                # 'standard_name' : '',
+                'long_name' : 'thermistor with calculation applied',
+                # 'units' : '',
+                # 'instrument' : ""
+            })
+        self.attr_ph = MainAttr('ph',
+            dtype= 'f4',
+            atts={
+                # 'standard_name' : '',
+                'long_name' : 'pH',
+                # 'units' : '',
+                # 'instrument' : ""
+            })
+
+       # NOT INCLUDING 'time'
+        self.attrObjArr = [
+                self.attr_serial,
+                self.attr_phCount, self.attr_phVolt, self.attr_phCalc,
+                self.attr_tempCount, self.attr_thermVolt, self.attr_thermCalc,
+                # self.attr_ph
+                ]
+
+        self.otherArr = [ self.ch_p1 ] #add instrument
+
+        r = Regex()
+        self.regex = r'^'+r.re_serverdate+r.re_s+r.re_ip+r.re_s+r.concatRegex(7)+r'$'
+
+    def text2nc(self, filename):
+        """#previously dataframe2nc
+        - Uses Panda's ``read_csv``
+        - Does a series of regular expressions (a.k.a. regex)
+        - Uses QC methods from **sassqc**
+
+        .. todo:
+            - columns if multiple, could be better. If change of column names
+                happens in a dataset, it only applies one set of column names
+            - qc_test for Spike Test should be done on NC after appending?
+            - qc_test for gap in Time
+            - rewrite sccoos.qc_tests to just take df and object
+            - rewrite nc.dataToNC for createNCshell?, not passing 'lookup'
+
+        :param str filename: filename, including directory location
+        :param str regex: regular expression used in pandas's read_csv/extract
+        :param array? columns: columns should contain: 'date', 'time', 'ip'; 'server_date'?
+        """
+
+        jsonFn = os.path.join(self.codedir, 'sass_'+self.sta.code_name+'_archive.json')
+        print os.path.isfile(jsonFn), jsonFn
+        with open(jsonFn) as json_file:
+            extDict = json.load(json_file)
+
+        print os.path.isfile(filename), filename
+        df = pd.read_csv(filename, sep='^', header=None, prefix='X',error_bad_lines=False)
+        # Split data into proper columns
+        df = df.X0.str.extract(self.regex)
+        # Drop any rows with NaN
+        df = df.dropna()
+
+        df.columns = self.get_cols(extDict["cols"], df.iloc[0,0])
+        # Set date_time to pandas datetime format
+        # to_datetime (utc=None) --default-- and True results are the same
+        df['date_time'] = pd.to_datetime(df.server_date, format='%Y-%m-%dT%H:%M:%SZ')
+        # Make date_time an index
+        df.set_index('date_time', inplace=True)
+        # df.index = df.index.tz_localize('UTC') #not needed?
+
+        #only look at IPs for station (strip out other ips)
+        df = df[df['ip'].isin(self.sta.ips)]
+
+        if len(df) > 0:
+            #set dataframe types, do calculations
+            for col in df.columns:
+                if col not in ['server_date', 'ip']:
+                    #ALL might not be float in the future?
+                    df.loc[:,col] = df.loc[:,col].astype(float)
+                    # #Check if column name has calculations
+                    # if col in extDict['calcs']:
+                    #     df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
+                    #     dates = extDict['calcs'][col].keys()
+                    #     dates.sort()
+                    #     #loop through dates and set appropriate date
+                    #     for calcDtStr in dates:
+                    #         calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
+                    #         df['calcDate'] = [calcDtStr if i > calcDt else df['calcDate'][i] for i in df.index]
+                    #     df.rename(columns={col: col+'_raw'}, inplace=True)
+                    #     df[col] = df.apply(self.doCalc, axis=1, col=col+'_raw', calcsDict=extDict['calcs'][col])
+                    #     df.drop('calcDate', axis=1, inplace=True)
+
+            self.attrArr = [] # dataToNC uses an attrArr which use to contain str names, not objects
+            for a in self.attrObjArr:
+                # print 'HASATTR', hasattr(a, 'miss_val')
+                # if the attribute has ANY of the qc attributes, run it through qc_tests
+                for qcv in MainAttr.qc_vars:
+                    if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
+                        df = self.qc_tests(df, a.name, miss_val=a.miss_val,
+                            sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
+                            high_reps=a.high_reps, eps=a.eps,
+                            low_thresh=a.low_thresh, high_thresh=a.high_thresh)
+                        break
+                self.attrArr.append(a.name)
+
+            #groupby year. Since newyear text file can contain data from last year.
+            groupedYr = df.groupby(df.index.year)
+            for yr in groupedYr.indices:
+                # Check file size, nccopy to bring size down, replace original file
+                grpYr = groupedYr.get_group(yr)
+                ncfilename = self.prefix+ str(yr) + '.nc'
+                filepath = os.path.join(self.ncpath, ncfilename)
+                self.dataToNC(filepath, grpYr, '')
+                print 'appending to:', filepath
+                self.fileSizeChecker(filepath)
