@@ -4,7 +4,7 @@
 # Description: adjusting to class/objects, inheriting NC/SASS classes
 #   This class is created for Automated Shore Stations
 #
-import os, time, datetime, json
+import os, time, datetime, json, math
 
 import pandas as pd
 import numpy as np
@@ -69,7 +69,7 @@ ucsd = Station(code_name = 'scripps_pier',
 
 uci2 = Station(code_name = 'newport_pier-ph',
                 long_name = 'Newport Pier pH',
-                ips= ['132.239.92.8'],
+                ips= ['132.239.92.8', '166.140.102.113'],
                 lat= 33.6061,
                 lon= -117.9311,
                 depth= '2',
@@ -807,15 +807,15 @@ class SASS_NPd2(SASS):
         self.regex = r'^'+r.re_serverdate+r.re_s+r.re_ip+r.re_s+r.concatRegex(7)+r.re_s+r.re_date+r.re_s+r.re_time+r.re_s+r.concatRegex(3)+r'$'
 
 
-class SASS_NPph(SASS):
+class SASS_pH(SASS):
     def __init__(self, sta):
-        super(SASS_NPph, self).__init__(sta)
+        super(SASS_pH, self).__init__(sta)
         """Setting up SASS Newport Pier new sensor
 
         .. todo::
             - QCs parameters for: O2thermistor and convertedOxygen (then add flags back for these)
         """
-        print "init SASS_NPd2"
+        print "init SASS_ph"
         self.logsdir = r'/data/InSitu/SASS/raw_data/newport_pier_ph/'
         self.ncPostName = '-ph'
         self.prefix = self.sta.code_name +"-"
@@ -902,13 +902,52 @@ class SASS_NPph(SASS):
                 self.attr_serial,
                 self.attr_phCount, self.attr_phVolt, self.attr_phCalc,
                 self.attr_tempCount, self.attr_thermVolt, self.attr_thermCalc,
-                # self.attr_ph
+                self.attr_ph
                 ]
 
         self.otherArr = [ self.ch_p1 ] #add instrument
 
         r = Regex()
         self.regex = r'^'+r.re_serverdate+r.re_s+r.re_ip+r.re_s+r.concatRegex(7)+r'$'
+
+    def calc_ph(self, row, inputs):
+        """
+        :param object row: pandas dataframe row with column name as attributes
+        :param dictionary inputs: dictionary containing the following
+        :param float inputs['pH_slope']:
+        :param float inputs['pH_intercept']:
+        :param float inputs['pH_intercept']:
+        :param float inputs['temp_slope']:
+        :param float inputs['temp_intercept']:
+        :param float inputs['E0']:
+        :param float inputs['Ts']:
+        :param float inputs['R']:
+        :param float inputs['F']:
+        """
+
+        try:
+            TempK = row.temp_counts*inputs['temp_slope']+inputs['temp_intercept']+273.15
+            E0t= inputs['E0'] - 0.001 * (TempK - inputs['Ts'])
+            ST = inputs['R'] * TempK * math.log(10) / inputs['F']
+            Vo = row.ph_counts * inputs['pH_slope'] + inputs['pH_intercept']
+            pH = (Vo - E0t) / ST
+
+            return pH
+
+        except:
+            return None
+
+    def doCalc(self, row, **kwargs):
+        """
+        :param object row: row, with columns as attributes
+        :param dictionary calcsDict:
+        :returns: output from calculation function
+        """
+        calcsDict = kwargs['calcsDict']
+        # col = kwargs['col']
+        func = calcsDict[row.calcDate]['function']
+        inputs = calcsDict[row.calcDate]['inputs']
+        return eval('self.'+func)(row, inputs=inputs)
 
     def text2nc(self, filename):
         """#previously dataframe2nc
@@ -958,18 +997,20 @@ class SASS_NPph(SASS):
                 if col not in ['server_date', 'ip']:
                     #ALL might not be float in the future?
                     df.loc[:,col] = df.loc[:,col].astype(float)
-                    # #Check if column name has calculations
-                    # if col in extDict['calcs']:
-                    #     df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
-                    #     dates = extDict['calcs'][col].keys()
-                    #     dates.sort()
-                    #     #loop through dates and set appropriate date
-                    #     for calcDtStr in dates:
-                    #         calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
-                    #         df['calcDate'] = [calcDtStr if i > calcDt else df['calcDate'][i] for i in df.index]
-                    #     df.rename(columns={col: col+'_raw'}, inplace=True)
-                    #     df[col] = df.apply(self.doCalc, axis=1, col=col+'_raw', calcsDict=extDict['calcs'][col])
-                    #     df.drop('calcDate', axis=1, inplace=True)
+                    #Check if column name has calculations
+            if 'ph' in extDict['calcs']:
+                df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
+                print extDict['calcs']['ph']
+                dates = extDict['calcs']['ph'].keys()
+                dates.sort()
+                #loop through dates and set appropriate date
+                for calcDtStr in dates:
+                    calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
+                    df['calcDate'] = [calcDtStr if i > calcDt else df['calcDate'][i] for i in df.index]
+                # df.rename(columns={col: col+'_raw'}, inplace=True)
+                df['ph'] = df.apply(self.doCalc, axis=1, calcsDict=extDict['calcs']['ph'])
+                df.drop('calcDate', axis=1, inplace=True)
+            print 'df count:', len(df)
 
             self.attrArr = [] # dataToNC uses an attrArr which use to contain str names, not objects
             for a in self.attrObjArr:
