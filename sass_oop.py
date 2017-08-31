@@ -67,7 +67,7 @@ ucsd = Station(code_name = 'scripps_pier',
                 url= 'http://sccoos.org/',
                 inst= 'Southern California Coastal Ocean Observing System (SCCOOS) at Scripps Institution of Oceanography (SIO)')
 
-uci2 = Station(code_name = 'newport_pier-ph',
+uci2 = Station(code_name = '005_newport_pier',
                 long_name = 'Newport Pier pH',
                 ips= ['132.239.92.8', '166.140.102.113'],
                 lat= 33.6061,
@@ -666,7 +666,7 @@ class SASS(sccoos.SCCOOS):
             loopCount += 1
             # Check if while loop has exceeded looplimit
             if loopCount > looplimit:
-                return time.time()-start
+                return loopCount
 
 
 class Attr(object):
@@ -817,8 +817,8 @@ class SASS_pH(SASS):
         """
         print "init SASS_ph"
         self.logsdir = r'/data/InSitu/SASS/raw_data/newport_pier_ph/'
-        self.ncPostName = '-ph'
-        self.prefix = self.sta.code_name +"-"
+        self.ncPostName = '-'
+        self.prefix = self.sta.code_name +self.ncPostName
 
         self.metaDict.update({
             'instrument':'Data was collected with _____ instruments.',
@@ -832,21 +832,13 @@ class SASS_pH(SASS):
 
         self.metaDict['keywords'] += self.metaDict['keywords']+', ' #Add ph keywords
 
-        self.attr_serial = MainAttr('serial',
-            dtype= 'u1',
-            atts={
-                # 'standard_name' : '',
-                'long_name' : 'serial number',
-                # 'units' : '',
-                # 'instrument' : ""
-            })
         self.attr_phCount = MainAttr('ph_counts',
             dtype= 'f4',
             atts={
                 # 'standard_name' : '',
                 'long_name' : 'ph counts',
                 # 'units' : '',
-                # 'instrument' : ""
+                'instrument' : "instrument1"
             })
         self.attr_phVolt = MainAttr('ph_voltage',
             dtype= 'f4',
@@ -854,15 +846,15 @@ class SASS_pH(SASS):
                 # 'standard_name' : '',
                 'long_name' : 'ph voltage',
                 # 'units' : '',
-                # 'instrument' : ""
+                'instrument' : "instrument1"
             })
-        self.attr_phCalc = MainAttr('ph_calc',
+        self.attr_phRaw = MainAttr('ph_raw',
             dtype= 'f4',
             atts={
                 # 'standard_name' : '',
-                'long_name' : 'ph with calculation applied',
+                'long_name' : 'ph raw',
                 # 'units' : '',
-                # 'instrument' : ""
+                'instrument' : "instrument1"
             })
         self.attr_tempCount = MainAttr('temp_counts',
             dtype= 'f4',
@@ -870,7 +862,15 @@ class SASS_pH(SASS):
                 # 'standard_name' : '',
                 'long_name' : 'temp counts',
                 # 'units' : '',
-                # 'instrument' : ""
+                'instrument' : "instrument1"
+            })
+        self.attr_temp = MainAttr('temperature',
+            dtype= 'f4',
+            atts={
+                'standard_name' : 'sea_water_temperature',
+                'long_name' : 'sea water temperature',
+                'units' : 'celsius',
+                'instrument' : "instrument1"
             })
         self.attr_thermVolt = MainAttr('thermistor_voltage',
             dtype= 'f4',
@@ -878,15 +878,15 @@ class SASS_pH(SASS):
                 # 'standard_name' : '',
                 'long_name' : 'thermistor voltage',
                 # 'units' : '',
-                # 'instrument' : ""
+                'instrument' : "instrument1"
             })
-        self.attr_thermCalc = MainAttr('thermistor_calc',
+        self.attr_thermRaw = MainAttr('thermistor_raw',
             dtype= 'f4',
             atts={
                 # 'standard_name' : '',
-                'long_name' : 'thermistor with calculation applied',
+                'long_name' : 'thermistor raw',
                 # 'units' : '',
-                # 'instrument' : ""
+                'instrument' : "instrument1"
             })
         self.attr_ph = MainAttr('ph',
             dtype= 'f4',
@@ -894,21 +894,42 @@ class SASS_pH(SASS):
                 # 'standard_name' : '',
                 'long_name' : 'pH',
                 # 'units' : '',
-                # 'instrument' : ""
+                'instrument' : "instrument1"
+            })
+
+        self.ch_i1 = CharVariable('instrument1', sta,
+            atts={
+                'make' : "",
+                'model' : "",
+                'comment' : "Instrument for measuring pH",
+                'ioos_code' : "urn:ioos:sensor:sccoos:"+self.sta.code_name+":ph"
             })
 
        # NOT INCLUDING 'time'
         self.attrObjArr = [
-                self.attr_serial,
-                self.attr_phCount, self.attr_phVolt, self.attr_phCalc,
-                self.attr_tempCount, self.attr_thermVolt, self.attr_thermCalc,
-                self.attr_ph
+                self.attr_phCount, self.attr_phVolt, self.attr_phRaw,
+                self.attr_tempCount, self.attr_thermVolt, self.attr_thermRaw,
+                self.attr_temp, self.attr_ph
                 ]
 
-        self.otherArr = [ self.ch_p1 ] #add instrument
+        self.otherArr = [ self.ch_p1, self.ch_i1 ] #add instrument
 
         r = Regex()
         self.regex = r'^'+r.re_serverdate+r.re_s+r.re_ip+r.re_s+r.concatRegex(7)+r'$'
+
+    def calc_temp(self, row, inputs):
+        """
+        :param object row: pandas dataframe row with column name as attributes
+        :param dictionary inputs: dictionary containing the following
+        :param float inputs['temp_slope']:
+        :param float inputs['temp_intercept']:
+        """
+
+        try:
+            return row.temp_counts*inputs['temp_slope']+inputs['temp_intercept']
+
+        except:
+            return None
 
     def calc_ph(self, row, inputs):
         """
@@ -917,8 +938,6 @@ class SASS_pH(SASS):
         :param float inputs['pH_slope']:
         :param float inputs['pH_intercept']:
         :param float inputs['pH_intercept']:
-        :param float inputs['temp_slope']:
-        :param float inputs['temp_intercept']:
         :param float inputs['E0']:
         :param float inputs['Ts']:
         :param float inputs['R']:
@@ -926,7 +945,7 @@ class SASS_pH(SASS):
         """
 
         try:
-            TempK = row.temp_counts*inputs['temp_slope']+inputs['temp_intercept']+273.15
+            TempK = row.temperature+273.15
             E0t= inputs['E0'] - 0.001 * (TempK - inputs['Ts'])
             ST = inputs['R'] * TempK * math.log(10) / inputs['F']
             Vo = row.ph_counts * inputs['pH_slope'] + inputs['pH_intercept']
@@ -998,17 +1017,17 @@ class SASS_pH(SASS):
                     #ALL might not be float in the future?
                     df.loc[:,col] = df.loc[:,col].astype(float)
                     #Check if column name has calculations
-            if 'ph' in extDict['calcs']:
+            for calc in ['temperature', 'ph']: # temperature needs to be done beofre ph
                 df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
-                print extDict['calcs']['ph']
-                dates = extDict['calcs']['ph'].keys()
+                print extDict['calcs'][calc]
+                dates = extDict['calcs'][calc].keys()
                 dates.sort()
                 #loop through dates and set appropriate date
                 for calcDtStr in dates:
                     calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
                     df['calcDate'] = [calcDtStr if i > calcDt else df['calcDate'][i] for i in df.index]
                 # df.rename(columns={col: col+'_raw'}, inplace=True)
-                df['ph'] = df.apply(self.doCalc, axis=1, calcsDict=extDict['calcs']['ph'])
+                df[calc] = df.apply(self.doCalc, axis=1, calcsDict=extDict['calcs'][calc])
                 df.drop('calcDate', axis=1, inplace=True)
             print 'df count:', len(df)
 
