@@ -641,7 +641,9 @@ class SASS(sccoos.SCCOOS):
 
     def text2nc_append(self):
         """SASS log files are organized by server date (when recorded)
-        .. todo: re-write? With every run, the latest file will always be gone
+        .. todo::
+            - if no lastNC file, run text2nc_all()
+            - re-write? With every run, the latest file will always be gone
             through (columns, calcs, qc), even if no new data will be appended
             (exist in nc.dataToNC)
         """
@@ -811,6 +813,11 @@ class SASS_pH(SASS):
     def __init__(self, sta):
         super(SASS_pH, self).__init__(sta)
         """Setting up SASS Newport Pier new sensor
+
+        .. warning: datetime is obtained by the server date. Not ideal, but a hack,
+        since instrument wasn't able to send this. If there's a problem the instrument
+        may send backed data all at once, and there's no way of knowing when that data
+        was collected, so NO rows with duplicated server dates will be saved to netCDF.
 
         .. todo::
             - QCs parameters for: O2thermistor and convertedOxygen (then add flags back for these)
@@ -1003,6 +1010,8 @@ class SASS_pH(SASS):
         # Set date_time to pandas datetime format
         # to_datetime (utc=None) --default-- and True results are the same
         df['date_time'] = pd.to_datetime(df.server_date, format='%Y-%m-%dT%H:%M:%SZ')
+        # Don't keep any rows with identical date_time/server_date. See warning in class.
+        df.drop_duplicates(subset='date_time', keep=False, inplace=True)
         # Make date_time an index
         df.set_index('date_time', inplace=True)
         # df.index = df.index.tz_localize('UTC') #not needed?
