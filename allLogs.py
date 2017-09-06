@@ -43,14 +43,23 @@ start = time.time()
 #s.text2nc_all()
 ##s.text2nc_append()
 
-#NEW Aug 2017
-import sass_oop
-#sass_oop.SASS_Basic(sass_oop.ucsb).text2nc_all()
-#sass_oop.SASS_Basic(sass_oop.ucla).text2nc_all()
-#sass_oop.SASS_Basic(sass_oop.ucsd).text2nc_all()
-##edit sass_newport_pier_archive.json: 2016-10-12
-#sass_oop.SASS_Basic(sass_oop.uci).text2nc_all() #crashes after 2016-10-11
+# #NEW Aug 2017
+# import sass_oop
+# testdir = r'/data/Junk/thredds-test/v2'
+# ucsb = sass_oop.SASS_Basic(sass_oop.ucsb)
+# ucsb.ncpath = testdir
+# ucsb.text2nc_all('2017')
+# #sass_oop.SASS_Basic(sass_oop.ucla).text2nc_all()
+# ucsd = sass_oop.SASS_Basic(sass_oop.ucsd)
+# ucsd.ncpath = testdir
+# ucsd.text2nc_all('2017')
+# ##edit sass_newport_pier_archive.json: 2016-10-12
+# #sass_oop.SASS_Basic(sass_oop.uci).text2nc_all() #crashes after 2016-10-11
+#
+# uci = sass_oop.SASS_NPd2(sass_oop.uci)
+# uci.ncpath = testdir
+# uci.text2nc_all('2017')
 
-sass_oop.SASS_NPd2(sass_oop.uci).text2nc_all()
+sass_oop.SASS_pH(sass_oop.uci2).text2nc_all('2017')
 
 print "Done!", time.asctime(),"Runtime:", time.time()-start
