@@ -1,0 +1,38 @@
+{
+  "calcs": {
+    "temperature": {
+      "2017-08-10T00:00:00Z": {
+        "function": "calc_temp",
+        "inputs": {
+          "temp_slope": 0.001567,
+          "temp_intercept": -5.69775
+        }
+      }
+    },
+    "ph": {
+      "2017-08-10T00:00:00Z": {
+        "function": "calc_ph",
+        "inputs": {
+          "pH_slope":0.00000730816,
+          "pH_intercept": 0.013636,
+          "E0": -0.40629,
+          "Ts": 293.81,
+          "R": 8.31451,
+          "F": 96487
+        }
+      }
+    }
+  },
+  "cols": {
+    "2017-08-10T00:00:00Z": [
+      "server_date",
+      "ip",
+      "serial",
+      "ph_counts",
+      "ph_voltage",
+      "ph_raw",
+      "temp_counts",
+      "thermistor_voltage",
+      "thermistor_raw"    ]
+  }
+}
