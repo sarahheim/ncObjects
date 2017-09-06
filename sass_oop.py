@@ -1028,7 +1028,6 @@ class SASS_pH(SASS):
                     #Check if column name has calculations
             for calc in ['temperature', 'ph']: # temperature needs to be done beofre ph
                 df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
-                print extDict['calcs'][calc]
                 dates = extDict['calcs'][calc].keys()
                 dates.sort()
                 #loop through dates and set appropriate date
@@ -1038,7 +1037,6 @@ class SASS_pH(SASS):
                 # df.rename(columns={col: col+'_raw'}, inplace=True)
                 df[calc] = df.apply(self.doCalc, axis=1, calcsDict=extDict['calcs'][calc])
                 df.drop('calcDate', axis=1, inplace=True)
-            print 'df count:', len(df)
 
             self.attrArr = [] # dataToNC uses an attrArr which use to contain str names, not objects
             for a in self.attrObjArr:
