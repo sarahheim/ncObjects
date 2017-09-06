@@ -95,11 +95,11 @@ class SASS(sccoos.SCCOOS):
         #print "init sass"
 
         # #test locations
-        self.codedir = '/home/scheim/NCobj/'
-        self.ncpath = '/home/scheim/NCobj/SASS_new'
+        # self.codedir = '/home/scheim/NCobj/'
+        # self.ncpath = '/home/scheim/NCobj/SASS_new'
 
-        # self.codedir = '/data/InSitu/SASS/code/ncobjects'
-        # self.ncpath = '/data/InSitu/SASS/netcdfs_new/'
+        self.codedir = '/data/InSitu/SASS/code/ncobjects'
+        self.ncpath = '/data/InSitu/SASS/netcdfs_new/'
 
         # self.dateformat = '%Y-%m-%dT%H:%M:%S.%fZ'
         self.crontab = True
