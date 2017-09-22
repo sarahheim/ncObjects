@@ -43,8 +43,8 @@ start = time.time()
 #s.text2nc_all()
 ##s.text2nc_append()
 
-# #NEW Aug 2017
-# import sass_oop
+## NEW Aug 2017
+import sass_oop
 # testdir = r'/data/Junk/thredds-test/v2'
 # ucsb = sass_oop.SASS_Basic(sass_oop.ucsb)
 # ucsb.ncpath = testdir
@@ -60,6 +60,11 @@ start = time.time()
 # uci.ncpath = testdir
 # uci.text2nc_all('2017')
 
+# Newport ph
 sass_oop.SASS_pH(sass_oop.uci2).text2nc_all('2017')
+# testdir = r'/data/Junk/thredds-test/newport_ph'
+# uci2 = sass_oop.SASS_pH(sass_oop.uci2)
+# uci2.ncpath = testdir
+# uci2.text2nc_all('2017')
 
 print "Done!", time.asctime(),"Runtime:", time.time()-start
