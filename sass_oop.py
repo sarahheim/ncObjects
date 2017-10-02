@@ -128,7 +128,8 @@ class SASS(sccoos.SCCOOS):
                 'comment':'also known as Epoch or Unix time',
                 'long_name':'time',
                 'standard_name':'time',
-                'units':'seconds since 1970-01-01 00:00:00 UTC'
+                'units':'seconds since 1970-01-01 00:00:00 UTC',
+                'platform': "platform1"
             })
         self.attr_temp = MainAttr('temperature',
             dtype= 'f4',
@@ -136,7 +137,8 @@ class SASS(sccoos.SCCOOS):
                 'standard_name' : 'sea_water_temperature',
                 'long_name' : 'sea water temperature',
                 'units' : 'celsius',
-                'instrument' : "instrument1"
+                'instrument' : "instrument1",
+                'platform': "platform1"
             },
             sensor_span=(-5,30), user_span=(8,30),
             low_reps=2, high_reps=6, eps=0.0001, low_thresh=2, high_thresh=3)
@@ -156,7 +158,8 @@ class SASS(sccoos.SCCOOS):
                 'standard_name' : 'sea_water_electrical_conductivity',
                 'long_name' : 'sea water electrical conductivity',
                 'units' : 'S/m',
-                'instrument' : "instrument1"
+                'instrument' : "instrument1",
+                'platform': "platform1"
             },
             sensor_span=(0,9), user_span=None,
             low_reps=2, high_reps=5, eps=0.00005, low_thresh=None, high_thresh=None)
@@ -176,7 +179,8 @@ class SASS(sccoos.SCCOOS):
                 'standard_name' : 'sea_water_pressure',
                 'long_name' : 'sea water pressure',
                 'units' : 'dbar',
-                'instrument' : "instrument1"
+                'instrument' : "instrument1",
+                'platform': "platform1"
             },
             sensor_span=(0,20), user_span=(1,7),
             low_reps=2, high_reps=5, eps=0.0005, low_thresh=4, high_thresh=5)
@@ -196,7 +200,8 @@ class SASS(sccoos.SCCOOS):
                 'standard_name' : 'sea_water_salinity',
                 'long_name' : 'sea water salinity',
                 'units' : '1e-3', #not psu??
-                'instrument' : "instrument1"
+                'instrument' : "instrument1",
+                'platform': "platform1"
             },
             sensor_span=(2,42), user_span=(30,34.5),
             low_reps=3, high_reps=5, eps=0.00004, low_thresh=0.4, high_thresh=0.5
@@ -227,7 +232,8 @@ class SASS(sccoos.SCCOOS):
                 'standard_name' : 'mass_concentration_of_chlorophyll_a_in_sea_water',
                 'long_name' : 'sea water chlorophyll',
                 'units' : 'ug/L',
-                'instrument' : "instrument2"
+                'instrument' : "instrument2",
+                'platform': "platform1"
             })
         self.attr_chl2= MainAttr('chlorophyll',
             dtype= 'f4',
@@ -235,7 +241,8 @@ class SASS(sccoos.SCCOOS):
                 'standard_name' : 'mass_concentration_of_chlorophyll_a_in_sea_water',
                 'long_name' : 'sea water chlorophyll',
                 'units' : 'ug/L',
-                'instrument' : "instrument2"
+                'instrument' : "instrument2",
+                'platform': "platform1"
             },
             sensor_span=(0.02,50), user_span=(0.02,50),
             low_reps=2, high_reps=5, eps=0.001, low_thresh=0.8, high_thresh=1.0)
@@ -295,7 +302,8 @@ class SASS(sccoos.SCCOOS):
                 # 'standard_name' : '', #???
                 'long_name' : 'O2 thermistor', #???
                 'units' : 'V', #not psu??
-                'instrument' : "instrument3"
+                'instrument' : "instrument3",
+                'platform': "platform1"
             }
             #qc
         )
@@ -315,7 +323,8 @@ class SASS(sccoos.SCCOOS):
                 'standard_name' : 'mass_concentration_of_oxygen_in_sea_water',
                 'long_name' : 'converted_oxygen', #'dissolved oxygen (raw)'???
                 'units' : 'mL/L',
-                'instrument' : "instrument3"
+                'instrument' : "instrument3",
+                'platform': "platform1"
             }
             #qc
         )
@@ -399,6 +408,7 @@ class SASS(sccoos.SCCOOS):
                 'grid_mapping':'crs',
                 'coordinates':'time lat lon depth'
             })
+            ncVar.setncatts(self.qc_meta(tv.name, tv))
 
     def createVariableCharNoDim(self, ncfile, v):
         """createVariable, type 'S1' a.k.a. 'c' -character"""
@@ -741,15 +751,16 @@ class SASS_Basic(SASS):
             ' and water level at frequent intervals in the nearshore coastal ocean.' +\
             ' This data can provide local and regional information on mixing and upwelling,' +\
             ' land run-off, and algal blooms.'
-            })
+            }) #add keywords !!!
 
-        self.metaDict['keywords'] += self.metaDict['keywords']+', ' #Add keywords
+        # self.metaDict['keywords'] += self.metaDict['keywords']+', ' #Add keywords
 
 
        # NOT INCLUDING 'time'
         self.attrObjArr = [
             self.attr_temp, self.attr_con, self.attr_pres, self.attr_sal,
             self.attr_chl1, self.attr_chl2,
+            # self.attr_chl2, # don't have chl_raw for old files (editOldNC)
             self.attr_tempF1, self.attr_tempF2,
             self.attr_conF1, self.attr_conF2,
             self.attr_presF1, self.attr_presF2,
@@ -763,6 +774,100 @@ class SASS_Basic(SASS):
         r = Regex()
         self.regex = r'^'+r.re_serverdate+r.re_s+r.re_ip+r.re_s+r.concatRegex(8)+r.re_s+r.re_date+r.re_s+r.re_time+r.re_s+r.concatRegex(3)+r'$'
 
+    def editOldNC(self, fname):
+        import xarray as xr
+        print 'editing old nc:', fname
+        # stations = [self.ucsb, self.ucla, self.ucsd, self.uci]
+        # staName = fname.split('-')[0]
+        # for sta in stations:
+            # if sta.code_name == staName:
+        print 'editOldNC', self.sta.code_name
+
+        jsonFn = os.path.join(self.codedir, 'sass_'+self.sta.code_name+'_archive.json')
+        print os.path.isfile(jsonFn), jsonFn
+        with open(jsonFn) as json_file:
+            extDict = json.load(json_file)
+
+        # ncfile = Dataset(fname, 'r')
+        # print self.sta.code_name, len(ncfile.variables['time'][:])
+        # ncfile.close()
+
+        newName = fname.split('.')[0]+"_new.nc"
+        print type(newName), newName
+        self.createNCshell(newName, '')
+        print 'created:', os.path.isfile(newName), newName
+        # df = pd.read_hdf(fname, mode='r')
+        ds = xr.open_dataset(fname)
+        # print ds.info()
+        # print ds.indexes
+        # print ds.data_vars
+        df = ds.to_dataframe()
+        timeNum = len(df.index)
+        print 'length', timeNum
+        # df['calcDate'] = pd.Series(np.repeat(pd.NaT, timeNum))
+        # dates = extDict['calcs']['chlorophyll'].keys()
+        # dates.sort()
+        # #loop through dates and set appropriate date
+        # for calcDtStr in dates:
+        #     # calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
+        #     calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ')#.value/1000000000
+        #     # .astype('int64') // 10**9
+        #     df['calcDate'] = [calcDtStr if i >= calcDt else df['calcDate'][i] for i in df.index]
+        # df.rename(columns={'chlorophyll':'chlorophyll_raw'}, inplace=True)
+        # df['chlorophyll'] = df.apply(self.doCalc, axis=1, col='chlorophyll_raw', calcsDict=extDict['calcs']['chlorophyll'])
+        # df.drop('calcDate', axis=1, inplace=True)
+        # df['chlorophyll_raw'] = np.zeros_like(df.chlorophyll, dtype='uint8')
+        df.drop('temperature_flagPrimary', axis=1, inplace=True)
+        df.drop('temperature_flagSecondary', axis=1, inplace=True)
+        df.drop('conductivity_flagPrimary', axis=1, inplace=True)
+        df.drop('conductivity_flagSecondary', axis=1, inplace=True)
+        df.drop('pressure_flagPrimary', axis=1, inplace=True)
+        df.drop('pressure_flagSecondary', axis=1, inplace=True)
+        df.drop('salinity_flagPrimary', axis=1, inplace=True)
+        df.drop('salinity_flagSecondary', axis=1, inplace=True)
+        df.drop('chlorophyll_flagPrimary', axis=1, inplace=True)
+        df.drop('chlorophyll_flagSecondary', axis=1, inplace=True)
+
+        # Do QC
+        self.attrArr = [] # dataToNC uses an attrArr which use to contain str names, not objects
+        for a in self.attrObjArr:
+            # print 'HASATTR', hasattr(a, 'miss_val')
+            # if the attribute has ANY of the qc attributes, run it through qc_tests
+            for qcv in MainAttr.qc_vars:
+                if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
+                    df = self.qc_tests(df, a.name, miss_val=a.miss_val,
+                        sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
+                        high_reps=a.high_reps, eps=a.eps,
+                        low_thresh=a.low_thresh, high_thresh=a.high_thresh)
+                    break
+            self.attrArr.append(a.name)
+
+        # Write to new NCs
+        # self.dataToNC(newName, df, '')
+        df['epochs'] = df.index.values.astype('int64') // 10**9
+        ncfile = Dataset(newName, 'a', format='NETCDF4')
+        ncfile.variables['time'][0:] = df['epochs'].values
+        for attr in self.attrArr:
+            #atLen = len(ncfile.variables[attr][:])
+            ncfile.variables[attr][0:] = df[attr].values
+            self.attrMinMax(ncfile, attr)
+        self.NCtimeMeta(ncfile)
+        ncfile.close()
+        print 'done', fname
+
+    def editOldNCs(self):
+        # self.ncpath = '/data/InSitu/SASS/'
+        self.ncpath = '/home/scheim/NCobj/SASS_old'
+        print 'editOldNCs', self.ncpath
+        filesArr = os.listdir(self.ncpath)
+        filesArr.sort()
+        for fn in filesArr:
+            if self.sta.code_name in fn:
+                filename = os.path.join(self.ncpath, fn)
+                #print "\n" + fn,
+                self.editOldNC(filename)
+        # fn =  self.sta.code_name+'-2006.nc'
+        # self.editOldNC(os.path.join(self.ncpath, fn))
 
 class SASS_NPd2(SASS):
     def __init__(self, sta):
@@ -785,9 +890,9 @@ class SASS_NPd2(SASS):
             ' and water level at frequent intervals in the nearshore coastal ocean.' +\
             ' This data can provide local and regional information on mixing and upwelling,' +\
             ' land run-off, and algal blooms.'
-            })
+            }) #add keywords !!!
 
-        self.metaDict['keywords'] += self.metaDict['keywords']+', ' #Add Oxygen keywords
+        # self.metaDict['keywords'] += self.metaDict['keywords']+', ' #Add Oxygen keywords
 
        # NOT INCLUDING 'time'
         self.attrObjArr = [
@@ -835,9 +940,9 @@ class SASS_pH(SASS):
             # ' and water level at frequent intervals in the nearshore coastal ocean.' +\
             # ' This data can provide local and regional information on mixing and upwelling,' +\
             # ' land run-off, and algal blooms.'
-            })
+            }) #add keywords !!!
 
-        self.metaDict['keywords'] += self.metaDict['keywords']+', ' #Add ph keywords
+        # self.metaDict['keywords'] += self.metaDict['keywords']+', ' #Add ph keywords
 
         self.attr_phCount = MainAttr('ph_counts',
             dtype= 'f4',

@@ -93,36 +93,61 @@ class SCCOOS(nc.NC):
         #return pd.to_datetime(unixtime, unit='s', utc=None)[0].isoformat()
         return unixtime
 
-    def qc_meta(self, attr, qcDict):
-        qcDict = {'references':'https://github.com/ioos/qartod'}
-        comment = 'The following QC tests were done on '+attr+'.'
-        if 'user_span' in qcDict:
-            # qcDict.update({
-            #     'data_min': qcDict['user_span'][0],
-            #     'data_max': qcDict['user_span'][1]
-            # })
-            comment += ' Range Check - Suspect: '+str(qcDict['user_span'])
+    def getAttrOrKey(self, objDict, kat):
+        """take specs and put into dictionary to be put in netcdf's variable's meta
 
-        if 'sensor_span' in qcDict:
-            qcDict.update({
-                'valid_min': qcDict['sensor_span'][0],
-                'valid_max': qcDict['sensor_span'][1]
+        :param str kat: name of attribute or key
+        :returns: meta
+
+        """
+        if hasattr(objDict, kat):
+            return getattr(objDict, kat)
+        elif (type(objDict) == dict) and (kat in objDict):
+            return objDict[kat]
+        else: return False
+
+    def qc_meta(self, varName, qcSpecs):
+        """take specs and put into dictionary to be put in netcdf's variable's meta
+
+        :param str varName: name of variable
+        :param qcSpecs: object or dictionary
+        :returns: dictionary of meta
+
+        """
+        metaDict = {'references':'https://github.com/ioos/qartod'}
+        comment = 'The following QC tests were done on '+varName+':'
+        uspan = self.getAttrOrKey(qcSpecs, 'user_span')
+        if uspan:
+            comment += ' Range Check (Suspect): '+str(uspan)+';'
+
+        sspan = self.getAttrOrKey(qcSpecs, 'sensor_span')
+        if sspan:
+            metaDict.update({
+                'valid_min': sspan[0],
+                'valid_max': sspan[1]
             })
-            comment += ' Range Check - Bad: '+str(qcDict['sensor_span'])
+            comment += ' Range Check (Bad): '+str(sspan)+';'
 
-        if ('low_reps' in qcDict) and ('high_reps' in qcDict) and ('eps' in qcDict):
-            comment += ' Flat Line Check - EPS: '+ str(qcDict['eps'])
-            comment += ' Flat Line Check - Suspect: '+ str(qcDict['low_thresh'])
-            comment += ' Flat Line Check - Bad: '+  str(qcDict['high_thresh'])
+        lreps = self.getAttrOrKey(qcSpecs, 'low_reps')
+        hreps = self.getAttrOrKey(qcSpecs, 'high_reps')
+        eps = self.getAttrOrKey(qcSpecs, 'eps')
+        if (lreps) and (hreps) and (eps):
+            comment += ' Flat Line Check (EPS): '+ str(eps)
+            comment += ' (Suspect): '+ str(lreps)
+            comment += ' (Bad): '+  str(hreps)+';'
 
-        if ('low_thresh' in qcDict) and ('high_thresh' in qcDict):
-            comment += ' Spike Test - Suspect: '+ str(qcDict['low_reps'])
-            comment += ' Spike Test - Bad: '+ str(qcDict['high_reps'])
+        lthr = self.getAttrOrKey(qcSpecs, 'low_thresh')
+        hthr = self.getAttrOrKey(qcSpecs, 'high_thresh')
+        if (lthr) and (hthr):
+            comment += ' Spike Test (Suspect): '+ str(lthr)
+            comment += ' (Bad): '+ str(hthr)+';'
 
-        qcDict.update({
+        if (comment == 'The following QC tests were done on '+varName+':'):
+            comment += ' None.'
+        metaDict.update({
             'comment': comment
         })
-        return qcDict
+        return metaDict
 
     def qc_tests(self, df, attr, miss_val=None, sensor_span=None, user_span=None, low_reps=None,
     high_reps=None, eps=None, low_thresh=None, high_thresh=None):
