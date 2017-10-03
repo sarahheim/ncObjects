@@ -100,7 +100,7 @@ def staXls2json(sta):
             print 'error with reading csv'
     connection.close()
 
-    jFile = 'sass_'+sta.name+'_archive-test.json'
+    jFile = 'sass_'+sta.name+'_archive.json'
     if os.path.isfile(jFile):
         if (df is not None) and (len(df)>0):
             #Read the json first
@@ -117,7 +117,7 @@ def staXls2json(sta):
         print 'Missing JSON file' #json file should exist with 'cols'
     print 'Done! calcs to json:', jFile
 
-# staXls2json(ucla)
+staXls2json(ucsd)
 
 def allStations():
     for ss in [ucsb, uci, ucla, ucsd]:
@@ -125,4 +125,4 @@ def allStations():
         print ss
         staXls2json(ss)
 
-allStations()
+# allStations()

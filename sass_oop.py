@@ -114,7 +114,7 @@ class SASS(sccoos.SCCOOS):
             'geospatial_vertical_positive':'down',
             'keywords':'EARTH SCIENCE, OCEANS, OCEAN CHEMISTRY, SALINITY/DENSITY, SALINITY,' +\
             ' CHLOROPHYLL, OCEAN TEMPERATURE, WATER TEMPERATURE, OCEAN PRESSURE, WATER PRESSURE',
-            'metadata_link':'www.sccoos.org.progress/data-products/automateed-shore-stations/',
+            'metadata_link':'http://sccoos.org/data/autoss/',
             'project':'Automated Shore Stations',
             'processing_level':'QA/QC have been performed'
             })
@@ -170,7 +170,7 @@ class SASS(sccoos.SCCOOS):
             })
         self.attr_conF2 = FlagAttr('conductivity_flagSecondary',
             atts={
-                'long_name' : 'sea water electrical condu`ctivity, qc secondary flag',
+                'long_name' : 'sea water electrical conductivity, qc secondary flag',
                 'standard_name' : "sea_water_electrical_conductivity status_flag"
             })
         self.attr_pres = MainAttr('pressure',

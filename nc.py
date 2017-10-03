@@ -39,7 +39,7 @@ class NC(object):
             'keywords_vocabulary':'Global Change Master Directory (GCMD) Earth Science Keywords',
             'standard_name_vocabulary':'CF Standard Name Table (v28, 07 January 2015)',
             'institution':'Scripps Institution of Oceanography, University of California San Diego',
-            'license':'Data is preliminary and should not be used by anyone.',
+            'license':'These data may be redistributed and used without restriction.',
             'geospatial_lon_units':'degrees_east',
             'geospatial_lat_units':'degrees_north',
             'time_coverage_units':'seconds since 1970-01-01 00:00:00 UTC',
