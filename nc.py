@@ -285,6 +285,36 @@ class NC(object):
 
         ncfile.close()
 
+    def updateNCmeta(self, ncName, newDir, lookup):
+        '''createNCshell (which will put latest metadata in netcdf), then add all previous data
+        File name will be the same so pass directory to put new files.
+
+            .. note: run in conda environment log2ncEnv3
+        '''
+        # import xarray as xr
+        fname  = os.path.join(self.ncpath, ncName)
+        print os.path.isfile(fname), fname
+        newName = os.path.join(newDir, ncName)
+        print newName
+        if fname != newName:
+            self.createNCshell(newName, lookup)
+            # ds = xr.open_dataset(fname)
+            # df = ds.to_dataframe()
+            df = Dataset(fname, 'r')
+            # df['epochs'] = df.index.values.astype('int64') // 10**9
+            ncfile = Dataset(newName, 'a', format='NETCDF4')
+            # ncfile.variables['time'][0:] = df['epochs'].values
+            # ncfile.variables['time'][0:] = df['time']
+            for vrbl in df.variables:
+                # print vrbl, df.variables[vrbl].size, df.variables[vrbl].dtype
+                #atLen = len(ncfile.variables[vrbl][:])
+                ncfile.variables[vrbl][0:] = df[vrbl][:]
+                if (df.variables[vrbl].dtype != 'S1') and (vrbl != 'time'): self.attrMinMax(ncfile, vrbl)
+            self.NCtimeMeta(ncfile)
+            df.close()
+            ncfile.close()
+            print 'done', ncName
+
 #class CDIP(NC):
 #    __metaclass__ = ABCMeta
 #    @abstractmethod

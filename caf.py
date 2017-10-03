@@ -49,7 +49,7 @@ class CAF(sccoos.SCCOOS):
 
         ##Meta
         self.staMeta = {
-            'depth': , 0.9
+            'depth': 0.9,
             'lat': 33.1390,
             'lon': -117.3390
         }
@@ -77,7 +77,7 @@ class CAF(sccoos.SCCOOS):
             'creator_url':'http://sccoos.org', #Martz Lab url?
             'geospatial_bounds_crs': 'EPSG:4326',
             'geospatial_bounds_vertical_crs': 'EPSG:5829',
-            'geospatial_bounds': 'POINT(', self.staMeta['lon'],' ',self.staMeta['lat'],')'
+            'geospatial_bounds': 'POINT('+ str(self.staMeta['lon'])+' '+str(self.staMeta['lat'])+')',
             "geospatial_lat_min": self.staMeta['lat'],
             "geospatial_lat_max": self.staMeta['lat'],
             "geospatial_lon_min": self.staMeta['lon'],

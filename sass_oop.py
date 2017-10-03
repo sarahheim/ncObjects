@@ -116,7 +116,12 @@ class SASS(sccoos.SCCOOS):
             ' CHLOROPHYLL, OCEAN TEMPERATURE, WATER TEMPERATURE, OCEAN PRESSURE, WATER PRESSURE',
             'metadata_link':'http://sccoos.org/data/autoss/',
             'project':'Automated Shore Stations',
-            'processing_level':'QA/QC have been performed'
+            'processing_level':'QA/QC have been performed',
+            'instrument': 'In Situ/Laboratory Instruments > Profilers/Sounders > > > CTD',
+            'instrument_vocabulary': 'GCMD Earth Science Keywords. Version 8.5',
+            'platform': 'In Situ Ocean-based Platforms > OCEAN PLATFORM/OCEAN STATIONS > OCEAN PLATFORMS',
+            'platform_vocabulary': 'GCMD Earth Science Keywords. Version 8.5',
+            'references':'http://sccoos.org/data/autoss/, https://github.com/ioos/qartod',
             })
 
         #Attributes
@@ -233,7 +238,9 @@ class SASS(sccoos.SCCOOS):
                 'long_name' : 'sea water chlorophyll',
                 'units' : 'ug/L',
                 'instrument' : "instrument2",
-                'platform': "platform1"
+                'platform': "platform1",
+                'valid_min': 0,
+                'valid_max': 5
             })
         self.attr_chl2= MainAttr('chlorophyll',
             dtype= 'f4',
@@ -260,7 +267,9 @@ class SASS(sccoos.SCCOOS):
             atts={
                 'standard_name' : 'sea_water_density',
                 'long_name' : 'sea water density',
-                'units' : 'kg/m^3'
+                'units' : 'kg/m^3',
+                'valid_min': 0,
+                'valid_max': 30
             })
         self.attr_dVolt = MainAttr('diagnosticVoltage',
             dtype= 'f4',
@@ -356,6 +365,7 @@ class SASS(sccoos.SCCOOS):
             atts={
                 'make' : "Seabird",
                 'model' : "SBE 16plus SEACAT",
+                'long_name': 'Seabird SBE 16plus SEACAT',
                 'comment' : "Seabird SBE 16plus SEACAT Conductivity, Temperature," + \
                 " and Pressure recorder. Derived output Salinity.",
                 'ioos_code' : "urn:ioos:sensor:sccoos:"+self.sta.code_name+":conductivity_temperature_pressure"
@@ -364,6 +374,7 @@ class SASS(sccoos.SCCOOS):
             atts={
                 'make' : "Seapoint",
                 'model' : "Chlorophyll Fluorometer",
+                'long_name': 'Seapoint Chlorophyll Fluorometer',
                 'comment' : "Seapoint Chlorophyll Fluorometer with a 0-50 ug/L gain setting.",
                 'ioos_code' : "urn:ioos:sensor:sccoos:"+self.sta.code_name+":chlorophyll"
             })
@@ -391,20 +402,22 @@ class SASS(sccoos.SCCOOS):
             if '_flagPrimary' in tv.name:
                 ncVar.setncatts({
                     'flag_values': bytearray([1, 2, 3, 4, 9]), # 1UB, 2UB, 3UB, 4UB, 9UB ;
-                    'flag_meanings':'GOOD_DATA UNKNOWN SUSPECT BAD_DATA MISSING'
+                    'flag_meanings':'GOOD_DATA UNKNOWN SUSPECT BAD_DATA MISSING',
                 });
             else:
                 ncVar.setncatts({
                     'flag_values': bytearray([0, 1, 2, 3]), # 1UB, 2UB, 3UB, 4UB, 9UB ;
-                    'flag_meanings':'UNSPECIFIED RANGE FLAT_LINE SPIKE'
+                    'flag_meanings':'UNSPECIFIED RANGE FLAT_LINE SPIKE',
                 });
             ncVar.setncatts({
                 'source':'QC results',
-                'comment': "Quality Control test are based on IOOS's Quality Control of Real-Time Ocean Data (QARTOD))"
+                'comment': "Quality Control test are based on IOOS's Quality Control of Real-Time Ocean Data (QARTOD))",
+                'references':'https://github.com/ioos/qartod'
             });
         elif tv.name != 'time':
             ncVar.setncatts({
                 'source':'insitu observations',
+                'cell_method': 'time: point',
                 'grid_mapping':'crs',
                 'coordinates':'time lat lon depth'
             })
@@ -424,6 +437,7 @@ class SASS(sccoos.SCCOOS):
         print "SASS createNCshell", ncName
         ncfile = Dataset(ncName, 'w', format='NETCDF4')
         self.metaDict.update({
+            'id': ncName.split('/')[-1].split('.')[0],
             'comment': 'The '+self.sta.long_name+' automated shore station operated' + \
             ' by ' + self.sta.inst + \
             ' is mounted at a nominal depth of '+ str(self.sta.depth) +' meters MLLW. The' + \
@@ -744,7 +758,6 @@ class SASS_Basic(SASS):
         print "ncPostName: ", self.ncPostName, '. prefix:', self.prefix
 
         self.metaDict.update({
-            'instrument':'Data was collected with Seabird and Seapoint instruments.',
             'summary':'Automated shore station with a suite of sensors that are' +\
             ' attached to piers along the nearshore California coast.' + \
             ' These automated sensors measure temperature, salinity, chlorophyll' + \
@@ -775,6 +788,7 @@ class SASS_Basic(SASS):
         self.regex = r'^'+r.re_serverdate+r.re_s+r.re_ip+r.re_s+r.concatRegex(8)+r.re_s+r.re_date+r.re_s+r.re_time+r.re_s+r.concatRegex(3)+r'$'
 
     def editOldNC(self, fname):
+        '''Go through old (2005-2012) netcdfs and copy all sensor values, but do qc'''
         import xarray as xr
         print 'editing old nc:', fname
         # stations = [self.ucsb, self.ucla, self.ucsd, self.uci]
@@ -883,7 +897,6 @@ class SASS_NPd2(SASS):
         self.prefix = self.sta.code_name + self.ncPostName+"-"
 
         self.metaDict.update({
-            'instrument':'Data was collected with Seabird, Seapoint, and _____ instruments.',
             'summary':'Automated shore station with a suite of sensors that are' +\
             ' attached to piers along the nearshore California coast.' + \
             ' These automated sensors measure temperature, salinity, chlorophyll, ph' + \

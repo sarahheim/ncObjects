@@ -32,6 +32,7 @@ class SCCOOS(nc.NC):
             # 'creator_name':'Southern California Coastal Ocean Observing System (SCCOOS)' + \
             # ' at Scripps Institution of Oceanography (SIO)',
             # 'creator_url':'https://sccoos.org',
+            'creator_email': 'info@sccoos.org',
             'institution': 'Scripps Institution of Oceanography, University of California San Diego',
             'publisher_institution': 'Scripps Institution of Oceanography (SIO)',
             'publisher_name':'Southern California Coastal Ocean Observing System',
@@ -114,7 +115,7 @@ class SCCOOS(nc.NC):
         :returns: dictionary of meta
 
         """
-        metaDict = {'references':'https://github.com/ioos/qartod'}
+        metaDict = {}
         comment = 'The following QC tests were done on '+varName+':'
         uspan = self.getAttrOrKey(qcSpecs, 'user_span')
         if uspan:
