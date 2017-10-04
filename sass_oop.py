@@ -121,7 +121,7 @@ class SASS(sccoos.SCCOOS):
             'instrument_vocabulary': 'GCMD Earth Science Keywords. Version 8.5',
             'platform': 'In Situ Ocean-based Platforms > OCEAN PLATFORM/OCEAN STATIONS > OCEAN PLATFORMS',
             'platform_vocabulary': 'GCMD Earth Science Keywords. Version 8.5',
-            'references':'http://sccoos.org/data/autoss/, https://github.com/ioos/qartod',
+            'references':'http://sccoos.org/data/autoss/, http://sccoos.org/about/dmac/, https://github.com/ioos/qartod',
             })
 
         #Attributes
@@ -417,9 +417,10 @@ class SASS(sccoos.SCCOOS):
         elif tv.name != 'time':
             ncVar.setncatts({
                 'source':'insitu observations',
-                'cell_method': 'time: point',
+                'cell_methods': 'time: point',
                 'grid_mapping':'crs',
-                'coordinates':'time lat lon depth'
+                'coordinates':'time lat lon depth',
+                'references': "http://sccoos.org/data/autoss/, http://sccoos.org/about/dmac/"
             })
             ncVar.setncatts(self.qc_meta(tv.name, tv))
 
