@@ -2,16 +2,18 @@
 import time
 start = time.time()
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import sass_oop
 
+# Making new netcdfs from OLD netcdfs (original base data, new metadata, new flag values)
 # # sass_oop.SASS_Basic(sass_oop.uci).editOldNC('/home/scheim/NCobj/SASS_old/newport_pier-2006.nc')
 # sass_oop.SASS_Basic(sass_oop.uci).editOldNCs()
 # sass_oop.SASS_Basic(sass_oop.ucla).editOldNCs()
 # sass_oop.SASS_Basic(sass_oop.ucsb).editOldNCs()
 # sass_oop.SASS_Basic(sass_oop.ucsd).editOldNCs()
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Update metadata only, but from code structure. Different from man_editMata...
 # sass_oop.SASS_Basic(sass_oop.ucsd).updateNCmeta('scripps_pier-2016.nc', '/data/Junk/thredds-test/sass_meta', '')
-
 def all_sass(obj, start, stop):
     for yr in range(start, stop):
         obj.updateNCmeta(obj.prefix+str(yr)+'.nc', '/data/Junk/thredds-test/sass_meta', '')
