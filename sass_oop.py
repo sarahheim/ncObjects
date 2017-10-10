@@ -4,7 +4,7 @@
 # Description: adjusting to class/objects, inheriting NC/SASS classes
 #   This class is created for Automated Shore Stations
 #
-import os, time, datetime, json, math
+import os, time, datetime, json, math, re
 
 import pandas as pd
 import numpy as np
@@ -788,27 +788,24 @@ class SASS_Basic(SASS):
         r = Regex()
         self.regex = r'^'+r.re_serverdate+r.re_s+r.re_ip+r.re_s+r.concatRegex(8)+r.re_s+r.re_date+r.re_s+r.re_time+r.re_s+r.concatRegex(3)+r'$'
 
-    def editOldNC(self, fname):
-        '''Go through old (2005-2012) netcdfs and copy all sensor values, but do qc'''
+    def editOldNC(self, fname, newDir):
+        '''Go through netcdfs and copy all sensor values, but do QC.
+        New files also have the new metadata'''
         import xarray as xr
-        print 'editing old nc:', fname
-        # stations = [self.ucsb, self.ucla, self.ucsd, self.uci]
-        # staName = fname.split('-')[0]
-        # for sta in stations:
-            # if sta.code_name == staName:
-        print 'editOldNC', self.sta.code_name
+        print 'Using old nc:', fname
 
-        jsonFn = os.path.join(self.codedir, 'sass_'+self.sta.code_name+'_archive.json')
-        print os.path.isfile(jsonFn), jsonFn
-        with open(jsonFn) as json_file:
-            extDict = json.load(json_file)
+        # jsonFn = os.path.join(self.codedir, 'sass_'+self.sta.code_name+'_archive.json')
+        # print os.path.isfile(jsonFn), jsonFn
+        # with open(jsonFn) as json_file:
+        #     extDict = json.load(json_file)
 
         # ncfile = Dataset(fname, 'r')
         # print self.sta.code_name, len(ncfile.variables['time'][:])
         # ncfile.close()
 
-        newName = fname.split('.')[0]+"_new.nc"
-        print type(newName), newName
+        # newName = fname.split('.')[0]+"_new.nc"
+        newName = os.path.join(newDir, fname.split('/')[-1])
+        print 'new File:', newName
         self.createNCshell(newName, '')
         print 'created:', os.path.isfile(newName), newName
         # df = pd.read_hdf(fname, mode='r')
@@ -832,16 +829,19 @@ class SASS_Basic(SASS):
         # df['chlorophyll'] = df.apply(self.doCalc, axis=1, col='chlorophyll_raw', calcsDict=extDict['calcs']['chlorophyll'])
         # df.drop('calcDate', axis=1, inplace=True)
         # df['chlorophyll_raw'] = np.zeros_like(df.chlorophyll, dtype='uint8')
-        df.drop('temperature_flagPrimary', axis=1, inplace=True)
-        df.drop('temperature_flagSecondary', axis=1, inplace=True)
-        df.drop('conductivity_flagPrimary', axis=1, inplace=True)
-        df.drop('conductivity_flagSecondary', axis=1, inplace=True)
-        df.drop('pressure_flagPrimary', axis=1, inplace=True)
-        df.drop('pressure_flagSecondary', axis=1, inplace=True)
-        df.drop('salinity_flagPrimary', axis=1, inplace=True)
-        df.drop('salinity_flagSecondary', axis=1, inplace=True)
-        df.drop('chlorophyll_flagPrimary', axis=1, inplace=True)
-        df.drop('chlorophyll_flagSecondary', axis=1, inplace=True)
+
+        # df.drop('temperature_flagPrimary', axis=1, inplace=True)
+        # df.drop('temperature_flagSecondary', axis=1, inplace=True)
+        # df.drop('conductivity_flagPrimary', axis=1, inplace=True)
+        # df.drop('conductivity_flagSecondary', axis=1, inplace=True)
+        # df.drop('pressure_flagPrimary', axis=1, inplace=True)
+        # df.drop('pressure_flagSecondary', axis=1, inplace=True)
+        # df.drop('salinity_flagPrimary', axis=1, inplace=True)
+        # df.drop('salinity_flagSecondary', axis=1, inplace=True)
+        # df.drop('chlorophyll_flagPrimary', axis=1, inplace=True)
+        # df.drop('chlorophyll_flagSecondary', axis=1, inplace=True)
+        for v in df:
+            if '_flag' in v: df.drop(v, axis=1, inplace=True)
 
         # Do QC
         self.attrArr = [] # dataToNC uses an attrArr which use to contain str names, not objects
@@ -870,17 +870,18 @@ class SASS_Basic(SASS):
         ncfile.close()
         print 'done', fname
 
-    def editOldNCs(self):
+    def editOldNCs(self, newDir):
         # self.ncpath = '/data/InSitu/SASS/'
-        self.ncpath = '/home/scheim/NCobj/SASS_old'
         print 'editOldNCs', self.ncpath
         filesArr = os.listdir(self.ncpath)
         filesArr.sort()
         for fn in filesArr:
-            if self.sta.code_name in fn:
+            regex = re.search(re.compile('^'+self.prefix+'(\d{4})\.nc'), fn)
+            if regex:
+            # if self.prefix in fn and ('005' not in fn) and ('d02' not in fn):
                 filename = os.path.join(self.ncpath, fn)
                 #print "\n" + fn,
-                self.editOldNC(filename)
+                self.editOldNC(filename, newDir)
         # fn =  self.sta.code_name+'-2006.nc'
         # self.editOldNC(os.path.join(self.ncpath, fn))
 

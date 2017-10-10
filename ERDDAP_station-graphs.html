@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ERDDAP Station graphs</title>
+<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script>
+function getGraphs() {
+  var sta = $("#station").val();
+  var yr = $("#year").val();
+  console.log(sta, yr, yr.length);
+  flagArr = ['temperature', 'pressure', 'chlorophyll', 'salinity']
+  $("#graphs").html('');
+  $.each(flagArr, function( i, v ) {
+    console.log(v);
+    if (yr.length == 4) {
+      timespan = yr+'-01-01&time%3C'+yr+'-12-31';
+    } else {
+      timespan = yr.split('.')[0]+'&time%3C'+yr.split('.')[1];
+    }
+    url = 'http://sccoos.org/erddap/tabledap/autoss.'+$("#size").val()+'?time,'+v+','+v+'_flagSecondary&station=%22'+sta+'%22&time%3E='+timespan+'&orderBy(%22'+v+'_flagSecondary%22)&.colorBar=Rainbow%7C%7C%7C0%7C4%7C&.marker=6%7C5'
+    $("#graphs").append('<img src="'+url+'">');
+    $("#graphs").append('<p><a href="'+url+'">'+url+'</a></p>');
+});
+}
+</script>
+</head>
+<body>
+<h1>ERDDAP Graphs</h1>
+<input type="text" id="year" value="2016">
+<select id='station'>
+  <option value="stearns_wharf">UCSB stearns_wharf</option>
+  <option value="newport_pier">UCI newport_pier</option>
+  <option value="santa_monica_pier">UCLA santa_monica_pier</option>
+  <option value="scripps_pier" selected>UCSD scripps_pier</option>
+</select>
+<select id='size'>
+  <option value="png">small</option>
+  <option value="largePng" selected>large</option>
+</select>
+<button onclick="getGraphs()">Submit</button>
+<div id="graphs">
+</div>
+</body>
+</html>

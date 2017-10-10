@@ -5,7 +5,7 @@
 # All datasets create object classes that will inherit this SCCOOS class
 #
 
-import os #, time, datetime
+import os, re, time#, datetime
 
 import pandas as pd
 import numpy as np
@@ -229,6 +229,30 @@ class SCCOOS(nc.NC):
         # df.loc[:, attr+'_flagSecondary'] = pd.DataFrame(qc2flags, index=df.index)
 
         return df
+
+    def flagStats_allYears(self, csvName):
+        start = time.time()
+        print 'dfStats_allYears ncpath:', self.ncpath
+        filesArr = os.listdir(self.ncpath)
+        filesArr.sort()
+        dict = {}
+        for fn in filesArr:
+            regex = re.search(re.compile('^'+self.prefix+'(\d{4})\.nc'), fn)
+            if regex:
+                yr = regex.group(1)
+                print yr, fn
+                dict[yr] = self.flagStats_single(os.path.join(self.ncpath, fn))
+        pd.DataFrame(dict).to_csv(csvName)
+        print "Done!", time.asctime(),"Runtime:", time.time()-start
+
+    def runAllNCyrs(self, func):
+        print 'runAllNCyrs ncpath:', self.ncpath
+        filesArr = os.listdir(self.ncpath)
+        filesArr.sort()
+        for fn in filesArr:
+            if re.search(re.compile('^'+self.prefix+'\d{4}\.nc'), fn):
+                print 'function:', func, 'file:', fn
+                eval(func)(os.path.join(self.ncpath, fn))
 
 #print c.ncpath
 #c.updateNCattrs_all()

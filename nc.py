@@ -259,7 +259,10 @@ class NC(object):
 
     def dataToNC(self, ncName, subset, lookup):
         """Take dataframe and put in netCDF (new file or append).
-        Assumes there's a 'time' variable in data/ncfile"""
+        Assumes there's a 'time' variable in data/ncfile
+
+        .. note: run in conda environment log2ncEnv3, do to line: appDF = subset[-exist]
+        """
         if not os.path.isfile(ncName):
             ncfile = self.createNCshell(ncName, lookup)
         ncfile = Dataset(ncName, 'a', format='NETCDF4')
@@ -288,8 +291,6 @@ class NC(object):
     def updateNCmeta(self, ncName, newDir, lookup):
         '''createNCshell (which will put latest metadata in netcdf), then add all previous data
         File name will be the same so pass directory to put new files.
-
-            .. note: run in conda environment log2ncEnv3
         '''
         # import xarray as xr
         fname  = os.path.join(self.ncpath, ncName)
@@ -315,6 +316,34 @@ class NC(object):
             ncfile.close()
             print 'done', ncName
 
+    def flagStats_single(self, fname):
+        '''counter of all the primary and secondary flags
+
+        '''
+        import pandas as pd
+        df = Dataset(fname, 'r')
+        arr = [pd.Series({'time size': df['time'].size})]
+        for vrbl in df.variables:
+            if '_flagPrimary' in vrbl:
+                dict = {}
+                v = vrbl.split('_')[0]
+                flagP = vrbl
+                flagS = v+'_flagSecondary'
+                pArr = df[flagP][:]
+                for p in [1,2,3,4,9]:
+                    # print flagP, p,':', df[flagP][:].tolist().count(p)
+                    dict[flagP+'.'+str(p)] = df[flagP][:].tolist().count(p)
+                for s in [1,2,3]:
+                    # print flagS, s, ':', df[flagS][:].tolist().count(s)
+                    pAtsArr = df[flagP][np.isin(df[flagS][:],s)]
+                    # print flagS, s, '(3):', pAtsArr.tolist().count(3)
+                    # print flagS, s, '(4):', pAtsArr.tolist().count(4)
+                    dict[flagS+'.'+str(s)+'.3']=  pAtsArr.tolist().count(3)
+                    dict[flagS+'.'+str(s)+'.4']=  pAtsArr.tolist().count(4)
+                arr.append(pd.Series(dict))
+        return pd.concat(arr)
+
+        df.close()
 #class CDIP(NC):
 #    __metaclass__ = ABCMeta
 #    @abstractmethod

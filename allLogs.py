@@ -43,28 +43,14 @@ start = time.time()
 #s.text2nc_all()
 ##s.text2nc_append()
 
-## NEW Aug 2017
+#NEW Aug 2017
 import sass_oop
-testdir = r'/data/Junk/thredds-test/newSIO'
-# ucsb = sass_oop.SASS_Basic(sass_oop.ucsb)
-# ucsb.ncpath = testdir
-# ucsb.text2nc_all('2017')
-# #sass_oop.SASS_Basic(sass_oop.ucla).text2nc_all()
-ucsd = sass_oop.SASS_Basic(sass_oop.ucsd)
-ucsd.ncpath = testdir
-ucsd.text2nc_all('2017')
-# ##edit sass_newport_pier_archive.json: 2016-10-12
-# #sass_oop.SASS_Basic(sass_oop.uci).text2nc_all() #crashes after 2016-10-11
-#
-# uci = sass_oop.SASS_NPd2(sass_oop.uci)
-# uci.ncpath = testdir
-# uci.text2nc_all('2017')
+#sass_oop.SASS_Basic(sass_oop.ucsb).text2nc_all()
+#sass_oop.SASS_Basic(sass_oop.ucla).text2nc_all()
+#sass_oop.SASS_Basic(sass_oop.ucsd).text2nc_all()
+##edit sass_newport_pier_archive.json: 2016-10-12
+#sass_oop.SASS_Basic(sass_oop.uci).text2nc_all() #crashes after 2016-10-11
 
-# Newport ph
-# sass_oop.SASS_pH(sass_oop.uci2).text2nc_all('2017')
-# testdir = r'/data/Junk/thredds-test/newport_ph'
-# uci2 = sass_oop.SASS_pH(sass_oop.uci2)
-# uci2.ncpath = testdir
-# uci2.text2nc_all('2017')
+sass_oop.SASS_NPd2(sass_oop.uci).text2nc_all()
 
 print "Done!", time.asctime(),"Runtime:", time.time()-start

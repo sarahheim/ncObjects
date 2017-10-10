@@ -12,7 +12,7 @@ def allStations(stations, postName):
     divs = ''
     jsCharts = ''
     for i, v in enumerate(allPn.major_axis):
-        divs += '<div id="container{}" style="height: 250px; min-width: 310px"></div>\n'.format(i)
+        divs += '<div id="container{}" style="height: 200px; min-width: 310px"></div>\n'.format(i)
         print v#, allPn.major_xs(v)
         seriesArr = []
         for s in allPn.major_xs(v):
@@ -20,9 +20,11 @@ def allStations(stations, postName):
         # print allPn.minor_axis[0]
         jsCharts += '''
 $('#container{}').highcharts({{
-    title : {{ text : "{}" }},
+    title : {{ text : "" }},
+    subtitle : {{ text : "{}" }},
     yAxis: {{ title: {{ text: "Flags" }} }},
     plotOptions: {{ series: {{ pointStart: {} }} }},
+    tooltip: {{ shared: true }},
     series : {}
 }}); '''.format(i, v, allPn.minor_axis[0], seriesArr)
     # print allPn[s, v, :].tolist()
@@ -31,7 +33,10 @@ $('#container{}').highcharts({{
     html.write('''<!DOCTYPE html>
 <html>
 <head>
-<title>Page Title</title>
+<title>Flag Stats</title>
+<style>
+div {{ border-style: solid none; }}
+</style>
 <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
 <script src="http://code.highcharts.com/stock/highstock.js"></script>
 <script src="http://code.highcharts.com/stock/modules/exporting.js"></script>
