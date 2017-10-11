@@ -8,7 +8,7 @@ function getGraphs() {
   var sta = $("#station").val();
   var yr = $("#year").val();
   console.log(sta, yr, yr.length);
-  flagArr = ['temperature', 'pressure', 'chlorophyll', 'salinity']
+  flagArr = ['temperature', 'pressure', 'chlorophyll', 'salinity', 'conductivity']
   $("#graphs").html('');
   $.each(flagArr, function( i, v ) {
     console.log(v);
