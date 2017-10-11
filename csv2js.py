@@ -35,7 +35,10 @@ $('#container{}').highcharts({{
 <head>
 <title>Flag Stats</title>
 <style>
-div {{ border-style: solid none; }}
+div {{
+border-style: solid none;
+border-width: thin;
+}}
 </style>
 <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
 <script src="http://code.highcharts.com/stock/highstock.js"></script>
@@ -54,4 +57,5 @@ $(function () {{
 </html>'''.format(jsCharts, postName, divs))
     html.close()
 
-allStations(['ucsb', 'uci', 'ucla', 'ucsd'], '_v1.csv')
+# allStations(['ucsb', 'uci', 'ucla', 'ucsd'], '_v1.csv')
+allStations(['ucsb', 'uci', 'ucla', 'ucsd'], '_v2.csv')

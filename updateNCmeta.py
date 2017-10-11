@@ -8,9 +8,9 @@ testdir = r'/data/Junk/thredds-test/newFlat'
 # Making new netcdfs from OLD netcdfs (original base data, new metadata, new flag values)
 # # sass_oop.SASS_Basic(sass_oop.uci).editOldNC('/home/scheim/NCobj/SASS_old/newport_pier-2006.nc')
 sass_oop.SASS_Basic(sass_oop.uci).editOldNCs(testdir)
-# sass_oop.SASS_Basic(sass_oop.ucla).editOldNCs()
-# sass_oop.SASS_Basic(sass_oop.ucsb).editOldNCs()
-# sass_oop.SASS_Basic(sass_oop.ucsd).editOldNCs()
+sass_oop.SASS_Basic(sass_oop.ucla).editOldNCs(testdir)
+sass_oop.SASS_Basic(sass_oop.ucsb).editOldNCs(testdir)
+sass_oop.SASS_Basic(sass_oop.ucsd).editOldNCs(testdir)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Update metadata only, but from code structure. Different from man_editMata...
 # sass_oop.SASS_Basic(sass_oop.ucsd).updateNCmeta('scripps_pier-2016.nc', '/data/Junk/thredds-test/sass_meta', '')
