@@ -58,4 +58,4 @@ $(function () {{
     html.close()
 
 # allStations(['ucsb', 'uci', 'ucla', 'ucsd'], '_v1.csv')
-allStations(['ucsb', 'uci', 'ucla', 'ucsd'], '_v3.csv')
+allStations(['ucsb', 'uci', 'ucla', 'ucsd'], '_v4.csv')

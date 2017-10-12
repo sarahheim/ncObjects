@@ -7,16 +7,16 @@ import sass_oop
 testdir = r'/data/Junk/thredds-test/newFlat'
 uci = sass_oop.SASS_Basic(sass_oop.uci)
 uci.ncpath = testdir
-uci.flagStats_allYears('/home/scheim/NCobj/uci_v3.csv')
+uci.flagStats_allYears('/home/scheim/NCobj/uci_v4.csv')
 ucla = sass_oop.SASS_Basic(sass_oop.ucla)
 ucla.ncpath = testdir
-ucla.flagStats_allYears('/home/scheim/NCobj/ucla_v3.csv')
+ucla.flagStats_allYears('/home/scheim/NCobj/ucla_v4.csv')
 ucsb = sass_oop.SASS_Basic(sass_oop.ucsb)
 ucsb.ncpath = testdir
-ucsb.flagStats_allYears('/home/scheim/NCobj/ucsb_v3.csv')
+ucsb.flagStats_allYears('/home/scheim/NCobj/ucsb_v4.csv')
 ucsd = sass_oop.SASS_Basic(sass_oop.ucsd)
 ucsd.ncpath = testdir
-ucsd.flagStats_allYears('/home/scheim/NCobj/ucsd_v3.csv')
+ucsd.flagStats_allYears('/home/scheim/NCobj/ucsd_v4.csv')
 
 
 print "Done!", time.asctime(),"Runtime:", time.time()-start
