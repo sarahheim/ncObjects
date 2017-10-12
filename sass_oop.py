@@ -147,7 +147,7 @@ class SASS(sccoos.SCCOOS):
             },
             sensor_span=(-5,30), user_span=(8,30),
             # low_reps=2, high_reps=6, eps=0.0001, low_thresh=2, high_thresh=3) #v1
-            low_reps=6, high_reps=10, eps=0.0001, low_thresh=2, high_thresh=3)
+            low_reps=5, high_reps=9, eps=0.0001, low_thresh=2, high_thresh=3)
         self.attr_tempF1 = FlagAttr('temperature_flagPrimary',
             atts={
                 'long_name' : 'sea water temperature, qc primary flag',
@@ -169,7 +169,7 @@ class SASS(sccoos.SCCOOS):
             },
             sensor_span=(0,9), user_span=None,
             # low_reps=2, high_reps=5, eps=0.00005, low_thresh=None, high_thresh=None) #v1
-            low_reps=6, high_reps=10, eps=0.00001, low_thresh=None, high_thresh=None)
+            low_reps=5, high_reps=9, eps=0.00001, low_thresh=None, high_thresh=None)
         self.attr_conF1 = FlagAttr('conductivity_flagPrimary',
             atts={
                 'long_name' : 'sea water electrical conductivity, qc primary flag',
@@ -191,7 +191,7 @@ class SASS(sccoos.SCCOOS):
             },
             sensor_span=(0,20), user_span=(1,7),
             # low_reps=2, high_reps=5, eps=0.0005, low_thresh=4, high_thresh=5) #v1
-            low_reps=6, high_reps=10, eps=0.0005, low_thresh=4, high_thresh=5)
+            low_reps=6, high_reps=9, eps=0.0005, low_thresh=4, high_thresh=5)
         self.attr_presF1 = FlagAttr('pressure_flagPrimary',
             atts={
                 'long_name' : 'sea water pressure, qc primary flag',
@@ -213,7 +213,7 @@ class SASS(sccoos.SCCOOS):
             },
             sensor_span=(2,42), user_span=(30,34.5),
             # low_reps=3, high_reps=5, eps=0.00004, low_thresh=0.4, high_thresh=0.5 #v1
-            low_reps=6, high_reps=10, eps=0.00005, low_thresh=0.4, high_thresh=0.5)
+            low_reps=6, high_reps=9, eps=0.00005, low_thresh=0.4, high_thresh=0.5)
         self.attr_salF1 = FlagAttr('salinity_flagPrimary',
             atts={
                 'long_name' : 'sea water salinity, qc primary flag',
