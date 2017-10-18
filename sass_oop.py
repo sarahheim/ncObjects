@@ -834,16 +834,6 @@ class SASS_Basic(SASS):
         # df.drop('calcDate', axis=1, inplace=True)
         # df['chlorophyll_raw'] = np.zeros_like(df.chlorophyll, dtype='uint8')
 
-        # df.drop('temperature_flagPrimary', axis=1, inplace=True)
-        # df.drop('temperature_flagSecondary', axis=1, inplace=True)
-        # df.drop('conductivity_flagPrimary', axis=1, inplace=True)
-        # df.drop('conductivity_flagSecondary', axis=1, inplace=True)
-        # df.drop('pressure_flagPrimary', axis=1, inplace=True)
-        # df.drop('pressure_flagSecondary', axis=1, inplace=True)
-        # df.drop('salinity_flagPrimary', axis=1, inplace=True)
-        # df.drop('salinity_flagSecondary', axis=1, inplace=True)
-        # df.drop('chlorophyll_flagPrimary', axis=1, inplace=True)
-        # df.drop('chlorophyll_flagSecondary', axis=1, inplace=True)
         for v in df:
             if '_flag' in v: df.drop(v, axis=1, inplace=True)
 
@@ -888,6 +878,46 @@ class SASS_Basic(SASS):
                 self.editOldNC(filename, newDir)
         # fn =  self.sta.code_name+'-2006.nc'
         # self.editOldNC(os.path.join(self.ncpath, fn))
+
+    def local2utc(self, start, end, adjSecs):
+        ''' Some stations had some data recorded in local time instead of UTC.
+        This method adjusts those local time to UTC.
+        >>> sass_oop.SASS_Basic(sass_oop.ucsb).local2utc('2009-05-14', '2009-07-02T13:05', 25200)
+        # +7:00 (25200)
+        >>> sass_oop.SASS_Basic(sass_oop.ucla).local2utc('2005-06-15', '2008-11-30', 28800)
+        # +8:00
+        '''
+        import xarray as xr
+        self.ncpath = '/home/scheim/NCobj/timeShift'
+        sDate = pd.Timestamp(start) # UTC
+        eDate = pd.Timestamp(end)
+        print sDate, eDate
+        for yr in range(sDate.year, eDate.year+1):
+            sEp = sDate.value // 10**9
+            eEp = eDate.value // 10**9
+            ncfilename = self.prefix+ str(yr) + '.nc'
+            filepath = os.path.join(self.ncpath, ncfilename)
+            print 'edit', filepath
+            if (os.path.isfile(filepath)):
+                ds = xr.open_dataset(filepath)
+                df = ds.to_dataframe()
+                ds.close()
+                timeNum = len(df.index)
+                print 'length', timeNum
+                print df.index[0], type(df.index[0])
+                df['epoch'] = df.index.astype(np.int64) // 10 ** 9
+                # df['adjTime'] = [ i.tz_localize('America/Los_Angeles').tz_convert('UTC') if sDate <= i <= eDate else i for i in df.index]
+                df['adjTime'] = [ i+adjSecs if sEp <= i <= eEp else i for i in df.epoch]
+                # print df['adjTime']
+
+                # Write new time to existing NC
+                print type(df.index), type(df.adjTime)
+                # df['epochs'] = pd.to_datetime(df.adjTime, utc=True).values.astype('int64') // 10**9
+                ncfile = Dataset(filepath, 'a', format='NETCDF4')
+                ncfile.variables['time'][0:] = df['adjTime'].values
+                self.NCtimeMeta(ncfile)
+                ncfile.close()
+                print 'done', filepath
 
 class SASS_NPd2(SASS):
     def __init__(self, sta):
