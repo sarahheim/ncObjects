@@ -5,6 +5,10 @@ import time, os, calendar
 logsdir = r'/data/InSitu/DelMar/data'
 ftp = ftplib.FTP('geo.ucsd.edu', 'anonymous', 'anonymous')
 ftp_log = r'ftp_log.txt'
+
+#if a file has a bad line, it may need to be edited WITHOUT being overwritten.
+# Once filename is in this array, it won't be re-copied.
+ignoreEdited = ['CT1169100u_11691_20170807.002c.sc1']
 # print ftp.retrlines('LIST')
 
 def copyFTPfile(log, ftp, fn, filename, fnModEp):
@@ -42,7 +46,7 @@ def syncFtpLogs(dpmt):
             # print 'HAVE:', fn
             #check if file size is different
             # WHAT IF FILE NEEDS TO BE EDITED !!!!!!!?!?!??!?!???????
-            if (fnSz != os.path.getsize(filename)):
+            if (fnSz != os.path.getsize(filename)) and (fn not in ignoreEdited):
                 # print '\tDIFF SIZE'
                 copyFTPfile(log, ftp, fn, filename, fnModEp)
         else:
