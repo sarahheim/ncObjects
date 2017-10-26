@@ -8,6 +8,7 @@ import os, time, datetime, json, math, re
 
 import pandas as pd
 import numpy as np
+import xarray as xr
 from netCDF4 import Dataset
 from abc import ABCMeta, abstractmethod
 
@@ -95,11 +96,12 @@ class SASS(sccoos.SCCOOS):
         #print "init sass"
 
         # #test locations
-        # self.codedir = '/home/scheim/NCobj/'
+        self.codedir = '/home/scheim/NCobj/'
         # self.ncpath = '/home/scheim/NCobj/SASS_new'
+        self.ncpath = '/data/Junk/thredds-test/append'
 
-        self.codedir = '/data/InSitu/SASS/code/ncobjects'
-        self.ncpath = '/data/InSitu/SASS/netcdfs_new/'
+        # self.codedir = '/data/InSitu/SASS/code/ncobjects'
+        # self.ncpath = '/data/InSitu/SASS/netcdfs_new/'
 
         # self.dateformat = '%Y-%m-%dT%H:%M:%S.%fZ'
         self.crontab = True
@@ -528,6 +530,30 @@ class SASS(sccoos.SCCOOS):
             return colsDict[useKey]
             #Check that the list is equal to # of columns?!!!
 
+    def textReader(self, filename, extDict):
+        print os.path.isfile(filename), filename
+        df = pd.read_csv(filename, sep='^', header=None, prefix='X',error_bad_lines=False)
+        # Split data into proper columns
+        df = df.X0.str.extract(self.regex)
+        # Drop any rows with NaN
+        df = df.dropna()
+
+        df.columns = self.get_cols(extDict["cols"], df.iloc[0,0])
+        # Set date_time to pandas datetime format
+        dateformat = "%d %b %Y %H:%M:%S"
+        # to_datetime (utc=None) --default-- and True results are the same
+        df['date_time'] = pd.to_datetime(df.date+' '+df.time, format=dateformat)
+        # Make date_time an index
+        df.set_index('date_time', inplace=True)
+        # df.index = df.index.tz_localize('UTC') #not needed?
+        # Drop columns that were merged
+        df.drop('date', axis=1, inplace=True)
+        df.drop('time', axis=1, inplace=True)
+
+        #only look at IPs for station (strip out other ips)
+        df = df[df['ip'].isin(self.sta.ips)]
+        return df
+
     def calc_factorOffset1(self, x, input):
         """
         :param x: number, assuming chlorophyll
@@ -558,17 +584,44 @@ class SASS(sccoos.SCCOOS):
         input = calcsDict[row.calcDate]['input']
         return func+"()"+str(row[col])+")"+str(input[0])+'+'+str(input[1])
 
+    #Basic
+    def calculations(self, df, extDict):
+        for col in df.columns:
+            if col not in ['server_date', 'ip']:
+                #ALL might not be float in the future?
+                df.loc[:,col] = df.loc[:,col].astype(float)
+                #Check if column name has calculations
+                if col in extDict['calcs']:
+                    df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
+                    dates = extDict['calcs'][col].keys()
+                    dates.sort()
+                    #loop through dates and set appropriate date
+                    for calcDtStr in dates:
+                        calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
+                        # df.loc[:,'calcDate'] = [calcDtStr if i >= calcDt else df['calcDate'][i] for i in df.index]
+                        df['calcDate'] = [calcDtStr if i >= calcDt else df['calcDate'][i] for i in df.index]
+                    df.rename(columns={col: col+'_raw'}, inplace=True)
+                    df.loc[:,col] = df.apply(self.doCalc, axis=1, col=col+'_raw', calcsDict=extDict['calcs'][col])
+                    # df[col+'_calc'] = df.apply(self.doCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
+                    # df[col+'_calcStr'] = df.apply(self.printCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
+                    df.drop('calcDate', axis=1, inplace=True)
+        return df
+
     def text2nc(self, filename):
         """#previously dataframe2nc
         - Uses Panda's ``read_csv``
         - Does a series of regular expressions (a.k.a. regex)
         - Uses QC methods from **sassqc**
 
+        .. note: most recent rewrite
+            - Moved reading to ``textReader``
+            - Moved calc to ``calculations``
+            - Doing QC on netcdf, not text file
+
         .. todo:
             - columns if multiple, could be better. If change of column names
                 happens in a dataset, it only applies one set of column names
-            - qc_test for Spike Test should be done on NC after appending?
-            - qc_test for gap in Time
+            - qc_test for gap in Time, others
             - rewrite sccoos.qc_tests to just take df and object
             - rewrite nc.dataToNC for createNCshell?, not passing 'lookup'
 
@@ -582,73 +635,69 @@ class SASS(sccoos.SCCOOS):
         with open(jsonFn) as json_file:
             extDict = json.load(json_file)
 
-        print os.path.isfile(filename), filename
-        df = pd.read_csv(filename, sep='^', header=None, prefix='X',error_bad_lines=False)
-        # Split data into proper columns
-        df = df.X0.str.extract(self.regex)
-        # Drop any rows with NaN
-        df = df.dropna()
+        df = self.textReader(filename, extDict)
 
-        df.columns = self.get_cols(extDict["cols"], df.iloc[0,0])
-        # Set date_time to pandas datetime format
-        dateformat = "%d %b %Y %H:%M:%S"
-        # to_datetime (utc=None) --default-- and True results are the same
-        df['date_time'] = pd.to_datetime(df.date+' '+df.time, format=dateformat)
-        # Make date_time an index
-        df.set_index('date_time', inplace=True)
-        # df.index = df.index.tz_localize('UTC') #not needed?
-        # Drop columns that were merged
-        df.drop('date', axis=1, inplace=True)
-        df.drop('time', axis=1, inplace=True)
+        #groupby year. Since newyear text file can contain data from last year.
+        groupedYr = df.groupby(df.index.year)
+        for yr in groupedYr.indices:
+            # Check file size, nccopy to bring size down, replace original file
+            grpYr = groupedYr.get_group(yr)
+            ncfilename = self.prefix+ str(yr) + '.nc'
+            ncfilepath = os.path.join(self.ncpath, ncfilename)
 
-        #only look at IPs for station (strip out other ips)
-        df = df[df['ip'].isin(self.sta.ips)]
+            if os.path.isfile(ncfilepath):
+                # ncfile = Dataset(ncName, 'r', format='NETCDF4')
+                ds = xr.open_dataset(ncfilepath)
+                ncDF = ds.to_dataframe()
+                ds.close()
+                print 'init size:', len(ncDF.index), 'last recorded:', ncDF.index[-1]
 
-        if len(df) > 0:
-            #set dataframe types, do calculations
-            for col in df.columns:
-                if col not in ['server_date', 'ip']:
-                    #ALL might not be float in the future?
-                    df.loc[:,col] = df.loc[:,col].astype(float)
-                    #Check if column name has calculations
-                    if col in extDict['calcs']:
-                        df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
-                        dates = extDict['calcs'][col].keys()
-                        dates.sort()
-                        #loop through dates and set appropriate date
-                        for calcDtStr in dates:
-                            calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
-                            df['calcDate'] = [calcDtStr if i > calcDt else df['calcDate'][i] for i in df.index]
-                        df.rename(columns={col: col+'_raw'}, inplace=True)
-                        df[col] = df.apply(self.doCalc, axis=1, col=col+'_raw', calcsDict=extDict['calcs'][col])
-                        # df[col+'_calc'] = df.apply(self.doCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
-                        # df[col+'_calcStr'] = df.apply(self.printCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
+                ## Add the following: remove any entries from the subset that already exist!!!!!!!
+                # exist = grpYr.epoch.isin(ncDep.variables['time'][:]) #
+                # grpYr['epochs'] = grpYr.index.values.astype('int64') // 10**9
+                exist  = grpYr.index.isin(ncDF.index)
+                # appDF = grpYr[~exist]
+                appDF = grpYr.loc[~exist]
+            else:
+                # ncfile = self.createNCshell(ncName, lookup)
+                # appDF = grpYr
+                appDF = grpYr.loc[:]
+                ncDF = pd.DataFrame({})
 
-                        df.drop('calcDate', axis=1, inplace=True)
+            print 'number of new:', len(appDF)
+            if len(appDF) > 0: # else all times are already in nc
+            # if len(df) > 0:
+                #set dataframe types, do calculations
+                appDF = self.calculations(appDF, extDict)
+                df2 = ncDF.append(appDF)
+                #Drop all flag columns (will be reset)
+                for v in df2:
+                    if '_flag' in v: df2.drop(v, axis=1, inplace=True)
 
-            self.attrArr = [] # dataToNC uses an attrArr which use to contain str names, not objects
-            for a in self.attrObjArr:
-                # print 'HASATTR', hasattr(a, 'miss_val')
-                # if the attribute has ANY of the qc attributes, run it through qc_tests
-                for qcv in MainAttr.qc_vars:
-                    if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
-                        df = self.qc_tests(df, a.name, miss_val=a.miss_val,
-                            sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
-                            high_reps=a.high_reps, eps=a.eps,
-                            low_thresh=a.low_thresh, high_thresh=a.high_thresh)
-                        break
-                self.attrArr.append(a.name)
-
-            #groupby year. Since newyear text file can contain data from last year.
-            groupedYr = df.groupby(df.index.year)
-            for yr in groupedYr.indices:
-                # Check file size, nccopy to bring size down, replace original file
-                grpYr = groupedYr.get_group(yr)
-                ncfilename = self.prefix+ str(yr) + '.nc'
-                filepath = os.path.join(self.ncpath, ncfilename)
-                self.dataToNC(filepath, grpYr, '')
-                print 'appending to:', filepath
-                self.fileSizeChecker(filepath)
+                print 'appending to:', ncfilepath
+                ncfile = Dataset(ncfilepath, 'a', format='NETCDF4')
+                print 'time lens', len(ncfile.variables['time']), df2.index.shape
+                ncfile.variables['time'][0:] = df2.index.values.astype('int64') // 10**9
+                for a in self.attrObjArr:
+                    # if the attribute has ANY of the qc attributes, run it through qc_tests
+                    for qcv in MainAttr.qc_vars:
+                        if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
+                            df2 = self.qc_tests(df2, a.name, miss_val=a.miss_val,
+                                sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
+                                high_reps=a.high_reps, eps=a.eps,
+                                low_thresh=a.low_thresh, high_thresh=a.high_thresh)
+                            break
+                    # Flag variables should be AFTER base variable
+                    # print 'sizes', a.name, len(ncfile.variables[a.name][:]), df2[a.name].shape
+                    ncfile.variables[a.name][0:] = df2[a.name].values
+                    self.attrMinMax(ncfile, a.name)
+                self.NCtimeMeta(ncfile)
+                ncfile.close()
+                ncfile = Dataset(ncfilepath, 'r', format='NETCDF4')
+                print 'post-time len check', len(ncfile.variables['time'])
+                ncfile.close()
+                self.fileSizeChecker(ncfilepath)
+                print 'finished appending file'
 
     def text2nc_all(self, qryMn):
         """ For now pass '201' to do all years (2013-2017)
@@ -679,6 +728,7 @@ class SASS(sccoos.SCCOOS):
         looplimit = 100
         loopCount = 1
         lastNC = self.getLastNC(self.prefix)
+        print 'lastNC:', lastNC
         latest = self.getLastDateNC(lastNC)
         LRdt = datetime.datetime.utcfromtimestamp(latest)
         print 'MAX, last recorded', LRdt
@@ -795,7 +845,6 @@ class SASS_Basic(SASS):
     def editOldNC(self, fname, newDir):
         '''Go through netcdfs and copy all sensor values, but do QC.
         New files also have the new metadata'''
-        import xarray as xr
         print 'Using old nc:', fname
 
         # jsonFn = os.path.join(self.codedir, 'sass_'+self.sta.code_name+'_archive.json')
@@ -887,7 +936,6 @@ class SASS_Basic(SASS):
         >>> sass_oop.SASS_Basic(sass_oop.ucla).local2utc('2005-06-15', '2008-11-30', 28800)
         # +8:00
         '''
-        import xarray as xr
         self.ncpath = '/home/scheim/NCobj/timeShift'
         sDate = pd.Timestamp(start) # UTC
         eDate = pd.Timestamp(end)
@@ -1078,6 +1126,25 @@ class SASS_pH(SASS):
         r = Regex()
         self.regex = r'^'+r.re_serverdate+r.re_s+r.re_ip+r.re_s+r.concatRegex(7)+r'$'
 
+    def textReader(self, filename, extDict):
+        print os.path.isfile(filename), filename
+        df = pd.read_csv(filename, sep='^', header=None, prefix='X',error_bad_lines=False)
+        # Split data into proper columns
+        df = df.X0.str.extract(self.regex)
+        # Drop any rows with NaN
+        df = df.dropna()
+
+        df.columns = self.get_cols(extDict["cols"], df.iloc[0,0])
+        # Set date_time to pandas datetime format
+        # to_datetime (utc=None) --default-- and True results are the same
+        df['date_time'] = pd.to_datetime(df.server_date, format='%Y-%m-%dT%H:%M:%SZ')
+        # Don't keep any rows with identical date_time/server_date. See warning in class.
+        df.drop_duplicates(subset='date_time', keep=False, inplace=True)
+        # Make date_time an index
+        df.set_index('date_time', inplace=True)
+        # df.index = df.index.tz_localize('UTC') #not needed?
+        return df
+
     def calc_temp(self, row, inputs):
         """
         :param object row: pandas dataframe row with column name as attributes
@@ -1129,89 +1196,20 @@ class SASS_pH(SASS):
         inputs = calcsDict[row.calcDate]['inputs']
         return eval('self.'+func)(row, inputs=inputs)
 
-    def text2nc(self, filename):
-        """#previously dataframe2nc
-        - Uses Panda's ``read_csv``
-        - Does a series of regular expressions (a.k.a. regex)
-        - Uses QC methods from **sassqc**
-
-        .. todo:
-            - columns if multiple, could be better. If change of column names
-                happens in a dataset, it only applies one set of column names
-            - qc_test for Spike Test should be done on NC after appending?
-            - qc_test for gap in Time
-            - rewrite sccoos.qc_tests to just take df and object
-            - rewrite nc.dataToNC for createNCshell?, not passing 'lookup'
-
-        :param str filename: filename, including directory location
-        :param str regex: regular expression used in pandas's read_csv/extract
-        :param array? columns: columns should contain: 'date', 'time', 'ip'; 'server_date'?
-        """
-
-        jsonFn = os.path.join(self.codedir, 'sass_'+self.sta.code_name+'_archive.json')
-        print os.path.isfile(jsonFn), jsonFn
-        with open(jsonFn) as json_file:
-            extDict = json.load(json_file)
-
-        print os.path.isfile(filename), filename
-        df = pd.read_csv(filename, sep='^', header=None, prefix='X',error_bad_lines=False)
-        # Split data into proper columns
-        df = df.X0.str.extract(self.regex)
-        # Drop any rows with NaN
-        df = df.dropna()
-
-        df.columns = self.get_cols(extDict["cols"], df.iloc[0,0])
-        # Set date_time to pandas datetime format
-        # to_datetime (utc=None) --default-- and True results are the same
-        df['date_time'] = pd.to_datetime(df.server_date, format='%Y-%m-%dT%H:%M:%SZ')
-        # Don't keep any rows with identical date_time/server_date. See warning in class.
-        df.drop_duplicates(subset='date_time', keep=False, inplace=True)
-        # Make date_time an index
-        df.set_index('date_time', inplace=True)
-        # df.index = df.index.tz_localize('UTC') #not needed?
-
-        #only look at IPs for station (strip out other ips)
-        df = df[df['ip'].isin(self.sta.ips)]
-
-        if len(df) > 0:
-            #set dataframe types, do calculations
-            for col in df.columns:
-                if col not in ['server_date', 'ip']:
-                    #ALL might not be float in the future?
-                    df.loc[:,col] = df.loc[:,col].astype(float)
-                    #Check if column name has calculations
-            for calc in ['temperature', 'ph']: # temperature needs to be done beofre ph
-                df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
-                dates = extDict['calcs'][calc].keys()
-                dates.sort()
-                #loop through dates and set appropriate date
-                for calcDtStr in dates:
-                    calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
-                    df['calcDate'] = [calcDtStr if i > calcDt else df['calcDate'][i] for i in df.index]
-                # df.rename(columns={col: col+'_raw'}, inplace=True)
-                df[calc] = df.apply(self.doCalc, axis=1, calcsDict=extDict['calcs'][calc])
-                df.drop('calcDate', axis=1, inplace=True)
-
-            self.attrArr = [] # dataToNC uses an attrArr which use to contain str names, not objects
-            for a in self.attrObjArr:
-                # print 'HASATTR', hasattr(a, 'miss_val')
-                # if the attribute has ANY of the qc attributes, run it through qc_tests
-                for qcv in MainAttr.qc_vars:
-                    if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
-                        df = self.qc_tests(df, a.name, miss_val=a.miss_val,
-                            sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
-                            high_reps=a.high_reps, eps=a.eps,
-                            low_thresh=a.low_thresh, high_thresh=a.high_thresh)
-                        break
-                self.attrArr.append(a.name)
-
-            #groupby year. Since newyear text file can contain data from last year.
-            groupedYr = df.groupby(df.index.year)
-            for yr in groupedYr.indices:
-                # Check file size, nccopy to bring size down, replace original file
-                grpYr = groupedYr.get_group(yr)
-                ncfilename = self.prefix+ str(yr) + '.nc'
-                filepath = os.path.join(self.ncpath, ncfilename)
-                self.dataToNC(filepath, grpYr, '')
-                print 'appending to:', filepath
-                self.fileSizeChecker(filepath)
+    def calculations(self, df, extDict):
+        for col in df.columns:
+            if col not in ['server_date', 'ip']:
+                #ALL might not be float in the future?
+                df.loc[:,col] = df.loc[:,col].astype(float)
+                #Check if column name has calculations
+        for calc in ['temperature', 'ph']: # temperature needs to be done beofre ph
+            df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
+            dates = extDict['calcs'][calc].keys()
+            dates.sort()
+            #loop through dates and set appropriate date
+            for calcDtStr in dates:
+                calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
+                df['calcDate'] = [calcDtStr if i >= calcDt else df['calcDate'][i] for i in df.index]
+            # df.rename(columns={col: col+'_raw'}, inplace=True)
+            df[calc] = df.apply(self.doCalc, axis=1, calcsDict=extDict['calcs'][calc])
+            df.drop('calcDate', axis=1, inplace=True)
