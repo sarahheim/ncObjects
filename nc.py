@@ -43,7 +43,7 @@ class NC(object):
             'geospatial_lon_units':'degrees_east',
             'geospatial_lat_units':'degrees_north',
             'time_coverage_units':'seconds since 1970-01-01 00:00:00 UTC',
-            'time_coverage_resolution': 'P1S' #prev '1'
+            'time_coverage_resolution': 'PT1S' #prev 'P1S'
             }
         self.meta_lat = {
         # lat = ncfile.createVariable('lat', 'f4')

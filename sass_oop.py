@@ -1,4 +1,4 @@
-#
+f#
 # Author Sarah Heim
 # Date create: 2016
 # Description: adjusting to class/objects, inheriting NC/SASS classes
@@ -455,6 +455,9 @@ class SASS(sccoos.SCCOOS):
             'creator_name': self.sta.inst,
             'creator_url': self.sta.url,
             "date_created": self.tupToISO(time.gmtime()), #time.ctime(time.time()),
+            'geospatial_bounds_crs': 'EPSG:4326',
+            'geospatial_bounds_vertical_crs': 'EPSG:5829',
+            'geospatial_bounds': 'POINT('+ str(self.staMeta['lon'])+' '+str(self.staMeta['lat'])+')',
             "geospatial_lat_min": self.sta.lat,
             "geospatial_lat_max": self.sta.lat,
             "geospatial_lon_min": self.sta.lon,
