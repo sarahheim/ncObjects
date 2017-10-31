@@ -98,10 +98,10 @@ class SASS(sccoos.SCCOOS):
         # #test locations
         self.codedir = '/home/scheim/NCobj/'
         # self.ncpath = '/home/scheim/NCobj/SASS_new'
-        self.ncpath = '/data/Junk/thredds-test/append'
+        # self.ncpath = '/data/Junk/thredds-test/append'
 
         # self.codedir = '/data/InSitu/SASS/code/ncobjects'
-        # self.ncpath = '/data/InSitu/SASS/netcdfs_new/'
+        self.ncpath = '/data/InSitu/SASS/netcdfs_new/'
 
         # self.dateformat = '%Y-%m-%dT%H:%M:%S.%fZ'
         self.crontab = True
@@ -394,7 +394,7 @@ class SASS(sccoos.SCCOOS):
         self.ch_p1 = CharVariable('platform1', sta,
             atts={
                 'long_name' : self.sta.code_name,
-                'ioos_code' : "urn:ioos:sensor:sccoos:"+self.sta.code_name
+                'ioos_code' : "urn:ioos:station:sccoos:"+self.sta.code_name
             })
 
     def createVariableTimeDim(self, ncfile, tv):
@@ -1197,6 +1197,12 @@ class SASS_pH(SASS):
         return eval('self.'+func)(row, inputs=inputs)
 
     def calculations(self, df, extDict):
+        """
+        .. note: Separate from SASS_Basic because, calculations needed to be done in a
+        specific order (temperature BEFORE ph).
+        .. todo: See note^. Merge both calculations methods to single parent.
+        Impliment order of calculations (JSON? "calc_order")
+        """
         for col in df.columns:
             if col not in ['server_date', 'ip']:
                 #ALL might not be float in the future?
