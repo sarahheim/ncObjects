@@ -18,12 +18,12 @@ def all_sass(obj, start, stop):
     for yr in range(start, stop):
         obj.updateNCmeta(obj.prefix+str(yr)+'.nc', '/data/Junk/thredds-test/sass_meta', '')
 
-all_sass(sass_oop.SASS_Basic(sass_oop.ucsb), 2005, 2018)
+# all_sass(sass_oop.SASS_Basic(sass_oop.ucsb), 2005, 2018)
 all_sass(sass_oop.SASS_Basic(sass_oop.uci), 2005, 2017)
-all_sass(sass_oop.SASS_Basic(sass_oop.ucla), 2005, 2016)
-all_sass(sass_oop.SASS_Basic(sass_oop.ucsd), 2005, 2018)
-all_sass(sass_oop.SASS_NPd2(sass_oop.uci), 2016, 2018)
-all_sass(sass_oop.SASS_pH(sass_oop.uci2), 2017, 2018)
+# all_sass(sass_oop.SASS_Basic(sass_oop.ucla), 2005, 2016)
+# all_sass(sass_oop.SASS_Basic(sass_oop.ucsd), 2005, 2018)
+# all_sass(sass_oop.SASS_NPd2(sass_oop.uci), 2016, 2018)
+# all_sass(sass_oop.SASS_pH(sass_oop.uci2), 2017, 2018)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

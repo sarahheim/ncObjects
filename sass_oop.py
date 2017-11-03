@@ -79,7 +79,12 @@ uci2 = Station(code_name = '005_newport_pier',
                 inst= 'University of California, Irvine')
 
 class SASS(sccoos.SCCOOS):
-    """Class for SCCOOS's Automated Shore Stations. Currently, log files and netCDFs"""
+    """Class for SCCOOS's Automated Shore Stations. Currently, log files and netCDFs
+
+    Move note to nc/sccoos.py?
+    ``self.attrObjArr``: string of names of variables
+    ``self.attrArr``: list of objects (use this.name)
+    """
     #set SASS metadata
     @abstractmethod
     def __init__(self, sta):
@@ -96,11 +101,11 @@ class SASS(sccoos.SCCOOS):
         #print "init sass"
 
         # #test locations
-        self.codedir = '/home/scheim/NCobj/'
+        # self.codedir = '/home/scheim/NCobj/'
         # self.ncpath = '/home/scheim/NCobj/SASS_new'
         # self.ncpath = '/data/Junk/thredds-test/append'
 
-        # self.codedir = '/data/InSitu/SASS/code/ncobjects'
+        self.codedir = '/data/InSitu/SASS/code/ncobjects'
         self.ncpath = '/data/InSitu/SASS/netcdfs_new/'
 
         # self.dateformat = '%Y-%m-%dT%H:%M:%S.%fZ'
@@ -932,8 +937,10 @@ class SASS_Basic(SASS):
         # self.editOldNC(os.path.join(self.ncpath, fn))
 
     def local2utc(self, start, end, adjSecs):
-        ''' Some stations had some data recorded in local time instead of UTC.
+        '''
+        .. warning: Some stations had some data recorded in local time instead of UTC.
         This method adjusts those local time to UTC.
+
         >>> sass_oop.SASS_Basic(sass_oop.ucsb).local2utc('2009-05-14', '2009-07-02T13:05', 25200)
         # +7:00 (25200)
         >>> sass_oop.SASS_Basic(sass_oop.ucla).local2utc('2005-06-15', '2008-11-30', 28800)
@@ -1222,3 +1229,4 @@ class SASS_pH(SASS):
             # df.rename(columns={col: col+'_raw'}, inplace=True)
             df[calc] = df.apply(self.doCalc, axis=1, calcsDict=extDict['calcs'][calc])
             df.drop('calcDate', axis=1, inplace=True)
+        return df
