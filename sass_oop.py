@@ -81,6 +81,12 @@ uci2 = Station(code_name = '005_newport_pier',
 class SASS(sccoos.SCCOOS):
     """Class for SCCOOS's Automated Shore Stations. Currently, log files and netCDFs
 
+    :attr str codedir: location of code to use
+    :attr str ncpath: location of netCDFs
+    :attr bool crontab:
+    :attr arr calcArr: array of calculations to be done in ORDER to be done
+    :attr dict metaDict: dictionary of metadata to put in netCDF global attribute
+
     Move note to nc/sccoos.py?
     ``self.attrObjArr``: string of names of variables
     ``self.attrArr``: list of objects (use this.name)
@@ -101,15 +107,16 @@ class SASS(sccoos.SCCOOS):
         #print "init sass"
 
         # #test locations
-        # self.codedir = '/home/scheim/NCobj/'
+        self.codedir = '/home/scheim/NCobj/'
         # self.ncpath = '/home/scheim/NCobj/SASS_new'
-        # self.ncpath = '/data/Junk/thredds-test/append'
+        self.ncpath = '/data/Junk/thredds-test/merge'
 
-        self.codedir = '/data/InSitu/SASS/code/ncobjects'
-        self.ncpath = '/data/InSitu/SASS/netcdfs_new/'
+        # self.codedir = '/data/InSitu/SASS/code/ncobjects'
+        # self.ncpath = '/data/InSitu/SASS/netcdfs_new/'
 
         # self.dateformat = '%Y-%m-%dT%H:%M:%S.%fZ'
         self.crontab = True
+        self.calcArr = ['chlorophyll']
 
         self.metaDict.update({
             'cdm_data_type':'Station',
@@ -564,33 +571,36 @@ class SASS(sccoos.SCCOOS):
 
     def calc_factorOffset1(self, x, input):
         """
-        :param x: number, assuming chlorophyll
-        :param array input: [Factor, Offset]
+        :param x: row,
+        :param array input: {'factor': a, 'offset':b]
         :returns: x times Factor plus Offset
         """
-        return x*input[0]+input[1]
-        # return str(x)+str(type(input[0]))+repr(input[0])+str(type(input[1]))+repr(input[1])
+        try:
+            return x.chlorophyll_raw*input['scale']+input['offset']
+
+        except:
+            return None
+
 
     def doCalc(self, row, **kwargs):
         """
         :param object row: row, with columns as attributes
-        :param str col: column name/attribute/variable to have function applied to
-        :param dictionary calcsDict:
+        :param dictionary calcsDict: dictionary containing
         :returns: output from calculation function
         """
         calcsDict = kwargs['calcsDict']
-        col = kwargs['col']
+        # col = kwargs['col']
         func = calcsDict[row.calcDate]['function']
         input = calcsDict[row.calcDate]['input']
-        return eval('self.'+func)(row[col], input=input)
+        return eval('self.'+func)(row, input=input)
 
     def printCalc(self, row, **kwargs):
         """This is just for testing, to check the function/input being used on a value"""
         calcsDict = kwargs['calcsDict']
-        col = kwargs['col']
+        # col = kwargs['col']
         func = calcsDict[row.calcDate]['function']
         input = calcsDict[row.calcDate]['input']
-        return func+"()"+str(row[col])+")"+str(input[0])+'+'+str(input[1])
+        return func+"()"+str(row)+")"+str(input)
 
     #Basic
     def calculations(self, df, extDict):
@@ -599,20 +609,31 @@ class SASS(sccoos.SCCOOS):
                 #ALL might not be float in the future?
                 df.loc[:,col] = df.loc[:,col].astype(float)
                 #Check if column name has calculations
-                if col in extDict['calcs']:
-                    df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
-                    dates = extDict['calcs'][col].keys()
-                    dates.sort()
-                    #loop through dates and set appropriate date
-                    for calcDtStr in dates:
-                        calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
-                        # df.loc[:,'calcDate'] = [calcDtStr if i >= calcDt else df['calcDate'][i] for i in df.index]
-                        df['calcDate'] = [calcDtStr if i >= calcDt else df['calcDate'][i] for i in df.index]
-                    df.rename(columns={col: col+'_raw'}, inplace=True)
-                    df.loc[:,col] = df.apply(self.doCalc, axis=1, col=col+'_raw', calcsDict=extDict['calcs'][col])
-                    # df[col+'_calc'] = df.apply(self.doCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
-                    # df[col+'_calcStr'] = df.apply(self.printCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
-                    df.drop('calcDate', axis=1, inplace=True)
+        for calc in self.calcArr:
+            df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
+            dates = extDict['calcs'][calc].keys()
+            dates.sort()
+            #loop through dates and set appropriate date
+            for calcDtStr in dates:
+                calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
+                df['calcDate'] = [calcDtStr if i >= calcDt else df['calcDate'][i] for i in df.index]
+            # df.rename(columns={calc: calc+'_raw'}, inplace=True)
+            df[calc] = df.apply(self.doCalc, axis=1, calcsDict=extDict['calcs'][calc])
+            df.drop('calcDate', axis=1, inplace=True)
+                # if col in extDict['calcs']:
+                #     df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
+                #     dates = extDict['calcs'][col].keys()
+                #     dates.sort()
+                #     #loop through dates and set appropriate date
+                #     for calcDtStr in dates:
+                #         calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
+                #         # df.loc[:,'calcDate'] = [calcDtStr if i >= calcDt else df['calcDate'][i] for i in df.index]
+                #         df['calcDate'] = [calcDtStr if i >= calcDt else df['calcDate'][i] for i in df.index]
+                #     df.rename(columns={col: col+'_raw'}, inplace=True)
+                #     df.loc[:,col] = df.apply(self.doCalc, axis=1, col=col+'_raw', calcsDict=extDict['calcs'][col])
+                #     # df[col+'_calc'] = df.apply(self.doCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
+                #     # df[col+'_calcStr'] = df.apply(self.printCalc, axis=1, col=col, calcsDict=extDict['calcs'][col])
+                #     df.drop('calcDate', axis=1, inplace=True)
         return df
 
     def text2nc(self, filename):
@@ -667,7 +688,7 @@ class SASS(sccoos.SCCOOS):
                 # appDF = grpYr[~exist]
                 appDF = grpYr.loc[~exist]
             else:
-                # ncfile = self.createNCshell(ncName, lookup)
+                ncfile = self.createNCshell(ncfilepath, '')
                 # appDF = grpYr
                 appDF = grpYr.loc[:]
                 ncDF = pd.DataFrame({})
@@ -702,7 +723,6 @@ class SASS(sccoos.SCCOOS):
                 self.NCtimeMeta(ncfile)
                 ncfile.close()
                 ncfile = Dataset(ncfilepath, 'r', format='NETCDF4')
-                print 'post-time len check', len(ncfile.variables['time'])
                 ncfile.close()
                 self.fileSizeChecker(ncfilepath)
                 print 'finished appending file'
@@ -1038,6 +1058,7 @@ class SASS_pH(SASS):
         self.logsdir = r'/data/InSitu/SASS/raw_data/newport_pier_ph/'
         self.ncPostName = '-'
         self.prefix = self.sta.code_name +self.ncPostName
+        self.calcArr = ['temperature', 'ph']
 
         self.metaDict.update({
             'instrument':'Data was collected with _____ instruments.',
@@ -1155,38 +1176,38 @@ class SASS_pH(SASS):
         # df.index = df.index.tz_localize('UTC') #not needed?
         return df
 
-    def calc_temp(self, row, inputs):
+    def calc_temp(self, row, input):
         """
         :param object row: pandas dataframe row with column name as attributes
-        :param dictionary inputs: dictionary containing the following
-        :param float inputs['temp_slope']:
-        :param float inputs['temp_intercept']:
+        :param dictionary input: dictionary containing the following
+        :param float input['temp_slope']:
+        :param float input['temp_intercept']:
         """
 
         try:
-            return row.temp_counts*inputs['temp_slope']+inputs['temp_intercept']
+            return row.temp_counts*input['temp_slope']+input['temp_intercept']
 
         except:
             return None
 
-    def calc_ph(self, row, inputs):
+    def calc_ph(self, row, input):
         """
         :param object row: pandas dataframe row with column name as attributes
-        :param dictionary inputs: dictionary containing the following
-        :param float inputs['pH_slope']:
-        :param float inputs['pH_intercept']:
-        :param float inputs['pH_intercept']:
-        :param float inputs['E0']:
-        :param float inputs['Ts']:
-        :param float inputs['R']:
-        :param float inputs['F']:
+        :param dictionary input: dictionary containing the following
+        :param float input['pH_slope']:
+        :param float input['pH_intercept']:
+        :param float input['pH_intercept']:
+        :param float input['E0']:
+        :param float input['Ts']:
+        :param float input['R']:
+        :param float input['F']:
         """
 
         try:
             TempK = row.temperature+273.15
-            E0t= inputs['E0'] - 0.001 * (TempK - inputs['Ts'])
-            ST = inputs['R'] * TempK * math.log(10) / inputs['F']
-            Vo = row.ph_counts * inputs['pH_slope'] + inputs['pH_intercept']
+            E0t= input['E0'] - 0.001 * (TempK - input['Ts'])
+            ST = input['R'] * TempK * math.log(10) / input['F']
+            Vo = row.ph_counts * input['pH_slope'] + input['pH_intercept']
             pH = (Vo - E0t) / ST
 
             return pH
@@ -1194,39 +1215,39 @@ class SASS_pH(SASS):
         except:
             return None
 
-    def doCalc(self, row, **kwargs):
-        """
-        :param object row: row, with columns as attributes
-        :param dictionary calcsDict:
-        :returns: output from calculation function
-        """
-        calcsDict = kwargs['calcsDict']
-        # col = kwargs['col']
-        func = calcsDict[row.calcDate]['function']
-        inputs = calcsDict[row.calcDate]['inputs']
-        return eval('self.'+func)(row, inputs=inputs)
-
-    def calculations(self, df, extDict):
-        """
-        .. note: Separate from SASS_Basic because, calculations needed to be done in a
-        specific order (temperature BEFORE ph).
-        .. todo: See note^. Merge both calculations methods to single parent.
-        Impliment order of calculations (JSON? "calc_order")
-        """
-        for col in df.columns:
-            if col not in ['server_date', 'ip']:
-                #ALL might not be float in the future?
-                df.loc[:,col] = df.loc[:,col].astype(float)
-                #Check if column name has calculations
-        for calc in ['temperature', 'ph']: # temperature needs to be done beofre ph
-            df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
-            dates = extDict['calcs'][calc].keys()
-            dates.sort()
-            #loop through dates and set appropriate date
-            for calcDtStr in dates:
-                calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
-                df['calcDate'] = [calcDtStr if i >= calcDt else df['calcDate'][i] for i in df.index]
-            # df.rename(columns={col: col+'_raw'}, inplace=True)
-            df[calc] = df.apply(self.doCalc, axis=1, calcsDict=extDict['calcs'][calc])
-            df.drop('calcDate', axis=1, inplace=True)
-        return df
+    # def doCalc(self, row, **kwargs):
+    #     """
+    #     :param object row: row, with columns as attributes
+    #     :param dictionary calcsDict:
+    #     :returns: output from calculation function
+    #     """
+    #     calcsDict = kwargs['calcsDict']
+    #     # col = kwargs['col']
+    #     func = calcsDict[row.calcDate]['function']
+    #     input = calcsDict[row.calcDate]['input']
+    #     return eval('self.'+func)(row, input=input)
+    #
+    # def calculations(self, df, extDict):
+    #     """
+    #     .. note: Separate from SASS_Basic because, calculations needed to be done in a
+    #     specific order (temperature BEFORE ph).
+    #     .. todo: See note^. Merge both calculations methods to single parent.
+    #     Impliment order of calculations (JSON? "calc_order")
+    #     """
+    #     for col in df.columns:
+    #         if col not in ['server_date', 'ip']:
+    #             #ALL might not be float in the future?
+    #             df.loc[:,col] = df.loc[:,col].astype(float)
+    #             #Check if column name has calculations
+    #     for calc in ['temperature', 'ph']: # temperature needs to be done beofre ph
+    #         df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
+    #         dates = extDict['calcs'][calc].keys()
+    #         dates.sort()
+    #         #loop through dates and set appropriate date
+    #         for calcDtStr in dates:
+    #             calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
+    #             df['calcDate'] = [calcDtStr if i >= calcDt else df['calcDate'][i] for i in df.index]
+    #         # df.rename(columns={col: col+'_raw'}, inplace=True)
+    #         df[calc] = df.apply(self.doCalc, axis=1, calcsDict=extDict['calcs'][calc])
+    #         df.drop('calcDate', axis=1, inplace=True)
+    #     return df

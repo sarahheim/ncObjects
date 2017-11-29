@@ -82,11 +82,13 @@ def staXls2json(sta):
             #entries are already sorted
             # df.sort_values('date_time', inplace=True) #sorting my flip entries that have the same date_time
             print 'DF len', len(df)
-            print df
+            print df.head()
 
             # df.drop_duplicates(inplace=True)
             df.drop_duplicates(['offset', 'scale'], keep='first', inplace=True)
-            df['input'] = df[['scale', 'offset']].values.tolist() #[df.scale, df.offset]
+            # df['input'] = df[['scale', 'offset']].values.tolist() #[df.scale, df.offset]
+            # df['input'] = df[['scale', 'offset']].apply(lambda x: x.to_json(force_ascii=False), axis=1)
+            df['input'] = df[['scale', 'offset']].apply(lambda x: dict(x), axis=1)
             df.drop('scale', axis=1, inplace=True)
             df.drop('offset', axis=1, inplace=True)
             df['date_time'] = df.date_time.dt.strftime(dateformat)
@@ -95,6 +97,7 @@ def staXls2json(sta):
             df['function'] = 'calc_factorOffset1'
             print 'DF len', len(df)
             print df
+            print repr(df.iloc[0,0])
 
         else:
             print 'error with reading csv'
@@ -117,7 +120,7 @@ def staXls2json(sta):
         print 'Missing JSON file' #json file should exist with 'cols'
     print 'Done! calcs to json:', jFile
 
-staXls2json(ucsd)
+# staXls2json(ucsd)
 
 def allStations():
     for ss in [ucsb, uci, ucla, ucsd]:
@@ -125,4 +128,4 @@ def allStations():
         print ss
         staXls2json(ss)
 
-# allStations()
+allStations()

@@ -3,7 +3,7 @@
     "temperature": {
       "2017-08-10T00:00:00Z": {
         "function": "calc_temp",
-        "inputs": {
+        "input": {
           "temp_slope": 0.001567,
           "temp_intercept": -5.69775
         }
@@ -12,7 +12,7 @@
     "ph": {
       "2017-08-10T00:00:00Z": {
         "function": "calc_ph",
-        "inputs": {
+        "input": {
           "pH_slope":0.00000730816,
           "pH_intercept": 0.013636,
           "E0": -0.40629,
