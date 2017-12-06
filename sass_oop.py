@@ -159,9 +159,10 @@ class SASS(sccoos.SCCOOS):
                 'instrument' : "instrument1",
                 'platform': "platform1"
             },
-            sensor_span=(-5,30), user_span=(8,30),
-            # low_reps=2, high_reps=6, eps=0.0001, low_thresh=2, high_thresh=3) #v1
-            low_reps=4, high_reps=7, eps=0.00005, low_thresh=2, high_thresh=3)
+            qc={
+                'sensor_span':(-5,30), 'user_span':(8,30),
+                'low_reps':4, 'high_reps':7, 'eps':0.00005, 'low_thresh':2, 'high_thresh':3
+            })
         self.attr_tempF1 = FlagAttr('temperature_flagPrimary',
             atts={
                 'long_name' : 'sea water temperature, qc primary flag',
@@ -181,9 +182,10 @@ class SASS(sccoos.SCCOOS):
                 'instrument' : "instrument1",
                 'platform': "platform1"
             },
-            sensor_span=(0,9), user_span=None,
-            # low_reps=2, high_reps=5, eps=0.00005, low_thresh=None, high_thresh=None) #v1
-            low_reps=4, high_reps=7, eps=0.00001, low_thresh=None, high_thresh=None)
+            qc={
+                'sensor_span':(0,9), 'user_span':None,
+                'low_reps':4, 'high_reps':7, 'eps':0.00001, 'low_thresh':None, 'high_thresh':None
+            })
         self.attr_conF1 = FlagAttr('conductivity_flagPrimary',
             atts={
                 'long_name' : 'sea water electrical conductivity, qc primary flag',
@@ -203,9 +205,10 @@ class SASS(sccoos.SCCOOS):
                 'instrument' : "instrument1",
                 'platform': "platform1"
             },
-            sensor_span=(0,20), user_span=(1,7),
-            # low_reps=2, high_reps=5, eps=0.0005, low_thresh=4, high_thresh=5) #v1
-            low_reps=6, high_reps=10, eps=0.0005, low_thresh=4, high_thresh=5)
+            qc={
+                'sensor_span':(0,20), 'user_span':(1,7),
+                'low_reps':6, 'high_reps':10, 'eps':0.0005, 'low_thresh':4, 'high_thresh':5
+            })
         self.attr_presF1 = FlagAttr('pressure_flagPrimary',
             atts={
                 'long_name' : 'sea water pressure, qc primary flag',
@@ -225,9 +228,10 @@ class SASS(sccoos.SCCOOS):
                 'instrument' : "instrument1",
                 'platform': "platform1"
             },
-            sensor_span=(2,42), user_span=(30,34.5),
-            # low_reps=3, high_reps=5, eps=0.00004, low_thresh=0.4, high_thresh=0.5 #v1
-            low_reps=6, high_reps=9, eps=0.00005, low_thresh=0.4, high_thresh=0.5)
+            qc={
+                'sensor_span':(2,42), 'user_span':(30,34.5),
+                'low_reps':6, 'high_reps':9, 'eps':0.00005, 'low_thresh':4, 'high_thresh':5
+            })
         self.attr_salF1 = FlagAttr('salinity_flagPrimary',
             atts={
                 'long_name' : 'sea water salinity, qc primary flag',
@@ -268,9 +272,10 @@ class SASS(sccoos.SCCOOS):
                 'instrument' : "instrument2",
                 'platform': "platform1"
             },
-            sensor_span=(0.02,50), user_span=(0.02,50),
-            # low_reps=2, high_reps=5, eps=0.001, low_thresh=0.8, high_thresh=1.0) #v1
-            low_reps=6, high_reps=10, eps=0.0005, low_thresh=0.8, high_thresh=1.0)
+            qc={
+                'sensor_span':(0.02,50), 'user_span':(0.02,50),
+                'low_reps':6, 'high_reps':10, 'eps':0.0005, 'low_thresh':0.8, 'high_thresh':1.0
+            })
         self.attr_chlF1 = FlagAttr('chlorophyll_flagPrimary',
             atts={
                 'long_name' : 'sea water chlorophyll, qc primary flag',
@@ -653,7 +658,6 @@ class SASS(sccoos.SCCOOS):
             - columns if multiple, could be better. If change of column names
                 happens in a dataset, it only applies one set of column names
             - qc_test for gap in Time, others
-            - rewrite sccoos.qc_tests to just take df and object
             - rewrite nc.dataToNC for createNCshell?, not passing 'lookup'
 
         :param str filename: filename, including directory location
@@ -710,14 +714,16 @@ class SASS(sccoos.SCCOOS):
                 print 'time lens', len(ncfile.variables['time']), df2.index.shape
                 ncfile.variables['time'][0:] = df2.index.values.astype('int64') // 10**9
                 for a in self.attrObjArr:
-                    # if the attribute has ANY of the qc attributes, run it through qc_tests
-                    for qcv in MainAttr.qc_vars:
-                        if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
-                            df2 = self.qc_tests(df2, a.name, miss_val=a.miss_val,
-                                sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
-                                high_reps=a.high_reps, eps=a.eps,
-                                low_thresh=a.low_thresh, high_thresh=a.high_thresh)
-                            break
+                    ## if the attribute has ANY of the qc attributes, run it through qc_tests
+                    # for qcv in MainAttr.qc_vars:
+                    #     if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
+                    #         df2 = self.qc_tests(df2, a.name, miss_val=a.miss_val,
+                    #             sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
+                    #             high_reps=a.high_reps, eps=a.eps,
+                    #             low_thresh=a.low_thresh, high_thresh=a.high_thresh)
+                    #         break
+                    if hasattr(a, 'qc'):
+                        df2 = self.qc_tests_obj(df2, a)
                     # Flag variables should be AFTER base variable
                     # print 'sizes', a.name, len(ncfile.variables[a.name][:]), df2[a.name].shape
                     ncfile.variables[a.name][0:] = df2[a.name].values
@@ -788,13 +794,13 @@ class Attr(object):
         self.name = name
 
 class MainAttr(Attr):
-    qc_vars = ['miss_val','sensor_span','user_span','low_reps','high_reps',
-            'eps','low_thresh','high_thresh']
+    # qc_vars = ['miss_val','sensor_span','user_span','low_reps','high_reps',
+    #         'eps','low_thresh','high_thresh']
 
     def __init__(self, name, **kwargs):
         super(MainAttr, self).__init__(name)
         # self.sensor_span = kwargs['sensor_span']
-        allowed_keys = set(['dtype','atts']+self.qc_vars)
+        allowed_keys = set(['dtype','atts', 'qc'])
         # initialize all allowed keys to false
         self.__dict__.update((key, None) for key in allowed_keys) #None or False?
         # and update the given keys by their given values

@@ -150,6 +150,81 @@ class SCCOOS(nc.NC):
         })
         return metaDict
 
+    def qc_tests_obj(self, df, obj):
+        """Run qc
+
+        .. todo::
+            - add _FillValue attribute
+            - add tests done to 'processing_level' metaDict
+            - add qc input into metadata
+            - miss_val as input? change if statement?
+
+        :param df: dataframe
+        :param obj: object
+        :param obj.name: object's name
+        :param obj.qc: dictionary of qc parameters
+        :returns: dataframe with primary and secondary flags added
+
+        Expected kwargs: sensor_span, user_span"""
+        # data = df[obj.name].values
+        qc2flags = np.zeros_like(df[obj.name].values, dtype='uint8')
+
+        # Missing check
+        # if miss_val:
+        if 'miss_val' in obj.qc:
+            qcflagsMiss = qc.check_nulls(df[obj.name].values)
+        else:
+            qcflagsMiss = np.ones_like(df[obj.name].values, dtype='uint8')
+
+        # Range Check
+        # sensor_span = (-5,30)
+        # user_span = (8,30)
+        if 'sensor_span' in obj.qc or 'user_span' in obj.qc:
+            #because of OR
+            sensor_span = obj.qc['sensor_span'] if 'sensor_span' in obj.qc else None
+            user_span = obj.qc['user_span'] if 'user_span' in obj.qc else None
+            qcflagsRange = qc.range_check(df[obj.name].values,sensor_span,user_span)
+            qc2flags[(qcflagsRange > 2)] = 1 # Range
+        else:
+            qcflagsRange = np.ones_like(df[obj.name].values, dtype='uint8')
+
+        # Flat Line Check
+        # low_reps = 2
+        # high_reps = 5
+        # eps = 0.0001
+        if 'low_reps' in obj.qc and 'high_reps' in obj.qc and 'eps' in obj.qc:
+            qcflagsFlat = qc.flat_line_check(df[obj.name].values,obj.qc['low_reps'],obj.qc['high_reps'],obj.qc['eps'])
+            qc2flags[(qcflagsFlat > 2)] = 2 # Flat line
+        else:
+            qcflagsFlat = np.ones_like(df[obj.name].values, dtype='uint8')
+
+        # Spike Test
+        # low_thresh = 2
+        # high_thresh = 3
+        if 'low_thresh' in obj.qc and 'high_thresh' in obj.qc:
+            qcflagsSpike = qc.spike_check(df[obj.name].values,obj.qc['low_thresh'],obj.qc['high_thresh'])
+            qc2flags[(qcflagsSpike > 2)] = 3 # Spike
+        else:
+            qcflagsSpike = np.ones_like(df[obj.name].values, dtype='uint8')
+
+        # Find maximum qc flag
+        qcflags = np.maximum.reduce([qcflagsMiss, qcflagsRange, qcflagsFlat, qcflagsSpike])
+        # print 'final primary flags:', obj.name,   qcflags[0:10]
+        # print 'final secondary flags:',obj.name, qc2flags[0:10]
+
+        # Output flags
+        # print qcflags
+        # print qc2flags
+        # df.loc[:, (obj.name+'_flagPrimary')] = qcflags
+        # df.loc[:, (obj.name+'_flagSecondary')] = qc2flags
+        flags = pd.DataFrame({obj.name+'_flagPrimary':qcflags , obj.name+'_flagSecondary':qc2flags} , index=df.index)
+        df = pd.concat([df, flags], axis=1)
+        del qcflags, qc2flags
+        # df.loc[:, obj.name+'_flagPrimary'] = pd.DataFrame(qcflags, index=df.index)
+        # df.loc[:, obj.name+'_flagSecondary'] = pd.DataFrame(qc2flags, index=df.index)
+
+        return df
+
     def qc_tests(self, df, attr, miss_val=None, sensor_span=None, user_span=None, low_reps=None,
     high_reps=None, eps=None, low_thresh=None, high_thresh=None):
         """Run qc
