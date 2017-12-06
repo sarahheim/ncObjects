@@ -109,10 +109,10 @@ class SASS(sccoos.SCCOOS):
         # #test locations
         self.codedir = '/home/scheim/NCobj/'
         # self.ncpath = '/home/scheim/NCobj/SASS_new'
-        self.ncpath = '/data/Junk/thredds-test/merge'
+        # self.ncpath = '/data/Junk/thredds-test/sass_meta'
 
         # self.codedir = '/data/InSitu/SASS/code/ncobjects'
-        # self.ncpath = '/data/InSitu/SASS/netcdfs_new/'
+        self.ncpath = '/data/InSitu/SASS/netcdfs_new/'
 
         # self.dateformat = '%Y-%m-%dT%H:%M:%S.%fZ'
         self.crontab = True
@@ -405,7 +405,7 @@ class SASS(sccoos.SCCOOS):
             })
         self.ch_p1 = CharVariable('platform1', sta,
             atts={
-                'long_name' : self.sta.code_name,
+                'long_name' : self.sta.long_name,
                 'ioos_code' : "urn:ioos:station:sccoos:"+self.sta.code_name
             })
 
@@ -492,10 +492,12 @@ class SASS(sccoos.SCCOOS):
             self.createVariableCharNoDim(ncfile, v)
 
         nm = ncfile.createVariable('station', 'S1', 'stationNameLength')
+        # nm = ncfile.createVariable('station', 'S1')
         nm.setncatts({
-            'long_name' : 'station_name',
+            'long_name' : self.sta.long_name,
             'cf_role' : 'timeseries_id'})
-        nm[:len(self.sta.code_name)] = list(self.sta.code_name)
+        # nm[:len(self.sta.code_name)] = list(self.sta.code_name)
+        nm[:len(self.sta.long_name)] = list(self.sta.long_name)
 
         lat = ncfile.createVariable('lat', 'f4')
         lat.setncatts(self.meta_lat) #from nc.py
@@ -875,11 +877,6 @@ class SASS_Basic(SASS):
         New files also have the new metadata'''
         print 'Using old nc:', fname
 
-        # jsonFn = os.path.join(self.codedir, 'sass_'+self.sta.code_name+'_archive.json')
-        # print os.path.isfile(jsonFn), jsonFn
-        # with open(jsonFn) as json_file:
-        #     extDict = json.load(json_file)
-
         # ncfile = Dataset(fname, 'r')
         # print self.sta.code_name, len(ncfile.variables['time'][:])
         # ncfile.close()
@@ -897,46 +894,34 @@ class SASS_Basic(SASS):
         df = ds.to_dataframe()
         timeNum = len(df.index)
         print 'length', timeNum
-        # df['calcDate'] = pd.Series(np.repeat(pd.NaT, timeNum))
-        # dates = extDict['calcs']['chlorophyll'].keys()
-        # dates.sort()
-        # #loop through dates and set appropriate date
-        # for calcDtStr in dates:
-        #     # calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
-        #     calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ')#.value/1000000000
-        #     # .astype('int64') // 10**9
-        #     df['calcDate'] = [calcDtStr if i >= calcDt else df['calcDate'][i] for i in df.index]
-        # df.rename(columns={'chlorophyll':'chlorophyll_raw'}, inplace=True)
-        # df['chlorophyll'] = df.apply(self.doCalc, axis=1, col='chlorophyll_raw', calcsDict=extDict['calcs']['chlorophyll'])
-        # df.drop('calcDate', axis=1, inplace=True)
-        # df['chlorophyll_raw'] = np.zeros_like(df.chlorophyll, dtype='uint8')
 
-        for v in df:
-            if '_flag' in v: df.drop(v, axis=1, inplace=True)
-
-        # Do QC
-        self.attrArr = [] # dataToNC uses an attrArr which use to contain str names, not objects
-        for a in self.attrObjArr:
-            # print 'HASATTR', hasattr(a, 'miss_val')
-            # if the attribute has ANY of the qc attributes, run it through qc_tests
-            for qcv in MainAttr.qc_vars:
-                if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
-                    df = self.qc_tests(df, a.name, miss_val=a.miss_val,
-                        sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
-                        high_reps=a.high_reps, eps=a.eps,
-                        low_thresh=a.low_thresh, high_thresh=a.high_thresh)
-                    break
-            self.attrArr.append(a.name)
+        # for v in df:
+        #     if '_flag' in v: df.drop(v, axis=1, inplace=True)
+        #
+        # # Do QC
+        # self.attrArr = [] # dataToNC uses an attrArr which use to contain str names, not objects
+        # for a in self.attrObjArr:
+        #     # print 'HASATTR', hasattr(a, 'miss_val')
+        #     # if the attribute has ANY of the qc attributes, run it through qc_tests
+        #     for qcv in MainAttr.qc_vars:
+        #         if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
+        #             df = self.qc_tests(df, a.name, miss_val=a.miss_val,
+        #                 sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
+        #                 high_reps=a.high_reps, eps=a.eps,
+        #                 low_thresh=a.low_thresh, high_thresh=a.high_thresh)
+        #             break
+        #     self.attrArr.append(a.name)
 
         # Write to new NCs
         # self.dataToNC(newName, df, '')
         df['epochs'] = df.index.values.astype('int64') // 10**9
         ncfile = Dataset(newName, 'a', format='NETCDF4')
         ncfile.variables['time'][0:] = df['epochs'].values
-        for attr in self.attrArr:
+        # for attr in self.attrArr:
+        for attr in self.attrObjArr:
             #atLen = len(ncfile.variables[attr][:])
-            ncfile.variables[attr][0:] = df[attr].values
-            self.attrMinMax(ncfile, attr)
+            ncfile.variables[attr.name][0:] = df[attr.name].values
+            self.attrMinMax(ncfile, attr.name)
         self.NCtimeMeta(ncfile)
         ncfile.close()
         print 'done', fname
