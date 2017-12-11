@@ -271,16 +271,14 @@ class CAF(sccoos.SCCOOS):
         instrument1.setncatts({
             'long_name': "Burkolator",
             'comment':"Burkolator",
-            'make':"LI-COR",
-            'model':"LI-840"
+            'make_model':"LI-COR LI-840"
         })
 
         instrument2 = ncfile.createVariable('instrument2', 'c')
         instrument2.setncatts({
-            'long_name': "DirectLine DL423 Sensor Module",
-            # 'comment':"DirectLine DL423 Sensor Module",
-            'make':"Honeywell",
-            'model':"DL423"
+            'long_name': "DL423",
+            'comment':"Honeywell DirectLine DL423 Sensor Module",
+            'make_model':"Honeywell DL423"
         })
 
         platform1 = ncfile.createVariable('platform1', 'c')

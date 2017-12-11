@@ -17,7 +17,7 @@ import sassqc #, qc #transition sassqc to qc
 
 class Station(object):
     def __init__(self, **kwargs):
-        allowed_keys = set(['code_name','long_name','dpmt', 'ips', 'lat','lon','depth',
+        allowed_keys = set(['code_name','long_name','wmo','dpmt', 'ips', 'lat','lon','depth',
             'abbr','url','inst'])
         # initialize all allowed keys to false
         self.__dict__.update((key, False) for key in allowed_keys)
@@ -25,7 +25,7 @@ class Station(object):
         self.__dict__.update((key, value) for key, value in kwargs.items() if key in allowed_keys)
 
     def __repr__(self):
-        return "Station(code_name='{}', long_name='{}', ips=['{}'])".format(self.code_name, self.last_name, self.ips)
+        return "Station(code_name='{}', long_name='{}', ips=['{}'])".format(self.code_name, self.long_name, self.ips)
 
     def __str__(self):
         return self.__dict__
@@ -33,6 +33,7 @@ class Station(object):
 #Stations
 ucsb = Station(code_name = 'stearns_wharf',
                 long_name= 'Stearns Wharf',
+                wmo='TNWC1',
                 ips= ['166.148.81.45'],
                 lat= 34.408,
                 lon= -119.685,
@@ -42,6 +43,7 @@ ucsb = Station(code_name = 'stearns_wharf',
                 inst= 'Marine Science Institute at University of California, Santa Barbara')
 uci = Station(code_name = 'newport_pier',
                 long_name = 'Newport Pier',
+                wmo = 'NEPC1',
                 ips= ['166.241.139.252','166.140.102.113'],
                 lat= 33.6061,
                 lon= -117.9311,
@@ -60,6 +62,7 @@ ucla = Station(code_name= 'santa_monica_pier',
                 inst= 'Institute of the Environment at University of California, Los Angeles')
 ucsd = Station(code_name = 'scripps_pier',
                 long_name = 'Scripps Pier',
+                wmo = 'LJSC1',
                 ips= ['132.239.117.226', '172.16.117.233'],
                 lat= 32.867,
                 lon= -117.257,
@@ -69,7 +72,8 @@ ucsd = Station(code_name = 'scripps_pier',
                 inst= 'Southern California Coastal Ocean Observing System (SCCOOS) at Scripps Institution of Oceanography (SIO)')
 
 uci2 = Station(code_name = '005_newport_pier',
-                long_name = 'Newport Pier pH',
+                long_name = 'Newport Pier',
+                # wmo = 'NEPC1',
                 ips= ['132.239.92.8', '166.140.102.113'],
                 lat= 33.6061,
                 lon= -117.9311,
@@ -149,12 +153,14 @@ class SASS(sccoos.SCCOOS):
                 'standard_name':'time',
                 'units':'seconds since 1970-01-01 00:00:00 UTC',
                 'platform': "platform1"
+
             })
         self.attr_temp = MainAttr('temperature',
             dtype= 'f4',
             atts={
                 'standard_name' : 'sea_water_temperature',
                 'long_name' : 'sea water temperature',
+                'ncei_name': 'WATER TEMPERATURE',
                 'units' : 'celsius',
                 'instrument' : "instrument1",
                 'platform': "platform1"
@@ -178,6 +184,7 @@ class SASS(sccoos.SCCOOS):
             atts={
                 'standard_name' : 'sea_water_electrical_conductivity',
                 'long_name' : 'sea water electrical conductivity',
+                'ncei_name': 'CONDUCTIVITY',
                 'units' : 'S/m',
                 'instrument' : "instrument1",
                 'platform': "platform1"
@@ -201,6 +208,7 @@ class SASS(sccoos.SCCOOS):
             atts={
                 'standard_name' : 'sea_water_pressure',
                 'long_name' : 'sea water pressure',
+                'ncei_name': 'PRESSURE - WATER',
                 'units' : 'dbar',
                 'instrument' : "instrument1",
                 'platform': "platform1"
@@ -224,7 +232,8 @@ class SASS(sccoos.SCCOOS):
             atts={
                 'standard_name' : 'sea_water_salinity',
                 'long_name' : 'sea water salinity',
-                'units' : '1e-3', #not psu??
+                'ncei_name': 'SALINITY',
+                'units' : '1e-3', #PSU?
                 'instrument' : "instrument1",
                 'platform': "platform1"
             },
@@ -268,6 +277,7 @@ class SASS(sccoos.SCCOOS):
             atts={
                 'standard_name' : 'mass_concentration_of_chlorophyll_a_in_sea_water',
                 'long_name' : 'sea water chlorophyll',
+                'ncei_name': 'CHLOROPHYLL', #??? 'CHLOROPHYLL - EXTRACTED', 'NANOPLANKTON - CHLOROPHYLL'
                 'units' : 'ug/L',
                 'instrument' : "instrument2",
                 'platform': "platform1"
@@ -290,6 +300,7 @@ class SASS(sccoos.SCCOOS):
             atts={
                 'standard_name' : 'sea_water_density',
                 'long_name' : 'sea water density',
+                'ncei_name': 'WATER DENSITY',
                 'units' : 'kg/m^3',
                 'valid_min': 0,
                 'valid_max': 30
@@ -334,6 +345,7 @@ class SASS(sccoos.SCCOOS):
                 # 'standard_name' : '', #???
                 'long_name' : 'O2 thermistor', #???
                 'units' : 'V', #not psu??
+                # 'ncei_name': '',#??? 'OXYGEN', 'DISSOLVED OXYGEN', ...
                 'instrument' : "instrument3",
                 'platform': "platform1"
             }
@@ -386,33 +398,37 @@ class SASS(sccoos.SCCOOS):
         #Instruments
         self.ch_i1 = CharVariable('instrument1', sta,
             atts={
-                'make' : "Seabird",
-                'model' : "SBE 16plus SEACAT",
-                'long_name': 'Seabird SBE 16plus SEACAT',
+                'make_model' : "Seabird SBE 16plus SEACAT",
+                'long_name': 'SBE 16plus SEACAT',
+                'ncei_name': 'CTD',
                 'comment' : "Seabird SBE 16plus SEACAT Conductivity, Temperature," + \
                 " and Pressure recorder. Derived output Salinity.",
                 'ioos_code' : "urn:ioos:sensor:sccoos:"+self.sta.code_name+":conductivity_temperature_pressure"
             })
         self.ch_i2 = CharVariable('instrument2', sta,
             atts={
-                'make' : "Seapoint",
-                'model' : "Chlorophyll Fluorometer",
-                'long_name': 'Seapoint Chlorophyll Fluorometer',
+                'make_model' : "Seapoint Chlorophyll Fluorometer",
+                'long_name': 'Chlorophyll Fluorometer',
+                # 'ncei_name': '', ???
                 'comment' : "Seapoint Chlorophyll Fluorometer with a 0-50 ug/L gain setting.",
                 'ioos_code' : "urn:ioos:sensor:sccoos:"+self.sta.code_name+":chlorophyll"
             })
         self.ch_i3 = CharVariable('instrument3', sta,
             atts={
-                'make' : "Seabird",
-                'model' : "SBE 63 Optical Dissolved Oxygen (DO) Sensor",
+                'make_model' : "Seabird SBE 63 Optical Dissolved Oxygen (DO) Sensor",
+                'long_name': "SBE 63 Optical Dissolved Oxygen (DO) Sensor",
                 # 'comment' : "",
+                # 'ncei_name': '', ???
                 'ioos_code' : "urn:ioos:sensor:sccoos:"+self.sta.code_name+":oxygen"
             })
-        self.ch_p1 = CharVariable('platform1', sta,
-            atts={
-                'long_name' : self.sta.long_name,
-                'ioos_code' : "urn:ioos:station:sccoos:"+self.sta.code_name
-            })
+
+        platformDict = {
+            'long_name' : self.sta.long_name,
+            'ioos_code': "urn:ioos:station:sccoos:"+self.sta.code_name
+        }
+        if self.sta.wmo:
+            platformDict.update({'wmo_code': self.sta.wmo})
+        self.ch_p1 = CharVariable('platform1', sta, atts=platformDict)
 
     def createVariableTimeDim(self, ncfile, tv):
         if '_flag' in tv.name:
@@ -445,7 +461,7 @@ class SASS(sccoos.SCCOOS):
                 'coordinates':'time lat lon depth',
                 'references': "http://sccoos.org/data/autoss/, http://sccoos.org/about/dmac/"
             })
-            ncVar.setncatts(self.qc_meta(tv.name, tv))
+            ncVar.setncatts(self.qc_meta(tv.name, tv.qc))
 
     def createVariableCharNoDim(self, ncfile, v):
         """createVariable, type 'S1' a.k.a. 'c' -character"""
@@ -484,6 +500,8 @@ class SASS(sccoos.SCCOOS):
             "history": "Created: "+ self.tupToISO(time.gmtime()), #time.ctime(time.time()),
             "title":self.metaDict["project"]+": "+self.sta.long_name,
             })
+        if self.sta.wmo:
+            self.metaDict.update({'wmo_code': self.sta.wmo})
         ncfile.setncatts(self.metaDict)
 
         time_dim = ncfile.createDimension('time', None)
@@ -706,8 +724,8 @@ class SASS(sccoos.SCCOOS):
                 appDF = self.calculations(appDF, extDict)
                 df2 = ncDF.append(appDF)
                 #Drop all flag columns (will be reset)
-                for v in df2:
-                    if '_flag' in v: df2.drop(v, axis=1, inplace=True)
+                # for v in df2:
+                #     if '_flag' in v: df2.drop(v, axis=1, inplace=True)
 
                 print 'appending to:', ncfilepath
                 ncfile = Dataset(ncfilepath, 'a', format='NETCDF4')
@@ -715,6 +733,8 @@ class SASS(sccoos.SCCOOS):
                 ncfile.variables['time'][0:] = df2.index.values.astype('int64') // 10**9
                 for a in self.attrObjArr:
                     ## if the attribute has ANY of the qc attributes, run it through qc_tests
+                    ## Flag variables should be AFTER base variable
+
                     # for qcv in MainAttr.qc_vars:
                     #     if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
                     #         df2 = self.qc_tests(df2, a.name, miss_val=a.miss_val,
@@ -722,9 +742,11 @@ class SASS(sccoos.SCCOOS):
                     #             high_reps=a.high_reps, eps=a.eps,
                     #             low_thresh=a.low_thresh, high_thresh=a.high_thresh)
                     #         break
-                    if hasattr(a, 'qc'):
+
+                    if hasattr(a, 'qc') and a.qc is not None:
+                        print a.name, a.qc
                         df2 = self.qc_tests_obj(df2, a)
-                    # Flag variables should be AFTER base variable
+
                     # print 'sizes', a.name, len(ncfile.variables[a.name][:]), df2[a.name].shape
                     ncfile.variables[a.name][0:] = df2[a.name].values
                     self.attrMinMax(ncfile, a.name)
@@ -785,6 +807,63 @@ class SASS(sccoos.SCCOOS):
             if loopCount > looplimit:
                 return loopCount
 
+    def editOldNC(self, fname, newDir):
+        '''Go through netcdfs and copy all sensor values, but do QC.
+        New files also have the new metadata'''
+        print 'Using old nc:', fname
+
+        # ncfile = Dataset(fname, 'r')
+        # print self.sta.code_name, len(ncfile.variables['time'][:])
+        # ncfile.close()
+
+        # newName = fname.split('.')[0]+"_new.nc"
+        newName = os.path.join(newDir, fname.split('/')[-1])
+        print 'new File:', newName
+        self.createNCshell(newName, '')
+        print 'created:', os.path.isfile(newName), newName
+        # df = pd.read_hdf(fname, mode='r')
+        ds = xr.open_dataset(fname)
+        # print ds.info()
+        # print ds.indexes
+        # print ds.data_vars
+        df = ds.to_dataframe()
+        timeNum = len(df.index)
+        print 'length', timeNum
+
+        # for v in df:
+        #     if '_flag' in v: df.drop(v, axis=1, inplace=True)
+
+        # Write to new NCs
+        # self.dataToNC(newName, df, '')
+        df['epochs'] = df.index.values.astype('int64') // 10**9
+        ncfile = Dataset(newName, 'a', format='NETCDF4')
+        ncfile.variables['time'][0:] = df['epochs'].values
+
+        for a in self.attrObjArr:
+            # Do QC if it has QC parameters
+            # if hasattr(a, 'qc') and a.qc is not None:
+            #     print 'QC:', a.name
+            #     df = self.qc_tests_obj(df, a)
+            ncfile.variables[a.name][0:] = df[a.name].values
+            self.attrMinMax(ncfile, a.name)
+        self.NCtimeMeta(ncfile)
+        ncfile.close()
+        print 'done', fname
+
+    def editOldNCs(self, newDir):
+        # self.ncpath = '/data/InSitu/SASS/'
+        print 'editOldNCs', self.ncpath
+        filesArr = os.listdir(self.ncpath)
+        filesArr.sort()
+        for fn in filesArr:
+            regex = re.search(re.compile('^'+self.prefix+'(\d{4})\.nc'), fn)
+            if regex:
+            # if self.prefix in fn and ('005' not in fn) and ('d02' not in fn):
+                filename = os.path.join(self.ncpath, fn)
+                #print "\n" + fn,
+                self.editOldNC(filename, newDir)
+        # fn =  self.sta.code_name+'-2006.nc'
+        # self.editOldNC(os.path.join(self.ncpath, fn))
 
 class Attr(object):
     @abstractmethod
@@ -877,75 +956,6 @@ class SASS_Basic(SASS):
 
         r = Regex()
         self.regex = r'^'+r.re_serverdate+r.re_s+r.re_ip+r.re_s+r.concatRegex(8)+r.re_s+r.re_date+r.re_s+r.re_time+r.re_s+r.concatRegex(3)+r'$'
-
-    def editOldNC(self, fname, newDir):
-        '''Go through netcdfs and copy all sensor values, but do QC.
-        New files also have the new metadata'''
-        print 'Using old nc:', fname
-
-        # ncfile = Dataset(fname, 'r')
-        # print self.sta.code_name, len(ncfile.variables['time'][:])
-        # ncfile.close()
-
-        # newName = fname.split('.')[0]+"_new.nc"
-        newName = os.path.join(newDir, fname.split('/')[-1])
-        print 'new File:', newName
-        self.createNCshell(newName, '')
-        print 'created:', os.path.isfile(newName), newName
-        # df = pd.read_hdf(fname, mode='r')
-        ds = xr.open_dataset(fname)
-        # print ds.info()
-        # print ds.indexes
-        # print ds.data_vars
-        df = ds.to_dataframe()
-        timeNum = len(df.index)
-        print 'length', timeNum
-
-        # for v in df:
-        #     if '_flag' in v: df.drop(v, axis=1, inplace=True)
-        #
-        # # Do QC
-        # self.attrArr = [] # dataToNC uses an attrArr which use to contain str names, not objects
-        # for a in self.attrObjArr:
-        #     # print 'HASATTR', hasattr(a, 'miss_val')
-        #     # if the attribute has ANY of the qc attributes, run it through qc_tests
-        #     for qcv in MainAttr.qc_vars:
-        #         if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
-        #             df = self.qc_tests(df, a.name, miss_val=a.miss_val,
-        #                 sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
-        #                 high_reps=a.high_reps, eps=a.eps,
-        #                 low_thresh=a.low_thresh, high_thresh=a.high_thresh)
-        #             break
-        #     self.attrArr.append(a.name)
-
-        # Write to new NCs
-        # self.dataToNC(newName, df, '')
-        df['epochs'] = df.index.values.astype('int64') // 10**9
-        ncfile = Dataset(newName, 'a', format='NETCDF4')
-        ncfile.variables['time'][0:] = df['epochs'].values
-        # for attr in self.attrArr:
-        for attr in self.attrObjArr:
-            #atLen = len(ncfile.variables[attr][:])
-            ncfile.variables[attr.name][0:] = df[attr.name].values
-            self.attrMinMax(ncfile, attr.name)
-        self.NCtimeMeta(ncfile)
-        ncfile.close()
-        print 'done', fname
-
-    def editOldNCs(self, newDir):
-        # self.ncpath = '/data/InSitu/SASS/'
-        print 'editOldNCs', self.ncpath
-        filesArr = os.listdir(self.ncpath)
-        filesArr.sort()
-        for fn in filesArr:
-            regex = re.search(re.compile('^'+self.prefix+'(\d{4})\.nc'), fn)
-            if regex:
-            # if self.prefix in fn and ('005' not in fn) and ('d02' not in fn):
-                filename = os.path.join(self.ncpath, fn)
-                #print "\n" + fn,
-                self.editOldNC(filename, newDir)
-        # fn =  self.sta.code_name+'-2006.nc'
-        # self.editOldNC(os.path.join(self.ncpath, fn))
 
     def local2utc(self, start, end, adjSecs):
         '''
@@ -1130,8 +1140,8 @@ class SASS_pH(SASS):
 
         self.ch_i1 = CharVariable('instrument1', sta,
             atts={
-                'make' : "",
-                'model' : "",
+                'make_model' : "",
+                'long_name': "",
                 'comment' : "Instrument for measuring pH",
                 'ioos_code' : "urn:ioos:sensor:sccoos:"+self.sta.code_name+":ph"
             })

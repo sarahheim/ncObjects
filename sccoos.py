@@ -156,8 +156,7 @@ class SCCOOS(nc.NC):
         .. todo::
             - add _FillValue attribute
             - add tests done to 'processing_level' metaDict
-            - add qc input into metadata
-            - miss_val as input? change if statement?
+            - miss_val as input? change if statement(s)?... if parameter in obj.qc AND not None
 
         :param df: dataframe
         :param obj: object
@@ -170,8 +169,9 @@ class SCCOOS(nc.NC):
         qc2flags = np.zeros_like(df[obj.name].values, dtype='uint8')
 
         # Missing check
-        # if miss_val:
-        if 'miss_val' in obj.qc:
+        if obj.qc['miss_val']:
+        # if 'miss_val' in obj.qc:
+        # if obj.qc.get('miss_val'):
             qcflagsMiss = qc.check_nulls(df[obj.name].values)
         else:
             qcflagsMiss = np.ones_like(df[obj.name].values, dtype='uint8')
@@ -179,7 +179,7 @@ class SCCOOS(nc.NC):
         # Range Check
         # sensor_span = (-5,30)
         # user_span = (8,30)
-        if 'sensor_span' in obj.qc or 'user_span' in obj.qc:
+        if obj.qc['sensor_span'] or obj.qc['user_span']:
             #because of OR
             sensor_span = obj.qc['sensor_span'] if 'sensor_span' in obj.qc else None
             user_span = obj.qc['user_span'] if 'user_span' in obj.qc else None
@@ -192,7 +192,7 @@ class SCCOOS(nc.NC):
         # low_reps = 2
         # high_reps = 5
         # eps = 0.0001
-        if 'low_reps' in obj.qc and 'high_reps' in obj.qc and 'eps' in obj.qc:
+        if obj.qc['low_reps'] and obj.qc['high_reps'] and obj.qc['eps']:
             qcflagsFlat = qc.flat_line_check(df[obj.name].values,obj.qc['low_reps'],obj.qc['high_reps'],obj.qc['eps'])
             qc2flags[(qcflagsFlat > 2)] = 2 # Flat line
         else:
@@ -201,7 +201,8 @@ class SCCOOS(nc.NC):
         # Spike Test
         # low_thresh = 2
         # high_thresh = 3
-        if 'low_thresh' in obj.qc and 'high_thresh' in obj.qc:
+        if obj.qc['low_thresh'] and obj.qc['high_thresh']:
+            # print obj.name, obj.qc['low_thresh'],obj.qc['high_thresh']
             qcflagsSpike = qc.spike_check(df[obj.name].values,obj.qc['low_thresh'],obj.qc['high_thresh'])
             qc2flags[(qcflagsSpike > 2)] = 3 # Spike
         else:
