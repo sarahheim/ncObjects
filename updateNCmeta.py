@@ -6,7 +6,7 @@ start = time.time()
 import sass_oop
 testdir = r'/data/Junk/thredds-test/sass_meta'
 # # Making new netcdfs from OLD netcdfs (original base data, new metadata, new flag values)
-# # # sass_oop.SASS_Basic(sass_oop.uci).editOldNC('/home/scheim/NCobj/SASS_old/newport_pier-2006.nc')
+# # sass_oop.SASS_Basic(sass_oop.uci).editOldNC('/home/scheim/NCobj/SASS_old/newport_pier-2006.nc')
 sass_oop.SASS_Basic(sass_oop.uci).editOldNCs(testdir)
 sass_oop.SASS_Basic(sass_oop.ucla).editOldNCs(testdir)
 sass_oop.SASS_Basic(sass_oop.ucsb).editOldNCs(testdir)

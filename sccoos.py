@@ -124,8 +124,8 @@ class SCCOOS(nc.NC):
         sspan = self.getAttrOrKey(qcSpecs, 'sensor_span')
         if sspan:
             metaDict.update({
-                'valid_min': sspan[0],
-                'valid_max': sspan[1]
+                'valid_min': np.float32(sspan[0]),
+                'valid_max': np.float32(sspan[1])
             })
             comment += ' Range Check (Bad): '+str(sspan)+';'
 

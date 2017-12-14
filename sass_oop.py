@@ -37,7 +37,7 @@ ucsb = Station(code_name = 'stearns_wharf',
                 ips= ['166.148.81.45'],
                 lat= 34.408,
                 lon= -119.685,
-                depth= '2',
+                depth= 2,
                 abbr='UCSB',
                 url= 'http://msi.ucsb.edu/',
                 inst= 'Marine Science Institute at University of California, Santa Barbara')
@@ -47,7 +47,7 @@ uci = Station(code_name = 'newport_pier',
                 ips= ['166.241.139.252','166.140.102.113'],
                 lat= 33.6061,
                 lon= -117.9311,
-                depth= '2',
+                depth= 2,
                 abbr='UCI',
                 url= 'http://uci.edu/',
                 inst= 'University of California, Irvine')
@@ -56,7 +56,7 @@ ucla = Station(code_name= 'santa_monica_pier',
                 ips= ['166.241.175.135'],
                 lat= 34.008,
                 lon= -118.499,
-                depth= '2',
+                depth= 2,
                 abbr='UCLA',
                 url= 'http://environment.ucla.edu/',
                 inst= 'Institute of the Environment at University of California, Los Angeles')
@@ -66,7 +66,7 @@ ucsd = Station(code_name = 'scripps_pier',
                 ips= ['132.239.117.226', '172.16.117.233'],
                 lat= 32.867,
                 lon= -117.257,
-                depth= '5',
+                depth= 5,
                 abbr='UCSD',
                 url= 'http://sccoos.org/',
                 inst= 'Southern California Coastal Ocean Observing System (SCCOOS) at Scripps Institution of Oceanography (SIO)')
@@ -77,7 +77,7 @@ uci2 = Station(code_name = '005_newport_pier',
                 ips= ['132.239.92.8', '166.140.102.113'],
                 lat= 33.6061,
                 lon= -117.9311,
-                depth= '2',
+                depth= 2,
                 abbr='UCI',
                 url= 'http://uci.edu/',
                 inst= 'University of California, Irvine')
@@ -269,8 +269,8 @@ class SASS(sccoos.SCCOOS):
                 'units' : 'ug/L',
                 'instrument' : "instrument2",
                 'platform': "platform1",
-                'valid_min': 0,
-                'valid_max': 5
+                'valid_min': np.float32(0),
+                'valid_max': np.float32(5)
             })
         self.attr_chl2= MainAttr('chlorophyll',
             dtype= 'f4',
@@ -302,8 +302,8 @@ class SASS(sccoos.SCCOOS):
                 'long_name' : 'sea water density',
                 'ncei_name': 'WATER DENSITY',
                 'units' : 'kg/m^3',
-                'valid_min': 0,
-                'valid_max': 30
+                'valid_min': np.float32(0),
+                'valid_max': np.float32(30)
             })
         self.attr_dVolt = MainAttr('diagnosticVoltage',
             dtype= 'f4',
@@ -524,17 +524,33 @@ class SASS(sccoos.SCCOOS):
 
         lat = ncfile.createVariable('lat', 'f4')
         lat.setncatts(self.meta_lat) #from nc.py
-        lat.setncatts({ 'valid_min':self.sta.lat, 'valid_max':self.sta.lat })
+        lat.setncatts({
+            'data_max':np.float32(self.sta.lat),
+            'data_min':np.float32(self.sta.lat),
+            'valid_max':np.float32(self.sta.lat),
+            'valid_mix':np.float32(self.sta.lat)
+        })
         ncfile.variables['lat'][0] = self.sta.lat
 
         lon = ncfile.createVariable('lon', 'f4')
         lon.setncatts(self.meta_lon)
-        lon.setncatts({ 'valid_min':self.sta.lon, 'valid_max':self.sta.lon })
+        lon.setncatts({
+            'data_max':np.float32(self.sta.lon),
+            'data_min':np.float32(self.sta.lon),
+            'valid_max':np.float32(self.sta.lon),
+            'valid_min':np.float32(self.sta.lon)
+
+        })
         ncfile.variables['lon'][0] = self.sta.lon
 
         dep = ncfile.createVariable('depth', 'f4')
         dep.setncatts(self.meta_dep)
-        dep.setncatts({ 'valid_min':self.sta.depth, 'valid_max':self.sta.depth })
+        dep.setncatts({
+            'data_max':np.float32(self.sta.depth),
+            'data_min':np.float32(self.sta.depth),
+            'valid_max':np.float32(self.sta.depth),
+            'valid_min':np.float32(self.sta.depth)
+        })
         ncfile.variables['depth'][0] = self.sta.depth
 
         crs = ncfile.createVariable('crs', 'd')
