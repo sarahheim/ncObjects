@@ -153,7 +153,6 @@ class SASS(sccoos.SCCOOS):
                 'standard_name':'time',
                 'units':'seconds since 1970-01-01 00:00:00 UTC',
                 'platform': "platform1"
-
             })
         self.attr_temp = MainAttr('temperature',
             dtype= 'f4',
@@ -168,6 +167,7 @@ class SASS(sccoos.SCCOOS):
             qc={
                 'sensor_span':(-5,30), 'user_span':(8,30),
                 'low_reps':4, 'high_reps':7, 'eps':0.00005, 'low_thresh':2, 'high_thresh':3
+                # , 'rec_time_col':'server_date', 'delay':60000, 'time_interval':1000
             })
         self.attr_tempF1 = FlagAttr('temperature_flagPrimary',
             atts={
@@ -825,7 +825,9 @@ class SASS(sccoos.SCCOOS):
 
     def editOldNC(self, fname, newDir):
         '''Go through netcdfs and copy all sensor values, but do QC.
-        New files also have the new metadata'''
+        New files also have the new metadata
+        .. todo: add Boolean parameter for doing/replacing QC
+        '''
         print 'Using old nc:', fname
 
         # ncfile = Dataset(fname, 'r')
@@ -846,20 +848,22 @@ class SASS(sccoos.SCCOOS):
         timeNum = len(df.index)
         print 'length', timeNum
 
-        # for v in df:
-        #     if '_flag' in v: df.drop(v, axis=1, inplace=True)
+        ## Remove QC variables IF re-doing QC
+        for v in df:
+            if '_flag' in v: df.drop(v, axis=1, inplace=True)
 
         # Write to new NCs
         # self.dataToNC(newName, df, '')
+
         df['epochs'] = df.index.values.astype('int64') // 10**9
         ncfile = Dataset(newName, 'a', format='NETCDF4')
         ncfile.variables['time'][0:] = df['epochs'].values
 
         for a in self.attrObjArr:
-            # Do QC if it has QC parameters
-            # if hasattr(a, 'qc') and a.qc is not None:
-            #     print 'QC:', a.name
-            #     df = self.qc_tests_obj(df, a)
+            ## Do QC if it has QC parameters
+            if hasattr(a, 'qc') and a.qc is not None:
+                print 'QC:', a.name
+                df = self.qc_tests_obj(df, a)
             ncfile.variables[a.name][0:] = df[a.name].values
             self.attrMinMax(ncfile, a.name)
         self.NCtimeMeta(ncfile)

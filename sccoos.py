@@ -150,6 +150,48 @@ class SCCOOS(nc.NC):
         })
         return metaDict
 
+    def qc_time_gap(self, dates1, dates2, allow):
+        """
+        Check for gap in time
+        date arrays should be in pd.to_datetime
+        Should flag be for QC on time or variables
+        :param dates1: The input array of observed values
+        :param dates2: The input array of server time/recorded
+        :param : cap in seconds
+        :returns: An array of flagS
+        """
+        flag_arr = np.ones_like(dates1, dtype='uint8')
+        time_gap = dates2-dates1
+
+        # return flag_arr
+        return time_gap #for testing
+
+    def qc_time_interval(self, arr, interval):
+        """
+        Check for gap in time
+        Should flag be for QC on time or variables
+        :param arr: The input array of observed values
+        :param interval: cap in seconds
+        :returns: An array of flagS
+        """
+        flag_arr = np.ones_like(arr, dtype='uint8')
+
+        #np.diff array is -1 size of original array
+        diff = np.diff(arr)
+        #insert a zero at the begining. array should now be same size as the data
+        # print len(arr), len(diff)
+        # print diff[0:5]
+        diff = np.insert(diff, 0, 0)
+        print len(arr), len(diff)
+        print diff[0:5]
+        flag_arr[:] = qc.QCFlags.GOOD_DATA
+        flag_arr[(diff > interval)] = qc.QCFlags.SUSPECT
+
+        flag_arr[0] = qc.QCFlags.UNKNOWN
+
+        # return flag_arr
+        return diff #for testing
+
     def qc_tests_obj(self, df, obj):
         """Run qc
 
@@ -168,13 +210,13 @@ class SCCOOS(nc.NC):
         # data = df[obj.name].values
         qc2flags = np.zeros_like(df[obj.name].values, dtype='uint8')
 
-        # Missing check
-        if obj.qc['miss_val']:
-        # if 'miss_val' in obj.qc:
-        # if obj.qc.get('miss_val'):
-            qcflagsMiss = qc.check_nulls(df[obj.name].values)
-        else:
-            qcflagsMiss = np.ones_like(df[obj.name].values, dtype='uint8')
+        # # Missing check
+        # if obj.qc['miss_val']:
+        # # if 'miss_val' in obj.qc:
+        # # if obj.qc.get('miss_val'):
+        #     qcflagsMiss = qc.check_nulls(df[obj.name].values)
+        # else:
+        #     qcflagsMiss = np.ones_like(df[obj.name].values, dtype='uint8')
 
         # Range Check
         # sensor_span = (-5,30)
@@ -208,8 +250,28 @@ class SCCOOS(nc.NC):
         else:
             qcflagsSpike = np.ones_like(df[obj.name].values, dtype='uint8')
 
+        # if obj.qc['rec_time_col'] and obj.qc['delay']:
+        #     print df.columns
+        #     print obj.name, 'qc_time_gap', obj.qc['rec_time_col'], obj.qc['delay']
+        #     # qcflagsTimeGap = self.qc_time_gap(pd.to_datetime(df[obj.qc['rec_time_col']].values),df.index.values,obj.qc['delay'])
+        #     qcflagsTimeGap = self.qc_time_gap(pd.to_datetime(df.server_date.values),df.index.values,obj.qc['delay'])
+        #     print qcflagsTimeGap
+        #     # qc2flags[(qcflagsSpike > 2)] =  4# Time Gap
+        # # else:
+        # #     qcflagsTimeInvl = np.ones_like(df[obj.name].values, dtype='uint8')
+
+        if 'time_interval' in obj.qc:
+            print obj.name, 'qc_time_interval', obj.qc['time_interval']
+            qcflagsTimeInvl = self.qc_time_interval(df[obj.name].values,obj.qc['time_interval'])
+            print qcflagsTimeInvl
+            # qc2flags[(qcflagsSpike > 2)] =  4# Time interval
+        # else:
+        #     qcflagsTimeInvl = np.ones_like(df[obj.name].values, dtype='uint8')
+
         # Find maximum qc flag
-        qcflags = np.maximum.reduce([qcflagsMiss, qcflagsRange, qcflagsFlat, qcflagsSpike])
+        # qcflags = np.maximum.reduce([qcflagsMiss, qcflagsRange, qcflagsFlat, qcflagsSpike])
+        qcflags = np.maximum.reduce([qcflagsRange, qcflagsFlat, qcflagsSpike])
+        # qcflags = np.maximum.reduce([qcflagsMiss, qcflagsRange, qcflagsFlat, qcflagsSpike, qcflagsGap, qcflagsTimeInvl])
         # print 'final primary flags:', obj.name,   qcflags[0:10]
         # print 'final secondary flags:',obj.name, qc2flags[0:10]
 
