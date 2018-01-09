@@ -13,11 +13,18 @@ class NC(object):
     """
     Class documentation: This root 'nc' class is an abstract class.
     It will be the base to make a netcdf file.
-    Its children are 'cdip' and 'sccoos' (grandchildren 'sass' & 'caf')
+    Its children are 'sccoos' (grandchildren 'sass' & 'caf')
 
     .. note::
         | Assume: nc files end in YYYY.nc
         | 'time' variable in data/ncfile
+
+    :attr str dateformat:
+    :attr dict metaDict: dictionary of netCDF's global attributes, can be added to
+    :attr dict mata_lat: dictionary of netCDF's latitude attributes
+    :attr dict meta_lon: dictionary of netCDF's longitude attributes
+    :attr dict meta_dep: dictionary of netCDF's depth attributes
+
     """
     __metaclass__ = ABCMeta
 
@@ -139,7 +146,7 @@ class NC(object):
     def updateNCattrs_single(self, ncName):
         """on a single file: run when ONLY nc METADATA needs updating, NOT any data
 
-        :param str ncName: file name of netCDF to be made, with path
+        :param str ncName: filename of netCDF to be made, with path
 
         .. note::
             Function uses metaDict variables set in various levels of __init__.
@@ -181,12 +188,19 @@ class NC(object):
             self.updateNCattrs_single(filename)
 
     def tupToISO(self, timeTup):
-        """Only return Day, Hour, Min, Sec in ISO 8601 duration format"""
+        """Only return Day, Hour, Min, Sec in ISO 8601 duration format
+        :param tuple timeTup: time in a tuple
+        :returns: timestamp in time in a ISO String
+        """
         return time.strftime('%Y-%m-%dT%H:%M:%SZ', timeTup)
     # Designed, testing NSDate int, may work with epoch (subsec???)
 
     def ISOduration(self, minTimeS, maxTimeS):
-        """returns ISO duration (days, hrs, mins, secs)"""
+        """returns ISO duration (days, hrs, mins, secs)
+        :param int minTimeS: min/start time (epoch)
+        :param int maxTimeS: max/end time (epoch)
+        :returns: duration in time in a ISO String
+        """
         secDif = maxTimeS - minTimeS
         days = secDif / (3600 * 24)
         dayRem = secDif % (3600 * 24)
@@ -201,7 +215,11 @@ class NC(object):
 
     def NCtimeMeta(self, ncfile):
         """Update time metadata values: Calculate, SPECIFIC to file.
-        ISO 8601 Time duration"""
+        ISO 8601 Time duration
+
+        :param Dataset ncfile: netCDF file writing to
+
+        """
         times = ncfile.variables['time'][:]
         minTimeS = min(times)
         maxTimeS = max(times)
@@ -223,7 +241,10 @@ class NC(object):
 
     def fileSizeChecker(self, ncfilepath):
         """filesize checker/resizer as a NC method.
-        Set as 1e6, could be make default and pass as arg"""
+        Set as 1e6, could be make default and pass as arg
+
+        :param str ncfilepath: filename of netcdf(with path)
+        """
         nameOnly = ncfilepath.split('/')[-1]
         if os.path.isfile(ncfilepath):
             fileMb = int(os.path.getsize(ncfilepath) / 1000000)
@@ -250,7 +271,11 @@ class NC(object):
                 print 'RESIZED FILE: prev:', origSz, os.path.getsize(ncfilepath)
 
     def attrMinMax(self, rt, attr):
-        """get variables' min and max and put values into the metadata"""
+        """get variables' min and max and put values into the metadata
+
+        :param Dataset rt: netCDF object
+        :param str attr: name of variable to get min/max
+        """
         if 'flag' not in attr:
             dMin = rt.variables[attr][:].min()
             dMax = rt.variables[attr][:].max()
@@ -262,6 +287,11 @@ class NC(object):
         Assumes there's a 'time' variable in data/ncfile
 
         .. note: run in conda environment log2ncEnv3, do to line: appDF = subset[-exist]
+
+        :param str ncName: name of netCDF with filepath
+        :param dataframe subset: dataframe to be added to netCDF file
+        :param lookup: a variable that might be needed for createNCshell, can be empty/Null
+
         """
         if not os.path.isfile(ncName):
             ncfile = self.createNCshell(ncName, lookup)

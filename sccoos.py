@@ -15,7 +15,9 @@ from abc import ABCMeta, abstractmethod
 import nc, qc
 
 class SCCOOS(nc.NC):
-    """Class to be used for SCCOOS related netCDFs"""
+    """Class to be used for SCCOOS related netCDFs
+
+    ..warning:: Assumptions: filename:prefix+YYYY.nc"""
     __metaclass__ = ABCMeta
     #add general SCCOOS metadata
     @abstractmethod
@@ -49,7 +51,10 @@ class SCCOOS(nc.NC):
        # print "addNCshell_SCCOOS"
 
     def getLastNC(self, prefix):
-        """look at all nc file names and get last year"""
+        """look at all nc file names and get last/latest year
+
+        :param str prefix: filename prefix
+        """
         ncFilesArr = os.listdir(self.ncpath)
         ncYrsArr = []
         for nc in ncFilesArr:
@@ -108,7 +113,7 @@ class SCCOOS(nc.NC):
         else: return False
 
     def qc_meta(self, varName, qcSpecs):
-        """take specs and put into dictionary to be put in netcdf's variable's meta
+        """take QC specs/parameters and put into dictionary to be put in netcdf's variable's meta
 
         :param str varName: name of variable
         :param qcSpecs: object or dictionary
@@ -151,13 +156,15 @@ class SCCOOS(nc.NC):
         return metaDict
 
     def qc_time_gap(self, dates1, dates2, allow):
-        """
-        Check for gap in time
-        date arrays should be in pd.to_datetime
-        Should flag be for QC on time or variables
+        """ Check for gap in time between sensor time and recorded (server_date)
+        .. warning: NOT done
+        .. note: date arrays should be in pd.to_datetime
+
+        Should flag be for QC on time only or variables
+
         :param dates1: The input array of observed values
         :param dates2: The input array of server time/recorded
-        :param : cap in seconds
+        :param allow: cap in seconds
         :returns: An array of flagS
         """
         flag_arr = np.ones_like(dates1, dtype='uint8')
@@ -167,9 +174,11 @@ class SCCOOS(nc.NC):
         return time_gap #for testing
 
     def qc_time_interval(self, arr, interval):
-        """
-        Check for gap in time
-        Should flag be for QC on time or variables
+        """ Check for gap in time array
+
+        .. warning: NOT done
+
+        Should flag be for QC on time only or variables
         :param arr: The input array of observed values
         :param interval: cap in seconds
         :returns: An array of flagS
@@ -193,7 +202,10 @@ class SCCOOS(nc.NC):
         return diff #for testing
 
     def qc_tests_obj(self, df, obj):
-        """Run qc
+        """Run qc tests. NEW version of ``qc_tests``, which passes object,
+        which can have various parameters
+
+        .. warning: NEW version of ``qc_tests``
 
         .. todo::
             - add _FillValue attribute
@@ -290,13 +302,14 @@ class SCCOOS(nc.NC):
 
     def qc_tests(self, df, attr, miss_val=None, sensor_span=None, user_span=None, low_reps=None,
     high_reps=None, eps=None, low_thresh=None, high_thresh=None):
-        """Run qc
+        """Run qc tests. OLD version which passes various parameters
+
+        .. warning: OLD version of ``qc_tests_obj``
 
         .. todo::
             - add _FillValue attribute
-            - add tests done to 'processing_level' metaDict
-            - add qc input into metadata
-            - miss_val as input? change if statement?
+
+        .. todo: Change all children projects to use ``qc_tests_obj``
 
         :param df: dataframe
         :param attr: attribute, qa is being applied to
@@ -369,6 +382,10 @@ class SCCOOS(nc.NC):
         return df
 
     def flagStats_allYears(self, csvName):
+        """Loop through all years/netCDFs make a CSV file of flag counts
+
+        .. todo: make ``flagStats_single`` a required function/abstractmethod for all projects
+        """
         start = time.time()
         print 'dfStats_allYears ncpath:', self.ncpath
         filesArr = os.listdir(self.ncpath)
@@ -384,6 +401,10 @@ class SCCOOS(nc.NC):
         print "Done!", time.asctime(),"Runtime:", time.time()-start
 
     def runAllNCyrs(self, func):
+        """Loop through all years/netCDFs and apply specified function
+
+        :param str func: function name to be applied to all netCDFs
+        """
         print 'runAllNCyrs ncpath:', self.ncpath
         filesArr = os.listdir(self.ncpath)
         filesArr.sort()

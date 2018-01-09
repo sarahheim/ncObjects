@@ -13,9 +13,22 @@ from netCDF4 import Dataset
 from abc import ABCMeta, abstractmethod
 
 import sccoos
-import sassqc #, qc #transition sassqc to qc
+# import sassqc #, qc #transition sassqc to qc
 
 class Station(object):
+    """Class for SCCOOS's Automated Shore Stations
+
+    .. warning: Newport has 2 deployments. PH was also added in 2017
+
+    :attr str code_name:
+    :attr str long_name:
+    :attr str wmo: if station has
+    :attr int: dpmt
+    :attr arr ips: list of possible ips
+    :attr float lat: latitude of station
+    :attr float lon: longitude of station
+    :attr int/float depth: depth of station
+    """
     def __init__(self, **kwargs):
         allowed_keys = set(['code_name','long_name','wmo','dpmt', 'ips', 'lat','lon','depth',
             'abbr','url','inst'])
@@ -85,11 +98,26 @@ uci2 = Station(code_name = '005_newport_pier',
 class SASS(sccoos.SCCOOS):
     """Class for SCCOOS's Automated Shore Stations. Currently, log files and netCDFs
 
+    .. note: Children include ``SASS_Basic``, ``SASS_NPd2``, ``SASS_pH``
+
+    .. warning: calcArr order in which calculations will be done
+
+    .. todo::
+        - Change from years to depoloyments
+
     :attr str codedir: location of code to use
-    :attr str ncpath: location of netCDFs
-    :attr bool crontab:
+    :attr str ncpath: location of netCDFs (has to do with envPath)
+    :attr bool crontab: If running as a crontab
     :attr arr calcArr: array of calculations to be done in ORDER to be done
-    :attr dict metaDict: dictionary of metadata to put in netCDF global attribute
+    :attr dict metaDict: dictionary of metadata to put in netCDF global attribute (APPEND to existing general)
+
+    Set in children:
+    :attr str logsdir: location of text files
+    :attr str ncPostName: can be used for deployment
+    :attr str prefix: prefix to netCDF filename
+    :attr arr attrObjArr: Array of variables (main and flags)
+    :attr arr otherArr: Array of other variables (instruments and platform)
+    :attr str regex: Regular Expression used for text files
 
     Move note to nc/sccoos.py?
     ``self.attrObjArr``: string of names of variables
@@ -587,6 +615,12 @@ class SASS(sccoos.SCCOOS):
             #Check that the list is equal to # of columns?!!!
 
     def textReader(self, filename, extDict):
+        """Get dataframe from text file using Pandas library
+
+        :param str filename: filename (with path) of text file to read
+        :param dict extDict: dictionary should contain ``cols`` key with array of column names
+        :returns: dataframe
+        """
         print os.path.isfile(filename), filename
         df = pd.read_csv(filename, sep='^', header=None, prefix='X',error_bad_lines=False)
         # Split data into proper columns
@@ -645,6 +679,11 @@ class SASS(sccoos.SCCOOS):
 
     #Basic
     def calculations(self, df, extDict):
+        """
+        :attr arr calcArr: array of calculations in the order they're to be done
+        :param dataframe df: dataframe
+        :param dict extDict: dictionary can contain 'calcs'
+        """
         for col in df.columns:
             if col not in ['server_date', 'ip']:
                 #ALL might not be float in the future?
@@ -886,6 +925,13 @@ class SASS(sccoos.SCCOOS):
         # self.editOldNC(os.path.join(self.ncpath, fn))
 
 class Attr(object):
+    """Class for SCCOOS's variables
+
+    .. note: parent to ``MainAttr`` and ``FlagAttr``
+    .. todo::
+        - move to sccoos.py/nc.py
+        - change name to Variable?
+    """
     @abstractmethod
     def __init__(self, name):
         # super(Attr, self).__init__(name)
@@ -893,6 +939,13 @@ class Attr(object):
         self.name = name
 
 class MainAttr(Attr):
+    """Class for SCCOOS's main variables. i.e. temperature, salinity
+
+    .. note: child to ``Attr``
+    .. todo::
+        - move to sccoos.py/nc.py
+        - change name to MainVariable?
+    """
     # qc_vars = ['miss_val','sensor_span','user_span','low_reps','high_reps',
     #         'eps','low_thresh','high_thresh']
 
@@ -912,16 +965,29 @@ class MainAttr(Attr):
         # self.calcIn = kwargs['calc_input']
 
 class FlagAttr(Attr):
+    """Class for SCCOOS's flag variables. i.e. temperature_flagPrimary, temperature_flagSecondary
+
+    .. note: child to ``Attr``
+    .. todo::
+        - move to sccoos.py/nc.py
+        - change name to FlagVariable?
+    """
     def __init__(self, name, atts):
         super(FlagAttr, self).__init__(name)
         self.atts = atts
 
 class CharVariable(object):
+    """Class for SCCOOS's netCDF variables. i.e. instruments and platforms
+
+    .. todo: move to sccoos.py/nc.py
+    """
     def __init__(self, name, sta, atts):
         self.name = name
         self.atts = atts
 
 class Regex(object):
+    """Class for Regular Expression (regex) used in SCCOOS's Automated Shore Stations text files.
+    """
     re_Y = r'[1-2]\d{3}' # Year
     re_d = r'[0-3]\d' # Days in Month
     re_b = r'[A-S][a-u][b-y]' # Month as abbreviated name
@@ -939,7 +1005,14 @@ class Regex(object):
         return Regex.re_s.join([Regex.re_attr]*num)
 
 class SASS_Basic(SASS):
+    """Class for INITIAL basic (most stations 2013-present) SCCOOS's Automated Shore Stations
+
+    .. note: Child of ``SASS``
+    """
     def __init__(self, sta):
+        """
+        .. see: ``SASS``
+        """
         super(SASS_Basic, self).__init__(sta)
         print "init SASS_Basic"
         self.logsdir = r'/data/InSitu/SASS/data/'
@@ -1179,6 +1252,12 @@ class SASS_pH(SASS):
         self.regex = r'^'+r.re_serverdate+r.re_s+r.re_ip+r.re_s+r.concatRegex(7)+r'$'
 
     def textReader(self, filename, extDict):
+        """Get dataframe from text file using Pandas library
+
+        :param str filename: filename (with path) of text file to read
+        :param dict extDict: dictionary should contain ``cols`` key with array of column names
+        :returns: dataframe
+        """
         print os.path.isfile(filename), filename
         df = pd.read_csv(filename, sep='^', header=None, prefix='X',error_bad_lines=False)
         # Split data into proper columns
@@ -1198,7 +1277,8 @@ class SASS_pH(SASS):
         return df
 
     def calc_temp(self, row, input):
-        """
+        """ Calculate temperature
+
         :param object row: pandas dataframe row with column name as attributes
         :param dictionary input: dictionary containing the following
         :param float input['temp_slope']:
@@ -1212,7 +1292,8 @@ class SASS_pH(SASS):
             return None
 
     def calc_ph(self, row, input):
-        """
+        """ Calculate PH
+
         :param object row: pandas dataframe row with column name as attributes
         :param dictionary input: dictionary containing the following
         :param float input['pH_slope']:
