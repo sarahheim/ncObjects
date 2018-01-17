@@ -70,7 +70,7 @@ class CAF(sccoos.SCCOOS):
             'cdm_data_type':'Station',
             'contributor_name': 'Carlsbad Aquafarm/SCCOOS, SCCOOS/IOOS/NOAA, SCCOOS',
             'contributor_role': 'station operation, station funding, data management', #??
-            'creator_email':'info@sccoos.org', #??
+            'creator_email':'info@sccoos.org',
             'creator_name':'Scripps Institution of Oceanography (SIO)', # Todd Martz/ Martz Lab?
             'creator_institution':'Scripps Institution of Oceanography (SIO)',
             'creator_type':'person',
@@ -82,20 +82,23 @@ class CAF(sccoos.SCCOOS):
             "geospatial_lat_max": self.staMeta['lat'],
             "geospatial_lon_min": self.staMeta['lon'],
             "geospatial_lon_max": self.staMeta['lon'],
+            'geospatial_lat_resolution':'2.77E-4',
+            'geospatial_lon_resolution':'2.77E-4',
+            'geospatial_vertical_resolution':'1',
             "geospatial_vertical_min": self.staMeta['depth'],
             "geospatial_vertical_max": self.staMeta['depth'],
             "geospatial_vertical_units": 'm',
             'geospatial_vertical_positive': 'down',
             'history':'Carlsbad Aquafarm cultivates Mediterranean Blue Mussels,' + \
             ' Pacific Oysters and Ogo. The company has been in operation since 1990 in Carlsbad.',
-            'ip':"132.239.92.62",
+            # 'ip':"132.239.92.62",
             'institution': 'Southern California Coastal Ocean Observing System (SCCOOS)' + \
             ' at Scripps Institution of Oceanography (SIO)', #or Carlsbad Aquafarm?
             'keywords':'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY, OCEAN CHEMISTRY, CARBON DIOXIDE, OCEAN TEMPERATURE, WATER TEMPERATURE',
-            'metadata_link':'http://www.sccoos.org/data/oa/',
+            'metadata_link':'http://sccoos.org/about/dmac/oaqc/',
             'processing_level':'QA/QC has been performed', ##!!!
             'project':'Burkolator, Carlsbad Aquafarm',
-            'references':'http://www.sccoos.org/data/oa/, http://www.carlsbadaquafarm.com/, https://github.com/ioos/qartod',
+            'references':'http://sccoos.org/about/dmac/oaqc/, http://carlsbadaquafarm.com/, https://github.com/ioos/qartod',
             'summary': 'With funding from NOAA and IOOS, and in support of the West Coast' + \
             ' shellfish industry; AOOS, NANOOS, CeNCOOS, and SCCOOS have added Ocean Acidification' + \
             ' monitoring to its ongoing observations of the coastal ocean. This project funds' + \
@@ -107,11 +110,7 @@ class CAF(sccoos.SCCOOS):
             'platform': 'In Situ Land-based Platforms > Ocean Platform/Ocean Stations > Coastal Stations',
             'instrument_vocabulary': 'GCMD Earth Science Keywords. Version 5.3.3',
             'instrument':'Data was collected with Honeywell and LI-COR instruments.',
-
-            # 'comment':'', !!!
-            # 'geospatial_lat_resolution':'',  # ?
-            # 'geospatial_lon_resolution':'',  # ?
-            # 'geospatial_vertical_resolution':'',  # ???
+            'comment':'basic QC is done on variables',
             })
 
     def createNCshell(self, ncName, ignore):
@@ -130,6 +129,7 @@ class CAF(sccoos.SCCOOS):
         flagSec_flag_meanings = 'UNSPECIFIED RANGE FLAT_LINE SPIKE'
         dup_varatts = {
             'source':'insitu observations',
+            'cell_methods': 'time: point',
             'grid_mapping':'crs',
             'coordinates':'time lat lon depth',
             'platform':'platform1'
@@ -291,24 +291,30 @@ class CAF(sccoos.SCCOOS):
         lat = ncfile.createVariable('lat', 'f4')
         lat.setncatts(self.meta_lat)
         lat.setncatts({
-            'valid_min':self.staMeta['lat'],
-            'valid_max':self.staMeta['lat']
+            'data_max':np.float32(self.staMeta['lat']),
+            'data_min':np.float32(self.staMeta['lat']),
+            'valid_min':np.float32(self.staMeta['lat']),
+            'valid_max':np.float32(self.staMeta['lat'])
         })
         ncfile.variables['lat'][0] = self.staMeta['lat']
 
         lon = ncfile.createVariable('lon', 'f4')
         lon.setncatts(self.meta_lon)
         lon.setncatts({
-            'valid_min':self.staMeta['lon'],
-            'valid_max':self.staMeta['lon']
+            'data_max':np.float32(self.staMeta['lon']),
+            'data_min':np.float32(self.staMeta['lon']),
+            'valid_min':np.float32(self.staMeta['lon']),
+            'valid_max':np.float32(self.staMeta['lon'])
         })
         ncfile.variables['lon'][0] = self.staMeta['lon']
 
         dep = ncfile.createVariable('depth', 'f4')
         dep.setncatts(self.meta_dep) #???
         dep.setncatts({
-            'valid_min':self.staMeta['depth'],
-            'valid_max':self.staMeta['depth']
+            'data_max':np.float32(self.staMeta['depth']),
+            'data_min':np.float32(self.staMeta['depth']),
+            'valid_min':np.float32(self.staMeta['depth']),
+            'valid_max':np.float32(self.staMeta['depth'])
         })
         ncfile.variables['depth'][0] = self.staMeta['depth']
 
@@ -362,6 +368,10 @@ class CAF(sccoos.SCCOOS):
                 self.fileSizeChecker(filepath)
 
     def text2nc_all(self):
+        """Write netCDFs from reading all log files.
+
+        .. warning: update **CAF_sorted** subdirectories with latest files
+        """
         yrArr = os.listdir(self.logsdir)
         yrArr.sort()
         for yr in yrArr:

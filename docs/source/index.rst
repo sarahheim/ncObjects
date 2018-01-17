@@ -43,7 +43,7 @@ Contents
 ^^^^^^^^
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 4
 
 .. autoclass:: nc.NC
     :members:
@@ -57,13 +57,19 @@ Contents
     :inherited-members:
     :show-inheritance:
 
-.. autoclass:: sccoos.SASS
+.. autoclass:: sass_oop.SASS
     :members:
     :undoc-members:
     :inherited-members:
     :show-inheritance:
 
-.. autoclass:: sccoos.CAF
+.. autoclass:: caf.CAF
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:
+
+.. autoclass:: dm_mooring.Moor
     :members:
     :undoc-members:
     :inherited-members:

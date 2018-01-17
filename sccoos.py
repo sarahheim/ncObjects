@@ -220,6 +220,11 @@ class SCCOOS(nc.NC):
 
         Expected kwargs: sensor_span, user_span"""
         # data = df[obj.name].values
+        # print obj.name, obj.qc
+        #object qc parameters may contain 'None's. If so, remove them due to if statements
+        for p in obj.qc.keys():
+        	if obj.qc[p] == None:
+        		obj.qc.pop(p)
         qc2flags = np.zeros_like(df[obj.name].values, dtype='uint8')
 
         # # Missing check
@@ -233,7 +238,8 @@ class SCCOOS(nc.NC):
         # Range Check
         # sensor_span = (-5,30)
         # user_span = (8,30)
-        if obj.qc['sensor_span'] or obj.qc['user_span']:
+        # if obj.qc['sensor_span'] or obj.qc['user_span']:
+        if 'sensor_span' in obj.qc or 'user_span' in obj.qc:
             #because of OR
             sensor_span = obj.qc['sensor_span'] if 'sensor_span' in obj.qc else None
             user_span = obj.qc['user_span'] if 'user_span' in obj.qc else None
@@ -246,7 +252,8 @@ class SCCOOS(nc.NC):
         # low_reps = 2
         # high_reps = 5
         # eps = 0.0001
-        if obj.qc['low_reps'] and obj.qc['high_reps'] and obj.qc['eps']:
+        # if obj.qc['low_reps'] and obj.qc['high_reps'] and obj.qc['eps']:
+        if 'low_reps' in obj.qc and 'high_reps' in obj.qc and 'eps' in obj.qc:
             qcflagsFlat = qc.flat_line_check(df[obj.name].values,obj.qc['low_reps'],obj.qc['high_reps'],obj.qc['eps'])
             qc2flags[(qcflagsFlat > 2)] = 2 # Flat line
         else:
@@ -255,7 +262,8 @@ class SCCOOS(nc.NC):
         # Spike Test
         # low_thresh = 2
         # high_thresh = 3
-        if obj.qc['low_thresh'] and obj.qc['high_thresh']:
+        # if obj.qc['low_thresh'] and obj.qc['high_thresh']:
+        if 'low_thresh' in obj.qc and 'high_thresh' in obj.qc:
             # print obj.name, obj.qc['low_thresh'],obj.qc['high_thresh']
             qcflagsSpike = qc.spike_check(df[obj.name].values,obj.qc['low_thresh'],obj.qc['high_thresh'])
             qc2flags[(qcflagsSpike > 2)] = 3 # Spike

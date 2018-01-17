@@ -81,7 +81,8 @@
             
                 <!-- Local TOC -->
                 <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">Text2NC&#8217;s documentation</a><ul>
+<li><a class="reference internal" href="#">Text2NC&#8217;s documentation</a></li>
+<li><a class="reference internal" href="#usage">USAGE</a><ul>
 <li><a class="reference internal" href="#guide">Guide</a></li>
 <li><a class="reference internal" href="#notes">Notes</a></li>
 <li><a class="reference internal" href="#contents">Contents</a></li>
@@ -139,7 +140,14 @@ different projects. Inheriting shared functions.</p>
 <p>Documentation can be found at <a class="reference external" href="https://sarahheim.github.io/ncObjects/build/html/">https://sarahheim.github.io/ncObjects/build/html/</a></p>
 <p>Source code can be found at <a class="reference external" href="https://github.com/sarahheim/ncObjects">https://github.com/sarahheim/ncObjects</a></p>
 <p>and <a class="reference external" href="https://bitbucket.org/sarahheim/ncobjects">https://bitbucket.org/sarahheim/ncobjects</a></p>
+<p>Create all new netCDFs: allLogs.py
+Append to existing netCDFs: appendLatest_SASS.py</p>
 <img alt="http://www.sccoos.org/static/img/SCCOOS-banner100.jpg" src="http://www.sccoos.org/static/img/SCCOOS-banner100.jpg" />
+</div>
+<div class="section" id="usage">
+<h1>USAGE<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<p>#NEW SCCOOS SASS (including Newport)
+<a href="#id1"><span class="problematic" id="id2">*</span></a>/4 * * * * /home/uproc/anaconda/envs/log2ncEnv/bin/python /data/InSitu/SASS/code/ncobjects/appendLatest_SASS.py &gt; ~/appendLatest_sass.out</p>
 <div class="section" id="guide">
 <h2>Guide<a class="headerlink" href="#guide" title="Permalink to this headline">¶</a></h2>
 <blockquote>
@@ -157,12 +165,10 @@ c.text2nc_all()</div></blockquote>
 <li>put <em>createVariable</em> in text</li>
 </ul>
 <p class="rubric">Class Inheritance</p>
-<img src="_images/inheritance-5bffc41f13e434e3ec739b4f0b2d2e05f429e642.png" alt="Inheritance diagram of sccoos" usemap="#inheritance45b1cfac9c" class="inheritance"/>
+<img src="_images/inheritance-37f6d54aa91ea8c4803ec33e45503cb5ee74554c.png" alt="Inheritance diagram of sccoos" usemap="#inheritance45b1cfac9c" class="inheritance"/>
 <map id="inheritance45b1cfac9c" name="inheritance45b1cfac9c">
-<area shape="rect" id="node1" href="#nc.NC" target="_top" title="Class documentation: This root &#39;nc&#39; class is an abstract class." alt="" coords="5,31,77,56"/>
-<area shape="rect" id="node3" href="#sccoos.SCCOOS" target="_top" title="Class to be used for SCCOOS related netCDFs" alt="" coords="125,31,252,56"/>
-<area shape="rect" id="node2" href="#sccoos.CAF" target="_top" title="Class for SCCOOS&#39;s Carlsbad Aqua Farm&#39;s burkolator. Currently, log files and netCDFs" alt="" coords="306,5,401,31"/>
-<area shape="rect" id="node4" href="#sccoos.SASS" target="_top" title="Class for SCCOOS&#39;s Automated Shore Stations. Currently, log files and netCDFs" alt="" coords="300,55,407,80"/>
+<area shape="rect" id="node1" href="#nc.NC" target="_top" title="Class documentation: This root &#39;nc&#39; class is an abstract class." alt="" coords="5,5,77,31"/>
+<area shape="rect" id="node2" href="#sccoos.SCCOOS" target="_top" title="Class to be used for SCCOOS related netCDFs" alt="" coords="125,5,252,31"/>
 </map>
 <p class="rubric">Graphviz Workflow</p>
 <img src="_images/graphviz-1a9e0d61669529651279848772244ec5a1befa30.png" alt="digraph Workflow {
@@ -254,6 +260,14 @@ c.text2nc_all()</div></blockquote>
 </map>
 <p class="rubric">Ex PlantUML</p>
 </div></blockquote>
+<p class="plantuml">
+<img src="_images/plantuml-5846e885396980f39cbc39e505786930333ef476.png" alt="&#64;startuml
+
+(*) --&gt; &quot;First mod&quot;
+&quot;First mod&quot; --&gt; (*)
+
+&#64;enduml" />
+</p>
 </div>
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
@@ -265,7 +279,7 @@ c.text2nc_all()</div></blockquote>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Class documentation: This root &#8216;nc&#8217; class is an abstract class.
 It will be the base to make a netcdf file.
-Its children are &#8216;cdip&#8217; and &#8216;sccoos&#8217; (grandchildren &#8216;sass&#8217; &amp; &#8216;caf&#8217;)</p>
+Its children are &#8216;sccoos&#8217; (grandchildren &#8216;sass&#8217; &amp; &#8216;caf&#8217;)</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <div class="last line-block">
@@ -273,10 +287,34 @@ Its children are &#8216;cdip&#8217; and &#8216;sccoos&#8217; (grandchildren &#82
 <div class="line">&#8216;time&#8217; variable in data/ncfile</div>
 </div>
 </div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Attr str dateformat:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Attr dict metaDict:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">dictionary of netCDF&#8217;s global attributes, can be added to</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Attr dict mata_lat:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">dictionary of netCDF&#8217;s latitude attributes</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Attr dict meta_lon:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">dictionary of netCDF&#8217;s longitude attributes</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Attr dict meta_dep:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">dictionary of netCDF&#8217;s depth attributes</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="nc.NC.ISOduration">
 <code class="descname">ISOduration</code><span class="sig-paren">(</span><em>minTimeS</em>, <em>maxTimeS</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nc.html#NC.ISOduration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nc.NC.ISOduration" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns ISO duration (days, hrs, mins, secs)</p>
+<dd><p>returns ISO duration (days, hrs, mins, secs)
+:param int minTimeS: min/start time (epoch)
+:param int maxTimeS: max/end time (epoch)
+:returns: duration in time in a ISO String</p>
 </dd></dl>
 
 <dl class="method">
@@ -284,17 +322,29 @@ Its children are &#8216;cdip&#8217; and &#8216;sccoos&#8217; (grandchildren &#82
 <code class="descname">NCtimeMeta</code><span class="sig-paren">(</span><em>ncfile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nc.html#NC.NCtimeMeta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nc.NC.NCtimeMeta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update time metadata values: Calculate, SPECIFIC to file.
 ISO 8601 Time duration</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="nc.NC.addNCshell_NC">
-<code class="descname">addNCshell_NC</code><span class="sig-paren">(</span><em>ncfile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nc.html#NC.addNCshell_NC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nc.NC.addNCshell_NC" title="Permalink to this definition">¶</a></dt>
-<dd><p>When creating new nc file, at some standard metadata</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncfile</strong> (<em>str</em>) &#8211; file name of netCDF to be made, sans-path (uses <strong>ncpath</strong>)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncfile</strong> (<em>Dataset</em>) &#8211; netCDF file writing to</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nc.NC.attrMinMax">
+<code class="descname">attrMinMax</code><span class="sig-paren">(</span><em>rt</em>, <em>attr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nc.html#NC.attrMinMax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nc.NC.attrMinMax" title="Permalink to this definition">¶</a></dt>
+<dd><p>get variables&#8217; min and max and put values into the metadata</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>rt</strong> (<em>Dataset</em>) &#8211; netCDF object</li>
+<li><strong>attr</strong> (<em>str</em>) &#8211; name of variable to get min/max</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -319,6 +369,19 @@ ISO 8601 Time duration</p>
 <code class="descname">dataToNC</code><span class="sig-paren">(</span><em>ncName</em>, <em>subset</em>, <em>lookup</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nc.html#NC.dataToNC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nc.NC.dataToNC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Take dataframe and put in netCDF (new file or append).
 Assumes there&#8217;s a &#8216;time&#8217; variable in data/ncfile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ncName</strong> (<em>str</em>) &#8211; name of netCDF with filepath</li>
+<li><strong>subset</strong> (<em>dataframe</em>) &#8211; dataframe to be added to netCDF file</li>
+<li><strong>lookup</strong> &#8211; a variable that might be needed for createNCshell, can be empty/Null</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -326,6 +389,20 @@ Assumes there&#8217;s a &#8216;time&#8217; variable in data/ncfile</p>
 <code class="descname">fileSizeChecker</code><span class="sig-paren">(</span><em>ncfilepath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nc.html#NC.fileSizeChecker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nc.NC.fileSizeChecker" title="Permalink to this definition">¶</a></dt>
 <dd><p>filesize checker/resizer as a NC method.
 Set as 1e6, could be make default and pass as arg</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncfilepath</strong> (<em>str</em>) &#8211; filename of netcdf(with path)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nc.NC.flagStats_single">
+<code class="descname">flagStats_single</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nc.html#NC.flagStats_single"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nc.NC.flagStats_single" title="Permalink to this definition">¶</a></dt>
+<dd><p>counter of all the primary and secondary flags</p>
 </dd></dl>
 
 <dl class="method">
@@ -365,7 +442,9 @@ then appends any recent data to netcdfs.</p>
 <dl class="method">
 <dt id="nc.NC.tupToISO">
 <code class="descname">tupToISO</code><span class="sig-paren">(</span><em>timeTup</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nc.html#NC.tupToISO"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nc.NC.tupToISO" title="Permalink to this definition">¶</a></dt>
-<dd><p>Only return Day, Hour, Min, Sec in ISO 8601 duration format</p>
+<dd><p>Only return Day, Hour, Min, Sec in ISO 8601 duration format
+:param tuple timeTup: time in a tuple
+:returns: timestamp in time in a ISO String</p>
 </dd></dl>
 
 <dl class="method">
@@ -382,10 +461,32 @@ then appends any recent data to netcdfs.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncName</strong> (<em>str</em>) &#8211; file name of netCDF to be made, with path</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncName</strong> (<em>str</em>) &#8211; filename of netCDF to be made, with path</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Function uses metaDict variables set in various levels of __init__.</p>
+</div>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<ul class="simple">
+<li>Shouldn&#8217;t delete global attributes set in <code class="docutils literal"><span class="pre">NCtimeMeta</span></code> :</li>
+</ul>
+<p class="last">time_coverage_duration, date_issued, date_modified, time_coverage_start, time_coverage_end
+- Except SASS object now sets <code class="docutils literal"><span class="pre">metaDict</span></code> in <code class="docutils literal"><span class="pre">createNCshell</span></code>. Therefore,
+these global attributes won&#8217;t work with this function.
+These include: title, date_created, history, geospatial_lat/lon/vertical_min/max,
+institution, comment.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="nc.NC.updateNCmeta">
+<code class="descname">updateNCmeta</code><span class="sig-paren">(</span><em>ncName</em>, <em>newDir</em>, <em>lookup</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nc.html#NC.updateNCmeta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nc.NC.updateNCmeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>createNCshell (which will put latest metadata in netcdf), then add all previous data
+File name will be the same so pass directory to put new files.</p>
 </dd></dl>
 
 </dd></dl>
@@ -395,10 +496,14 @@ then appends any recent data to netcdfs.</p>
 <em class="property">class </em><code class="descclassname">sccoos.</code><code class="descname">SCCOOS</code><a class="reference internal" href="_modules/sccoos.html#SCCOOS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SCCOOS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#nc.NC" title="nc.NC"><code class="xref py py-class docutils literal"><span class="pre">nc.NC</span></code></a></p>
 <p>Class to be used for SCCOOS related netCDFs</p>
+<p>..warning:: Assumptions: filename:prefix+YYYY.nc</p>
 <dl class="method">
 <dt id="sccoos.SCCOOS.ISOduration">
 <code class="descname">ISOduration</code><span class="sig-paren">(</span><em>minTimeS</em>, <em>maxTimeS</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SCCOOS.ISOduration" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns ISO duration (days, hrs, mins, secs)</p>
+<dd><p>returns ISO duration (days, hrs, mins, secs)
+:param int minTimeS: min/start time (epoch)
+:param int maxTimeS: max/end time (epoch)
+:returns: duration in time in a ISO String</p>
 </dd></dl>
 
 <dl class="method">
@@ -406,17 +511,11 @@ then appends any recent data to netcdfs.</p>
 <code class="descname">NCtimeMeta</code><span class="sig-paren">(</span><em>ncfile</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SCCOOS.NCtimeMeta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update time metadata values: Calculate, SPECIFIC to file.
 ISO 8601 Time duration</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sccoos.SCCOOS.addNCshell_NC">
-<code class="descname">addNCshell_NC</code><span class="sig-paren">(</span><em>ncfile</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SCCOOS.addNCshell_NC" title="Permalink to this definition">¶</a></dt>
-<dd><p>When creating new nc file, at some standard metadata</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncfile</strong> (<em>str</em>) &#8211; file name of netCDF to be made, sans-path (uses <strong>ncpath</strong>)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncfile</strong> (<em>Dataset</em>) &#8211; netCDF file writing to</td>
 </tr>
 </tbody>
 </table>
@@ -426,6 +525,24 @@ ISO 8601 Time duration</p>
 <dt id="sccoos.SCCOOS.addNCshell_SCCOOS">
 <code class="descname">addNCshell_SCCOOS</code><span class="sig-paren">(</span><em>ncfile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#SCCOOS.addNCshell_SCCOOS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SCCOOS.addNCshell_SCCOOS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="sccoos.SCCOOS.attrMinMax">
+<code class="descname">attrMinMax</code><span class="sig-paren">(</span><em>rt</em>, <em>attr</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SCCOOS.attrMinMax" title="Permalink to this definition">¶</a></dt>
+<dd><p>get variables&#8217; min and max and put values into the metadata</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>rt</strong> (<em>Dataset</em>) &#8211; netCDF object</li>
+<li><strong>attr</strong> (<em>str</em>) &#8211; name of variable to get min/max</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="sccoos.SCCOOS.createNCshell">
@@ -446,6 +563,19 @@ ISO 8601 Time duration</p>
 <code class="descname">dataToNC</code><span class="sig-paren">(</span><em>ncName</em>, <em>subset</em>, <em>lookup</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SCCOOS.dataToNC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Take dataframe and put in netCDF (new file or append).
 Assumes there&#8217;s a &#8216;time&#8217; variable in data/ncfile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ncName</strong> (<em>str</em>) &#8211; name of netCDF with filepath</li>
+<li><strong>subset</strong> (<em>dataframe</em>) &#8211; dataframe to be added to netCDF file</li>
+<li><strong>lookup</strong> &#8211; a variable that might be needed for createNCshell, can be empty/Null</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -453,6 +583,42 @@ Assumes there&#8217;s a &#8216;time&#8217; variable in data/ncfile</p>
 <code class="descname">fileSizeChecker</code><span class="sig-paren">(</span><em>ncfilepath</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SCCOOS.fileSizeChecker" title="Permalink to this definition">¶</a></dt>
 <dd><p>filesize checker/resizer as a NC method.
 Set as 1e6, could be make default and pass as arg</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncfilepath</strong> (<em>str</em>) &#8211; filename of netcdf(with path)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sccoos.SCCOOS.flagStats_allYears">
+<code class="descname">flagStats_allYears</code><span class="sig-paren">(</span><em>csvName</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#SCCOOS.flagStats_allYears"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SCCOOS.flagStats_allYears" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loop through all years/netCDFs make a CSV file of flag counts</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sccoos.SCCOOS.flagStats_single">
+<code class="descname">flagStats_single</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SCCOOS.flagStats_single" title="Permalink to this definition">¶</a></dt>
+<dd><p>counter of all the primary and secondary flags</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sccoos.SCCOOS.getAttrOrKey">
+<code class="descname">getAttrOrKey</code><span class="sig-paren">(</span><em>objDict</em>, <em>kat</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#SCCOOS.getAttrOrKey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SCCOOS.getAttrOrKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>take specs and put into dictionary to be put in netcdf&#8217;s variable&#8217;s meta</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kat</strong> (<em>str</em>) &#8211; name of attribute or key</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">meta</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -476,7 +642,154 @@ Set as 1e6, could be make default and pass as arg</p>
 <dl class="method">
 <dt id="sccoos.SCCOOS.getLastNC">
 <code class="descname">getLastNC</code><span class="sig-paren">(</span><em>prefix</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#SCCOOS.getLastNC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SCCOOS.getLastNC" title="Permalink to this definition">¶</a></dt>
-<dd><p>look at all nc file names and get last year</p>
+<dd><p>look at all nc file names and get last/latest year</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>prefix</strong> (<em>str</em>) &#8211; filename prefix</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sccoos.SCCOOS.qc_meta">
+<code class="descname">qc_meta</code><span class="sig-paren">(</span><em>varName</em>, <em>qcSpecs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#SCCOOS.qc_meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SCCOOS.qc_meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>take QC specs/parameters and put into dictionary to be put in netcdf&#8217;s variable&#8217;s meta</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>varName</strong> (<em>str</em>) &#8211; name of variable</li>
+<li><strong>qcSpecs</strong> &#8211; object or dictionary</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dictionary of meta</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sccoos.SCCOOS.qc_tests">
+<code class="descname">qc_tests</code><span class="sig-paren">(</span><em>df</em>, <em>attr</em>, <em>miss_val=None</em>, <em>sensor_span=None</em>, <em>user_span=None</em>, <em>low_reps=None</em>, <em>high_reps=None</em>, <em>eps=None</em>, <em>low_thresh=None</em>, <em>high_thresh=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#SCCOOS.qc_tests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SCCOOS.qc_tests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run qc tests. OLD version which passes various parameters</p>
+<div class="admonition-todo admonition" id="index-1">
+<p class="first admonition-title">Todo</p>
+<ul class="last simple">
+<li>add _FillValue attribute</li>
+</ul>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> &#8211; dataframe</li>
+<li><strong>attr</strong> &#8211; attribute, qa is being applied to</li>
+<li><strong>miss_val</strong> (<em>boo</em>) &#8211; T/F; uses isnan</li>
+<li><strong>sensor_span</strong> &#8211; for Range Test; tuple of low and high of good values (sensor)</li>
+<li><strong>user_span</strong> &#8211; for Range Test; tuple of low and high of good values (expected/location appropriate)</li>
+<li><strong>low_reps</strong> &#8211; for Flat Line check; number of repeating to be considered suspect</li>
+<li><strong>high_reps</strong> &#8211; for Flat Line check; number of repeating to be considered bad</li>
+<li><strong>eps</strong> &#8211; for Flat Line check;</li>
+<li><strong>low_thresh</strong> &#8211; for Spike Test; see qc.spike_check</li>
+<li><strong>high_thresh</strong> &#8211; for Spike Test; see qc.spike_check</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dataframe with primary and secondary flags added</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Expected kwargs: sensor_span, user_span</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sccoos.SCCOOS.qc_tests_obj">
+<code class="descname">qc_tests_obj</code><span class="sig-paren">(</span><em>df</em>, <em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#SCCOOS.qc_tests_obj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SCCOOS.qc_tests_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run qc tests. NEW version of <code class="docutils literal"><span class="pre">qc_tests</span></code>, which passes object,
+which can have various parameters</p>
+<div class="admonition-todo admonition" id="index-2">
+<p class="first admonition-title">Todo</p>
+<ul class="last simple">
+<li>add _FillValue attribute</li>
+<li>add tests done to &#8216;processing_level&#8217; metaDict</li>
+<li>miss_val as input? change if statement(s)?... if parameter in obj.qc AND not None</li>
+</ul>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> &#8211; dataframe</li>
+<li><strong>obj</strong> &#8211; object</li>
+<li><strong>obj.name</strong> &#8211; object&#8217;s name</li>
+<li><strong>obj.qc</strong> &#8211; dictionary of qc parameters</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dataframe with primary and secondary flags added</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Expected kwargs: sensor_span, user_span</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sccoos.SCCOOS.qc_time_gap">
+<code class="descname">qc_time_gap</code><span class="sig-paren">(</span><em>dates1</em>, <em>dates2</em>, <em>allow</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#SCCOOS.qc_time_gap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SCCOOS.qc_time_gap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check for gap in time between sensor time and recorded (server_date)
+.. warning: NOT done
+.. note: date arrays should be in pd.to_datetime</p>
+<p>Should flag be for QC on time only or variables</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dates1</strong> &#8211; The input array of observed values</li>
+<li><strong>dates2</strong> &#8211; The input array of server time/recorded</li>
+<li><strong>allow</strong> &#8211; cap in seconds</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An array of flagS</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sccoos.SCCOOS.qc_time_interval">
+<code class="descname">qc_time_interval</code><span class="sig-paren">(</span><em>arr</em>, <em>interval</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#SCCOOS.qc_time_interval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SCCOOS.qc_time_interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check for gap in time array</p>
+<p>Should flag be for QC on time only or variables
+:param arr: The input array of observed values
+:param interval: cap in seconds
+:returns: An array of flagS</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sccoos.SCCOOS.runAllNCyrs">
+<code class="descname">runAllNCyrs</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#SCCOOS.runAllNCyrs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SCCOOS.runAllNCyrs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loop through all years/netCDFs and apply specified function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> (<em>str</em>) &#8211; function name to be applied to all netCDFs</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -516,7 +829,9 @@ then appends any recent data to netcdfs.</p>
 <dl class="method">
 <dt id="sccoos.SCCOOS.tupToISO">
 <code class="descname">tupToISO</code><span class="sig-paren">(</span><em>timeTup</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SCCOOS.tupToISO" title="Permalink to this definition">¶</a></dt>
-<dd><p>Only return Day, Hour, Min, Sec in ISO 8601 duration format</p>
+<dd><p>Only return Day, Hour, Min, Sec in ISO 8601 duration format
+:param tuple timeTup: time in a tuple
+:returns: timestamp in time in a ISO String</p>
 </dd></dl>
 
 <dl class="method">
@@ -533,155 +848,42 @@ then appends any recent data to netcdfs.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncName</strong> (<em>str</em>) &#8211; file name of netCDF to be made, with path</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncName</strong> (<em>str</em>) &#8211; filename of netCDF to be made, with path</td>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="sccoos.SASS">
-<em class="property">class </em><code class="descclassname">sccoos.</code><code class="descname">SASS</code><a class="reference internal" href="_modules/sccoos.html#SASS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SASS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sccoos.SCCOOS" title="sccoos.SCCOOS"><code class="xref py py-class docutils literal"><span class="pre">sccoos.SCCOOS</span></code></a></p>
-<p>Class for SCCOOS&#8217;s Automated Shore Stations. Currently, log files and netCDFs</p>
-<p>Setting up SASS variables</p>
-<div class="admonition-todo admonition" id="index-0">
-<p class="first admonition-title">Todo</p>
-<ul class="last simple">
-<li>change ncpath (currently local for testing)</li>
-<li>move metadata to external text file(s)?</li>
-</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Function uses metaDict variables set in various levels of __init__.</p>
 </div>
-<dl class="method">
-<dt id="sccoos.SASS.ISOduration">
-<code class="descname">ISOduration</code><span class="sig-paren">(</span><em>minTimeS</em>, <em>maxTimeS</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SASS.ISOduration" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns ISO duration (days, hrs, mins, secs)</p>
+<div class="admonition-todo admonition" id="index-3">
+<p class="first admonition-title">Todo</p>
+<ul class="simple">
+<li>Shouldn&#8217;t delete global attributes set in <code class="docutils literal"><span class="pre">NCtimeMeta</span></code> :</li>
+</ul>
+<p class="last">time_coverage_duration, date_issued, date_modified, time_coverage_start, time_coverage_end
+- Except SASS object now sets <code class="docutils literal"><span class="pre">metaDict</span></code> in <code class="docutils literal"><span class="pre">createNCshell</span></code>. Therefore,
+these global attributes won&#8217;t work with this function.
+These include: title, date_created, history, geospatial_lat/lon/vertical_min/max,
+institution, comment.</p>
+</div>
 </dd></dl>
 
 <dl class="method">
-<dt id="sccoos.SASS.NCtimeMeta">
-<code class="descname">NCtimeMeta</code><span class="sig-paren">(</span><em>ncfile</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SASS.NCtimeMeta" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update time metadata values: Calculate, SPECIFIC to file.
-ISO 8601 Time duration</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sccoos.SASS.addNCshell_NC">
-<code class="descname">addNCshell_NC</code><span class="sig-paren">(</span><em>ncfile</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SASS.addNCshell_NC" title="Permalink to this definition">¶</a></dt>
-<dd><p>When creating new nc file, at some standard metadata</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncfile</strong> (<em>str</em>) &#8211; file name of netCDF to be made, sans-path (uses <strong>ncpath</strong>)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="sccoos.SASS.addNCshell_SCCOOS">
-<code class="descname">addNCshell_SCCOOS</code><span class="sig-paren">(</span><em>ncfile</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SASS.addNCshell_SCCOOS" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="sccoos.SASS.createNCshell">
-<code class="descname">createNCshell</code><span class="sig-paren">(</span><em>ncfile</em>, <em>sta</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#SASS.createNCshell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SASS.createNCshell" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="sccoos.SASS.dataToNC">
-<code class="descname">dataToNC</code><span class="sig-paren">(</span><em>ncName</em>, <em>subset</em>, <em>lookup</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SASS.dataToNC" title="Permalink to this definition">¶</a></dt>
-<dd><p>Take dataframe and put in netCDF (new file or append).
-Assumes there&#8217;s a &#8216;time&#8217; variable in data/ncfile</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sccoos.SASS.fileSizeChecker">
-<code class="descname">fileSizeChecker</code><span class="sig-paren">(</span><em>ncfilepath</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SASS.fileSizeChecker" title="Permalink to this definition">¶</a></dt>
-<dd><p>filesize checker/resizer as a NC method.
-Set as 1e6, could be make default and pass as arg</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sccoos.SASS.getLastDateNC">
-<code class="descname">getLastDateNC</code><span class="sig-paren">(</span><em>ncFilename</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SASS.getLastDateNC" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read a netCDF file and return the lastest time value in epoch/seconds</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncFilename</strong> (<em>str</em>) &#8211; path of netCDF file</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">latest time value in epoch/seconds</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">number (<code class="docutils literal"><span class="pre">float</span></code>), change to <code class="docutils literal"><span class="pre">int</span></code>?</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="sccoos.SASS.getLastNC">
-<code class="descname">getLastNC</code><span class="sig-paren">(</span><em>prefix</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SASS.getLastNC" title="Permalink to this definition">¶</a></dt>
-<dd><p>look at all nc file names and get last year</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sccoos.SASS.text2nc">
-<code class="descname">text2nc</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#SASS.text2nc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SASS.text2nc" title="Permalink to this definition">¶</a></dt>
-<dd><p>#previously dataframe2nc
-- Uses Panda&#8217;s <code class="docutils literal"><span class="pre">read_csv</span></code>
-- Does a series of regular expressions (a.k.a. regex)
-- Uses QC methods from <strong>sassqc</strong></p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sccoos.SASS.text2nc_all">
-<code class="descname">text2nc_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#SASS.text2nc_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SASS.text2nc_all" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="sccoos.SASS.text2nc_append">
-<code class="descname">text2nc_append</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#SASS.text2nc_append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.SASS.text2nc_append" title="Permalink to this definition">¶</a></dt>
-<dd><p>SASS log files are organized by server date (when recorded)</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sccoos.SASS.tupToISO">
-<code class="descname">tupToISO</code><span class="sig-paren">(</span><em>timeTup</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SASS.tupToISO" title="Permalink to this definition">¶</a></dt>
-<dd><p>Only return Day, Hour, Min, Sec in ISO 8601 duration format</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sccoos.SASS.updateNCattrs_all">
-<code class="descname">updateNCattrs_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SASS.updateNCattrs_all" title="Permalink to this definition">¶</a></dt>
-<dd><p>loop through all nc files and apply updates to metadata</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sccoos.SASS.updateNCattrs_single">
-<code class="descname">updateNCattrs_single</code><span class="sig-paren">(</span><em>ncName</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SASS.updateNCattrs_single" title="Permalink to this definition">¶</a></dt>
-<dd><p>on a single file: run when ONLY nc METADATA needs updating, NOT any data</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncName</strong> (<em>str</em>) &#8211; file name of netCDF to be made, with path</td>
-</tr>
-</tbody>
-</table>
+<dt id="sccoos.SCCOOS.updateNCmeta">
+<code class="descname">updateNCmeta</code><span class="sig-paren">(</span><em>ncName</em>, <em>newDir</em>, <em>lookup</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.SCCOOS.updateNCmeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>createNCshell (which will put latest metadata in netcdf), then add all previous data
+File name will be the same so pass directory to put new files.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="sccoos.CAF">
-<em class="property">class </em><code class="descclassname">sccoos.</code><code class="descname">CAF</code><a class="reference internal" href="_modules/sccoos.html#CAF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.CAF" title="Permalink to this definition">¶</a></dt>
+<dt id="caf.CAF">
+<em class="property">class </em><code class="descclassname">caf.</code><code class="descname">CAF</code><a class="reference internal" href="_modules/caf.html#CAF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#caf.CAF" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sccoos.SCCOOS" title="sccoos.SCCOOS"><code class="xref py py-class docutils literal"><span class="pre">sccoos.SCCOOS</span></code></a></p>
-<p>Class for SCCOOS&#8217;s Carlsbad Aqua Farm&#8217;s burkolator. Currently, log files and netCDFs</p>
+<p>Class for SCCOOS&#8217;s Carlsbad Aquafarm&#8217;s burkolator. Currently, log files and netCDFs.
+Rename to OA/BURK??</p>
 <p>Setting up CAF variables</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
@@ -692,59 +894,123 @@ which may need to be syncing/ files copied from CAF_2016 and CAF_Latest</li>
 </ul>
 </div>
 <dl class="method">
-<dt id="sccoos.CAF.ISOduration">
-<code class="descname">ISOduration</code><span class="sig-paren">(</span><em>minTimeS</em>, <em>maxTimeS</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.CAF.ISOduration" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns ISO duration (days, hrs, mins, secs)</p>
+<dt id="caf.CAF.ISOduration">
+<code class="descname">ISOduration</code><span class="sig-paren">(</span><em>minTimeS</em>, <em>maxTimeS</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.ISOduration" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns ISO duration (days, hrs, mins, secs)
+:param int minTimeS: min/start time (epoch)
+:param int maxTimeS: max/end time (epoch)
+:returns: duration in time in a ISO String</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="sccoos.CAF.NCtimeMeta">
-<code class="descname">NCtimeMeta</code><span class="sig-paren">(</span><em>ncfile</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.CAF.NCtimeMeta" title="Permalink to this definition">¶</a></dt>
+<dt id="caf.CAF.NCtimeMeta">
+<code class="descname">NCtimeMeta</code><span class="sig-paren">(</span><em>ncfile</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.NCtimeMeta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update time metadata values: Calculate, SPECIFIC to file.
 ISO 8601 Time duration</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sccoos.CAF.addNCshell_NC">
-<code class="descname">addNCshell_NC</code><span class="sig-paren">(</span><em>ncfile</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.CAF.addNCshell_NC" title="Permalink to this definition">¶</a></dt>
-<dd><p>When creating new nc file, at some standard metadata</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncfile</strong> (<em>str</em>) &#8211; file name of netCDF to be made, sans-path (uses <strong>ncpath</strong>)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncfile</strong> (<em>Dataset</em>) &#8211; netCDF file writing to</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="sccoos.CAF.addNCshell_SCCOOS">
-<code class="descname">addNCshell_SCCOOS</code><span class="sig-paren">(</span><em>ncfile</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.CAF.addNCshell_SCCOOS" title="Permalink to this definition">¶</a></dt>
+<dt id="caf.CAF.addNCshell_SCCOOS">
+<code class="descname">addNCshell_SCCOOS</code><span class="sig-paren">(</span><em>ncfile</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.addNCshell_SCCOOS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="sccoos.CAF.createNCshell">
-<code class="descname">createNCshell</code><span class="sig-paren">(</span><em>ncfile</em>, <em>ignore</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#CAF.createNCshell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.CAF.createNCshell" title="Permalink to this definition">¶</a></dt>
+<dt id="caf.CAF.attrMinMax">
+<code class="descname">attrMinMax</code><span class="sig-paren">(</span><em>rt</em>, <em>attr</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.attrMinMax" title="Permalink to this definition">¶</a></dt>
+<dd><p>get variables&#8217; min and max and put values into the metadata</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>rt</strong> (<em>Dataset</em>) &#8211; netCDF object</li>
+<li><strong>attr</strong> (<em>str</em>) &#8211; name of variable to get min/max</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="caf.CAF.createNCshell">
+<code class="descname">createNCshell</code><span class="sig-paren">(</span><em>ncName</em>, <em>ignore</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/caf.html#CAF.createNCshell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#caf.CAF.createNCshell" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="sccoos.CAF.dataToNC">
-<code class="descname">dataToNC</code><span class="sig-paren">(</span><em>ncName</em>, <em>subset</em>, <em>lookup</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.CAF.dataToNC" title="Permalink to this definition">¶</a></dt>
+<dt id="caf.CAF.dataToNC">
+<code class="descname">dataToNC</code><span class="sig-paren">(</span><em>ncName</em>, <em>subset</em>, <em>lookup</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.dataToNC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Take dataframe and put in netCDF (new file or append).
 Assumes there&#8217;s a &#8216;time&#8217; variable in data/ncfile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ncName</strong> (<em>str</em>) &#8211; name of netCDF with filepath</li>
+<li><strong>subset</strong> (<em>dataframe</em>) &#8211; dataframe to be added to netCDF file</li>
+<li><strong>lookup</strong> &#8211; a variable that might be needed for createNCshell, can be empty/Null</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="sccoos.CAF.fileSizeChecker">
-<code class="descname">fileSizeChecker</code><span class="sig-paren">(</span><em>ncfilepath</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.CAF.fileSizeChecker" title="Permalink to this definition">¶</a></dt>
+<dt id="caf.CAF.fileSizeChecker">
+<code class="descname">fileSizeChecker</code><span class="sig-paren">(</span><em>ncfilepath</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.fileSizeChecker" title="Permalink to this definition">¶</a></dt>
 <dd><p>filesize checker/resizer as a NC method.
 Set as 1e6, could be make default and pass as arg</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncfilepath</strong> (<em>str</em>) &#8211; filename of netcdf(with path)</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="sccoos.CAF.getLastDateNC">
-<code class="descname">getLastDateNC</code><span class="sig-paren">(</span><em>ncFilename</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.CAF.getLastDateNC" title="Permalink to this definition">¶</a></dt>
+<dt id="caf.CAF.flagStats_allYears">
+<code class="descname">flagStats_allYears</code><span class="sig-paren">(</span><em>csvName</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.flagStats_allYears" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loop through all years/netCDFs make a CSV file of flag counts</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="caf.CAF.flagStats_single">
+<code class="descname">flagStats_single</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.flagStats_single" title="Permalink to this definition">¶</a></dt>
+<dd><p>counter of all the primary and secondary flags</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="caf.CAF.getAttrOrKey">
+<code class="descname">getAttrOrKey</code><span class="sig-paren">(</span><em>objDict</em>, <em>kat</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.getAttrOrKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>take specs and put into dictionary to be put in netcdf&#8217;s variable&#8217;s meta</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kat</strong> (<em>str</em>) &#8211; name of attribute or key</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">meta</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="caf.CAF.getLastDateNC">
+<code class="descname">getLastDateNC</code><span class="sig-paren">(</span><em>ncFilename</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.getLastDateNC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a netCDF file and return the lastest time value in epoch/seconds</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -761,51 +1027,611 @@ Set as 1e6, could be make default and pass as arg</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="sccoos.CAF.getLastNC">
-<code class="descname">getLastNC</code><span class="sig-paren">(</span><em>prefix</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.CAF.getLastNC" title="Permalink to this definition">¶</a></dt>
-<dd><p>look at all nc file names and get last year</p>
+<dt id="caf.CAF.getLastNC">
+<code class="descname">getLastNC</code><span class="sig-paren">(</span><em>prefix</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.getLastNC" title="Permalink to this definition">¶</a></dt>
+<dd><p>look at all nc file names and get last/latest year</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>prefix</strong> (<em>str</em>) &#8211; filename prefix</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="sccoos.CAF.text2nc">
-<code class="descname">text2nc</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#CAF.text2nc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.CAF.text2nc" title="Permalink to this definition">¶</a></dt>
+<dt id="caf.CAF.qc_meta">
+<code class="descname">qc_meta</code><span class="sig-paren">(</span><em>varName</em>, <em>qcSpecs</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.qc_meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>take QC specs/parameters and put into dictionary to be put in netcdf&#8217;s variable&#8217;s meta</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>varName</strong> (<em>str</em>) &#8211; name of variable</li>
+<li><strong>qcSpecs</strong> &#8211; object or dictionary</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dictionary of meta</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="caf.CAF.qc_tests">
+<code class="descname">qc_tests</code><span class="sig-paren">(</span><em>df</em>, <em>attr</em>, <em>miss_val=None</em>, <em>sensor_span=None</em>, <em>user_span=None</em>, <em>low_reps=None</em>, <em>high_reps=None</em>, <em>eps=None</em>, <em>low_thresh=None</em>, <em>high_thresh=None</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.qc_tests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run qc tests. OLD version which passes various parameters</p>
+<div class="admonition-todo admonition" id="index-4">
+<p class="first admonition-title">Todo</p>
+<ul class="last simple">
+<li>add _FillValue attribute</li>
+</ul>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> &#8211; dataframe</li>
+<li><strong>attr</strong> &#8211; attribute, qa is being applied to</li>
+<li><strong>miss_val</strong> (<em>boo</em>) &#8211; T/F; uses isnan</li>
+<li><strong>sensor_span</strong> &#8211; for Range Test; tuple of low and high of good values (sensor)</li>
+<li><strong>user_span</strong> &#8211; for Range Test; tuple of low and high of good values (expected/location appropriate)</li>
+<li><strong>low_reps</strong> &#8211; for Flat Line check; number of repeating to be considered suspect</li>
+<li><strong>high_reps</strong> &#8211; for Flat Line check; number of repeating to be considered bad</li>
+<li><strong>eps</strong> &#8211; for Flat Line check;</li>
+<li><strong>low_thresh</strong> &#8211; for Spike Test; see qc.spike_check</li>
+<li><strong>high_thresh</strong> &#8211; for Spike Test; see qc.spike_check</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dataframe with primary and secondary flags added</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Expected kwargs: sensor_span, user_span</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="caf.CAF.qc_tests_obj">
+<code class="descname">qc_tests_obj</code><span class="sig-paren">(</span><em>df</em>, <em>obj</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.qc_tests_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run qc tests. NEW version of <code class="docutils literal"><span class="pre">qc_tests</span></code>, which passes object,
+which can have various parameters</p>
+<div class="admonition-todo admonition" id="index-5">
+<p class="first admonition-title">Todo</p>
+<ul class="last simple">
+<li>add _FillValue attribute</li>
+<li>add tests done to &#8216;processing_level&#8217; metaDict</li>
+<li>miss_val as input? change if statement(s)?... if parameter in obj.qc AND not None</li>
+</ul>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> &#8211; dataframe</li>
+<li><strong>obj</strong> &#8211; object</li>
+<li><strong>obj.name</strong> &#8211; object&#8217;s name</li>
+<li><strong>obj.qc</strong> &#8211; dictionary of qc parameters</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dataframe with primary and secondary flags added</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Expected kwargs: sensor_span, user_span</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="caf.CAF.qc_time_gap">
+<code class="descname">qc_time_gap</code><span class="sig-paren">(</span><em>dates1</em>, <em>dates2</em>, <em>allow</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.qc_time_gap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check for gap in time between sensor time and recorded (server_date)
+.. warning: NOT done
+.. note: date arrays should be in pd.to_datetime</p>
+<p>Should flag be for QC on time only or variables</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dates1</strong> &#8211; The input array of observed values</li>
+<li><strong>dates2</strong> &#8211; The input array of server time/recorded</li>
+<li><strong>allow</strong> &#8211; cap in seconds</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An array of flagS</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="caf.CAF.qc_time_interval">
+<code class="descname">qc_time_interval</code><span class="sig-paren">(</span><em>arr</em>, <em>interval</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.qc_time_interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check for gap in time array</p>
+<p>Should flag be for QC on time only or variables
+:param arr: The input array of observed values
+:param interval: cap in seconds
+:returns: An array of flagS</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="caf.CAF.runAllNCyrs">
+<code class="descname">runAllNCyrs</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.runAllNCyrs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loop through all years/netCDFs and apply specified function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> (<em>str</em>) &#8211; function name to be applied to all netCDFs</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="caf.CAF.text2nc">
+<code class="descname">text2nc</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/caf.html#CAF.text2nc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#caf.CAF.text2nc" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="sccoos.CAF.text2nc_all">
-<code class="descname">text2nc_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#CAF.text2nc_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.CAF.text2nc_all" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="caf.CAF.text2nc_all">
+<code class="descname">text2nc_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/caf.html#CAF.text2nc_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#caf.CAF.text2nc_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write netCDFs from reading all log files.</p>
+</dd></dl>
 
 <dl class="method">
-<dt id="sccoos.CAF.text2nc_append">
-<code class="descname">text2nc_append</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sccoos.html#CAF.text2nc_append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sccoos.CAF.text2nc_append" title="Permalink to this definition">¶</a></dt>
+<dt id="caf.CAF.text2nc_append">
+<code class="descname">text2nc_append</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/caf.html#CAF.text2nc_append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#caf.CAF.text2nc_append" title="Permalink to this definition">¶</a></dt>
 <dd><p>CAF data files are set by size.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="sccoos.CAF.tupToISO">
-<code class="descname">tupToISO</code><span class="sig-paren">(</span><em>timeTup</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.CAF.tupToISO" title="Permalink to this definition">¶</a></dt>
-<dd><p>Only return Day, Hour, Min, Sec in ISO 8601 duration format</p>
+<dt id="caf.CAF.tupToISO">
+<code class="descname">tupToISO</code><span class="sig-paren">(</span><em>timeTup</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.tupToISO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only return Day, Hour, Min, Sec in ISO 8601 duration format
+:param tuple timeTup: time in a tuple
+:returns: timestamp in time in a ISO String</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="sccoos.CAF.updateNCattrs_all">
-<code class="descname">updateNCattrs_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.CAF.updateNCattrs_all" title="Permalink to this definition">¶</a></dt>
+<dt id="caf.CAF.updateNCattrs_all">
+<code class="descname">updateNCattrs_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.updateNCattrs_all" title="Permalink to this definition">¶</a></dt>
 <dd><p>loop through all nc files and apply updates to metadata</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="sccoos.CAF.updateNCattrs_single">
-<code class="descname">updateNCattrs_single</code><span class="sig-paren">(</span><em>ncName</em><span class="sig-paren">)</span><a class="headerlink" href="#sccoos.CAF.updateNCattrs_single" title="Permalink to this definition">¶</a></dt>
+<dt id="caf.CAF.updateNCattrs_single">
+<code class="descname">updateNCattrs_single</code><span class="sig-paren">(</span><em>ncName</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.updateNCattrs_single" title="Permalink to this definition">¶</a></dt>
 <dd><p>on a single file: run when ONLY nc METADATA needs updating, NOT any data</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncName</strong> (<em>str</em>) &#8211; file name of netCDF to be made, with path</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncName</strong> (<em>str</em>) &#8211; filename of netCDF to be made, with path</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Function uses metaDict variables set in various levels of __init__.</p>
+</div>
+<div class="admonition-todo admonition" id="index-6">
+<p class="first admonition-title">Todo</p>
+<ul class="simple">
+<li>Shouldn&#8217;t delete global attributes set in <code class="docutils literal"><span class="pre">NCtimeMeta</span></code> :</li>
+</ul>
+<p class="last">time_coverage_duration, date_issued, date_modified, time_coverage_start, time_coverage_end
+- Except SASS object now sets <code class="docutils literal"><span class="pre">metaDict</span></code> in <code class="docutils literal"><span class="pre">createNCshell</span></code>. Therefore,
+these global attributes won&#8217;t work with this function.
+These include: title, date_created, history, geospatial_lat/lon/vertical_min/max,
+institution, comment.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="caf.CAF.updateNCmeta">
+<code class="descname">updateNCmeta</code><span class="sig-paren">(</span><em>ncName</em>, <em>newDir</em>, <em>lookup</em><span class="sig-paren">)</span><a class="headerlink" href="#caf.CAF.updateNCmeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>createNCshell (which will put latest metadata in netcdf), then add all previous data
+File name will be the same so pass directory to put new files.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dm_mooring.Moor">
+<em class="property">class </em><code class="descclassname">dm_mooring.</code><code class="descname">Moor</code><span class="sig-paren">(</span><em>dpmt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dm_mooring.html#Moor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dm_mooring.Moor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sccoos.SCCOOS" title="sccoos.SCCOOS"><code class="xref py py-class docutils literal"><span class="pre">sccoos.SCCOOS</span></code></a></p>
+<p>Class for SCCOOS&#8217;s Del Mar&#8217;s mooring. Currently, log files and netCDFs.</p>
+<p>Setting up Moor variables</p>
+<dl class="method">
+<dt id="dm_mooring.Moor.ISOduration">
+<code class="descname">ISOduration</code><span class="sig-paren">(</span><em>minTimeS</em>, <em>maxTimeS</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.ISOduration" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns ISO duration (days, hrs, mins, secs)
+:param int minTimeS: min/start time (epoch)
+:param int maxTimeS: max/end time (epoch)
+:returns: duration in time in a ISO String</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.NCtimeMeta">
+<code class="descname">NCtimeMeta</code><span class="sig-paren">(</span><em>ncfile</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.NCtimeMeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update time metadata values: Calculate, SPECIFIC to file.
+ISO 8601 Time duration</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncfile</strong> (<em>Dataset</em>) &#8211; netCDF file writing to</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.addNCshell_SCCOOS">
+<code class="descname">addNCshell_SCCOOS</code><span class="sig-paren">(</span><em>ncfile</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.addNCshell_SCCOOS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.attrMinMax">
+<code class="descname">attrMinMax</code><span class="sig-paren">(</span><em>rt</em>, <em>attr</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.attrMinMax" title="Permalink to this definition">¶</a></dt>
+<dd><p>get variables&#8217; min and max and put values into the metadata</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>rt</strong> (<em>Dataset</em>) &#8211; netCDF object</li>
+<li><strong>attr</strong> (<em>str</em>) &#8211; name of variable to get min/max</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.createNCshell">
+<code class="descname">createNCshell</code><span class="sig-paren">(</span><em>ncName</em>, <em>lookup</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dm_mooring.html#Moor.createNCshell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dm_mooring.Moor.createNCshell" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.dataToNC">
+<code class="descname">dataToNC</code><span class="sig-paren">(</span><em>ncName</em>, <em>subset</em>, <em>lookup</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.dataToNC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take dataframe and put in netCDF (new file or append).
+Assumes there&#8217;s a &#8216;time&#8217; variable in data/ncfile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ncName</strong> (<em>str</em>) &#8211; name of netCDF with filepath</li>
+<li><strong>subset</strong> (<em>dataframe</em>) &#8211; dataframe to be added to netCDF file</li>
+<li><strong>lookup</strong> &#8211; a variable that might be needed for createNCshell, can be empty/Null</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.fileSizeChecker">
+<code class="descname">fileSizeChecker</code><span class="sig-paren">(</span><em>ncfilepath</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.fileSizeChecker" title="Permalink to this definition">¶</a></dt>
+<dd><p>filesize checker/resizer as a NC method.
+Set as 1e6, could be make default and pass as arg</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncfilepath</strong> (<em>str</em>) &#8211; filename of netcdf(with path)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.flagStats_allYears">
+<code class="descname">flagStats_allYears</code><span class="sig-paren">(</span><em>csvName</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.flagStats_allYears" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loop through all years/netCDFs make a CSV file of flag counts</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.flagStats_single">
+<code class="descname">flagStats_single</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.flagStats_single" title="Permalink to this definition">¶</a></dt>
+<dd><p>counter of all the primary and secondary flags</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.getAttrOrKey">
+<code class="descname">getAttrOrKey</code><span class="sig-paren">(</span><em>objDict</em>, <em>kat</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.getAttrOrKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>take specs and put into dictionary to be put in netcdf&#8217;s variable&#8217;s meta</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kat</strong> (<em>str</em>) &#8211; name of attribute or key</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">meta</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.getLastDateNC">
+<code class="descname">getLastDateNC</code><span class="sig-paren">(</span><em>ncFilename</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.getLastDateNC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a netCDF file and return the lastest time value in epoch/seconds</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncFilename</strong> (<em>str</em>) &#8211; path of netCDF file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">latest time value in epoch/seconds</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">number (<code class="docutils literal"><span class="pre">float</span></code>), change to <code class="docutils literal"><span class="pre">int</span></code>?</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.getLastNC">
+<code class="descname">getLastNC</code><span class="sig-paren">(</span><em>prefix</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.getLastNC" title="Permalink to this definition">¶</a></dt>
+<dd><p>look at all nc file names and get last/latest year</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>prefix</strong> (<em>str</em>) &#8211; filename prefix</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.logFilepath">
+<code class="descname">logFilepath</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dm_mooring.html#Moor.logFilepath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dm_mooring.Moor.logFilepath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.qc_meta">
+<code class="descname">qc_meta</code><span class="sig-paren">(</span><em>varName</em>, <em>qcSpecs</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.qc_meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>take QC specs/parameters and put into dictionary to be put in netcdf&#8217;s variable&#8217;s meta</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>varName</strong> (<em>str</em>) &#8211; name of variable</li>
+<li><strong>qcSpecs</strong> &#8211; object or dictionary</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dictionary of meta</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.qc_tests">
+<code class="descname">qc_tests</code><span class="sig-paren">(</span><em>df</em>, <em>attr</em>, <em>miss_val=None</em>, <em>sensor_span=None</em>, <em>user_span=None</em>, <em>low_reps=None</em>, <em>high_reps=None</em>, <em>eps=None</em>, <em>low_thresh=None</em>, <em>high_thresh=None</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.qc_tests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run qc tests. OLD version which passes various parameters</p>
+<div class="admonition-todo admonition" id="index-7">
+<p class="first admonition-title">Todo</p>
+<ul class="last simple">
+<li>add _FillValue attribute</li>
+</ul>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> &#8211; dataframe</li>
+<li><strong>attr</strong> &#8211; attribute, qa is being applied to</li>
+<li><strong>miss_val</strong> (<em>boo</em>) &#8211; T/F; uses isnan</li>
+<li><strong>sensor_span</strong> &#8211; for Range Test; tuple of low and high of good values (sensor)</li>
+<li><strong>user_span</strong> &#8211; for Range Test; tuple of low and high of good values (expected/location appropriate)</li>
+<li><strong>low_reps</strong> &#8211; for Flat Line check; number of repeating to be considered suspect</li>
+<li><strong>high_reps</strong> &#8211; for Flat Line check; number of repeating to be considered bad</li>
+<li><strong>eps</strong> &#8211; for Flat Line check;</li>
+<li><strong>low_thresh</strong> &#8211; for Spike Test; see qc.spike_check</li>
+<li><strong>high_thresh</strong> &#8211; for Spike Test; see qc.spike_check</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dataframe with primary and secondary flags added</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Expected kwargs: sensor_span, user_span</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.qc_tests_obj">
+<code class="descname">qc_tests_obj</code><span class="sig-paren">(</span><em>df</em>, <em>obj</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.qc_tests_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run qc tests. NEW version of <code class="docutils literal"><span class="pre">qc_tests</span></code>, which passes object,
+which can have various parameters</p>
+<div class="admonition-todo admonition" id="index-8">
+<p class="first admonition-title">Todo</p>
+<ul class="last simple">
+<li>add _FillValue attribute</li>
+<li>add tests done to &#8216;processing_level&#8217; metaDict</li>
+<li>miss_val as input? change if statement(s)?... if parameter in obj.qc AND not None</li>
+</ul>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> &#8211; dataframe</li>
+<li><strong>obj</strong> &#8211; object</li>
+<li><strong>obj.name</strong> &#8211; object&#8217;s name</li>
+<li><strong>obj.qc</strong> &#8211; dictionary of qc parameters</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dataframe with primary and secondary flags added</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Expected kwargs: sensor_span, user_span</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.qc_time_gap">
+<code class="descname">qc_time_gap</code><span class="sig-paren">(</span><em>dates1</em>, <em>dates2</em>, <em>allow</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.qc_time_gap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check for gap in time between sensor time and recorded (server_date)
+.. warning: NOT done
+.. note: date arrays should be in pd.to_datetime</p>
+<p>Should flag be for QC on time only or variables</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dates1</strong> &#8211; The input array of observed values</li>
+<li><strong>dates2</strong> &#8211; The input array of server time/recorded</li>
+<li><strong>allow</strong> &#8211; cap in seconds</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An array of flagS</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.qc_time_interval">
+<code class="descname">qc_time_interval</code><span class="sig-paren">(</span><em>arr</em>, <em>interval</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.qc_time_interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check for gap in time array</p>
+<p>Should flag be for QC on time only or variables
+:param arr: The input array of observed values
+:param interval: cap in seconds
+:returns: An array of flagS</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.read_csv1">
+<code class="descname">read_csv1</code><span class="sig-paren">(</span><em>fn</em>, <em>col_names</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dm_mooring.html#Moor.read_csv1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dm_mooring.Moor.read_csv1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.read_csv2">
+<code class="descname">read_csv2</code><span class="sig-paren">(</span><em>fn</em>, <em>col_names</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dm_mooring.html#Moor.read_csv2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dm_mooring.Moor.read_csv2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.read_csv3">
+<code class="descname">read_csv3</code><span class="sig-paren">(</span><em>fn</em>, <em>col_names</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dm_mooring.html#Moor.read_csv3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dm_mooring.Moor.read_csv3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.runAllNCyrs">
+<code class="descname">runAllNCyrs</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.runAllNCyrs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loop through all years/netCDFs and apply specified function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> (<em>str</em>) &#8211; function name to be applied to all netCDFs</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.setExtDict">
+<code class="descname">setExtDict</code><span class="sig-paren">(</span><em>fnEnd</em>, <em>fnDict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dm_mooring.html#Moor.setExtDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dm_mooring.Moor.setExtDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>fnDict should contain &#8216;latest_file&#8217;, &#8216;latest_epoch&#8217; and &#8216;latest_file_size&#8217;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.text2nc">
+<code class="descname">text2nc</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dm_mooring.html#Moor.text2nc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dm_mooring.Moor.text2nc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.text2nc_all">
+<code class="descname">text2nc_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dm_mooring.html#Moor.text2nc_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dm_mooring.Moor.text2nc_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>If starting with all new text files:
+CT1169100u_11691_20160515.002c.sc1 line 31 was a problem line. If taken out,
+the rest run smoothly.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.text2nc_append">
+<code class="descname">text2nc_append</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dm_mooring.html#Moor.text2nc_append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dm_mooring.Moor.text2nc_append" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.tupToISO">
+<code class="descname">tupToISO</code><span class="sig-paren">(</span><em>timeTup</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.tupToISO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only return Day, Hour, Min, Sec in ISO 8601 duration format
+:param tuple timeTup: time in a tuple
+:returns: timestamp in time in a ISO String</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.updateNCattrs_all">
+<code class="descname">updateNCattrs_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.updateNCattrs_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>loop through all nc files and apply updates to metadata</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.updateNCattrs_single">
+<code class="descname">updateNCattrs_single</code><span class="sig-paren">(</span><em>ncName</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.updateNCattrs_single" title="Permalink to this definition">¶</a></dt>
+<dd><p>on a single file: run when ONLY nc METADATA needs updating, NOT any data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ncName</strong> (<em>str</em>) &#8211; filename of netCDF to be made, with path</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Function uses metaDict variables set in various levels of __init__.</p>
+</div>
+<div class="admonition-todo admonition" id="index-9">
+<p class="first admonition-title">Todo</p>
+<ul class="simple">
+<li>Shouldn&#8217;t delete global attributes set in <code class="docutils literal"><span class="pre">NCtimeMeta</span></code> :</li>
+</ul>
+<p class="last">time_coverage_duration, date_issued, date_modified, time_coverage_start, time_coverage_end
+- Except SASS object now sets <code class="docutils literal"><span class="pre">metaDict</span></code> in <code class="docutils literal"><span class="pre">createNCshell</span></code>. Therefore,
+these global attributes won&#8217;t work with this function.
+These include: title, date_created, history, geospatial_lat/lon/vertical_min/max,
+institution, comment.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="dm_mooring.Moor.updateNCmeta">
+<code class="descname">updateNCmeta</code><span class="sig-paren">(</span><em>ncName</em>, <em>newDir</em>, <em>lookup</em><span class="sig-paren">)</span><a class="headerlink" href="#dm_mooring.Moor.updateNCmeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>createNCshell (which will put latest metadata in netcdf), then add all previous data
+File name will be the same so pass directory to put new files.</p>
 </dd></dl>
 
 </dd></dl>

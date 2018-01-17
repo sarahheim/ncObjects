@@ -753,6 +753,7 @@ class SASS(sccoos.SCCOOS):
             ncfilename = self.prefix+ str(yr) + '.nc'
             ncfilepath = os.path.join(self.ncpath, ncfilename)
 
+            # Read in existing dataframe
             if os.path.isfile(ncfilepath):
                 # ncfile = Dataset(ncName, 'r', format='NETCDF4')
                 ds = xr.open_dataset(ncfilepath)
@@ -761,11 +762,10 @@ class SASS(sccoos.SCCOOS):
                 print 'init size:', len(ncDF.index), 'last recorded:', ncDF.index[-1]
 
                 ## Add the following: remove any entries from the subset that already exist!!!!!!!
-                # exist = grpYr.epoch.isin(ncDep.variables['time'][:]) #
-                # grpYr['epochs'] = grpYr.index.values.astype('int64') // 10**9
                 exist  = grpYr.index.isin(ncDF.index)
                 # appDF = grpYr[~exist]
                 appDF = grpYr.loc[~exist]
+            # Or create an empty dataframe
             else:
                 ncfile = self.createNCshell(ncfilepath, '')
                 # appDF = grpYr
@@ -778,32 +778,27 @@ class SASS(sccoos.SCCOOS):
                 #set dataframe types, do calculations
                 appDF = self.calculations(appDF, extDict)
                 df2 = ncDF.append(appDF)
-                #Drop all flag columns (will be reset)
-                # for v in df2:
-                #     if '_flag' in v: df2.drop(v, axis=1, inplace=True)
+                ## Drop all flag columns (will be reset)
+                for v in df2:
+                    if '_flag' in v: df2.drop(v, axis=1, inplace=True)
 
                 print 'appending to:', ncfilepath
                 ncfile = Dataset(ncfilepath, 'a', format='NETCDF4')
+                # timeLen = len(ncfile.variables['time'][:])
                 print 'time lens', len(ncfile.variables['time']), df2.index.shape
-                ncfile.variables['time'][0:] = df2.index.values.astype('int64') // 10**9
+                # ncfile.variables['time'][:] = []
+                ncfile.variables['time'][:] = df2.index.values.astype('int64') // 10**9
                 for a in self.attrObjArr:
                     ## if the attribute has ANY of the qc attributes, run it through qc_tests
                     ## Flag variables should be AFTER base variable
 
-                    # for qcv in MainAttr.qc_vars:
-                    #     if qcv in a.__dict__.keys() and getattr(a, qcv) is not None:
-                    #         df2 = self.qc_tests(df2, a.name, miss_val=a.miss_val,
-                    #             sensor_span=a.sensor_span, user_span=a.user_span, low_reps=a.low_reps,
-                    #             high_reps=a.high_reps, eps=a.eps,
-                    #             low_thresh=a.low_thresh, high_thresh=a.high_thresh)
-                    #         break
-
                     if hasattr(a, 'qc') and a.qc is not None:
-                        print a.name, a.qc
+                        # print a.name, a.qc
                         df2 = self.qc_tests_obj(df2, a)
 
-                    # print 'sizes', a.name, len(ncfile.variables[a.name][:]), df2[a.name].shape
-                    ncfile.variables[a.name][0:] = df2[a.name].values
+                    # print 'sizes', a.name, len(ncfile.variables[a.name][:]), df2[a.name].shape, df2[a.name][:][0]
+                    # ncfile.variables[a.name][:] = []
+                    ncfile.variables[a.name][:] = df2[a.name].values
                     self.attrMinMax(ncfile, a.name)
                 self.NCtimeMeta(ncfile)
                 ncfile.close()
@@ -863,9 +858,10 @@ class SASS(sccoos.SCCOOS):
                 return loopCount
 
     def editOldNC(self, fname, newDir):
-        '''Go through netcdfs and copy all sensor values, but do QC.
-        New files also have the new metadata
-        .. todo: add Boolean parameter for doing/replacing QC
+        '''Go through netcdfs and copy all sensor values, but do QC (or edit to don't).
+        All new files have the new metadata!
+        .. todo::
+            - add Boolean parameter for doing/replacing QC: (T) Redo QC values (F) only copy all values
         '''
         print 'Using old nc:', fname
 
@@ -901,7 +897,7 @@ class SASS(sccoos.SCCOOS):
         for a in self.attrObjArr:
             ## Do QC if it has QC parameters
             if hasattr(a, 'qc') and a.qc is not None:
-                print 'QC:', a.name
+                # print 'QC:', a.name
                 df = self.qc_tests_obj(df, a)
             ncfile.variables[a.name][0:] = df[a.name].values
             self.attrMinMax(ncfile, a.name)
@@ -1054,6 +1050,10 @@ class SASS_Basic(SASS):
         '''
         .. warning: Some stations had some data recorded in local time instead of UTC.
         This method adjusts those local time to UTC.
+
+        :param datetime start: start datetime
+        :param datetime end: end datetime
+        :param int adjSecs: adjustment in seconds
 
         >>> sass_oop.SASS_Basic(sass_oop.ucsb).local2utc('2009-05-14', '2009-07-02T13:05', 25200)
         # +7:00 (25200)

@@ -21,22 +21,26 @@ import sys
 
 class Moor(sccoos.SCCOOS):
     """Class for SCCOOS's Del Mar's mooring. Currently, log files and netCDFs."""
-    def __init__(self):
+    def __init__(self, dpmt):
         """Setting up Moor variables
 
         .. todo:
             - lat,lon,dep variables could be recorded. And/or valid_min/valid_max could be exact.
         """
+        self.dpmt = dpmt
 
         super(Moor, self).__init__()
         print "init dm_mooring. start time: ", self.tupToISO(time.gmtime())
         # self.logsdir = r'/home/scheim/NCobj/delmar_moor/' # TEMP!!!!!
         # self.ncpath = '/home/scheim/NCobj/DM_Moor' # TEMP!!!!!
         # self.crontab = False # TEMP!!!!!
+
         self.logsdir = r'/data/InSitu/DelMar/data'
         self.ncpath = r'/data/InSitu/DelMar/netcdf'
         self.crontab = True
-        self.extsDictFn = os.path.join(r'/data/InSitu/DelMar/code', r'delmar_mooring_extensions.json')
+        self.codedir = r'/data/InSitu/DelMar/code'
+        self.extsDictFn = os.path.join(self.codedir, r'delmar_mooring_extensions.json')
+        print 'Deployment:', self.dpmt
         print "USING JSON", self.extsDictFn
         # self.txtFnPre = 'CAF_RTproc_' !!!!!
         self.ncFnPre = ''
@@ -70,30 +74,43 @@ class Moor(sccoos.SCCOOS):
             'featureType':"timeSeriesProfile",
             'geospatial_bounds_crs': 'EPSG:4326',
             'geospatial_bounds_vertical_crs': 'EPSG:5829',
-            # 'geospatial_bounds': 'POINT(', self.staMeta[dpmt]['lon'],' ',self.staMeta[dpmt]['lat'],')'
-            # "geospatial_lat_min": self.staMeta[dpmt]['lat'],
-            # "geospatial_lat_max": self.staMeta[dpmt]['lat'],
-            # "geospatial_lon_min": self.staMeta[dpmt]['lon'],
-            # "geospatial_lon_max": self.staMeta[dpmt]['lon'],
+            'geospatial_bounds': 'POINT('+str(self.staMeta[self.dpmt]['lon'])+' '+str(self.staMeta[self.dpmt]['lat'])+')',
+            "geospatial_lat_min": self.staMeta[self.dpmt]['lat'],
+            "geospatial_lat_max": self.staMeta[self.dpmt]['lat'],
+            "geospatial_lon_min": self.staMeta[self.dpmt]['lon'],
+            "geospatial_lon_max": self.staMeta[self.dpmt]['lon'],
+            'geospatial_lat_resolution':'2.77E-4',
+            'geospatial_lon_resolution':'2.77E-4',
+            'geospatial_vertical_resolution':'1',
             "geospatial_vertical_units": 'm',
             'geospatial_vertical_positive': 'down',
-            'history':'',
+            'history':'initial deployment 4 naut. miles offshore La Jolla, Feb. 2005 - Nov. 2005.' + \
+            ' First deployment at the Del Mar site, Feb. 2006 - Dec. 2007.' + \
+            ' Second deployment Jan. 2008 - Aug. 2008.' + \
+            ' Third deployment Aug. 2008 - Nov. 2009.' + \
+            ' Fourth deployment Nov. 2009 - May. 2011.' + \
+            ' Fifth deployment Jun. 2011 - May. 2012' + \
+            ' Sixth deployment Jun. 2012 - May. 2013.' + \
+            ' Seventh deployment Jun. 2013 - May. 2014.' + \
+            ' Eighth deployment May 2014 - Apr. 2015.' + \
+            ' Ninth deployment Jun. 2015 - Oct. 2015.' + \
+            ' Tenth deployment Nov. 2015 - Apr. 2016.' + \
+            ' Eleventh deployment since May 2016.',
             'institution': 'Southern California Coastal Ocean Observing System (SCCOOS)' + \
             ' at Scripps Institution of Oceanography (SIO)',
             'keywords':'EARTH SCIENCE, OCEANS, SALINITY/DENSITY, SALINITY, TEMPERATURE,',##!!!
             'metadata_link':'http://mooring.ucsd.edu/index.html?/projects/delmar/delmar_intro.html',
-            'reference':'http://mooring.ucsd.edu/index.html?/projects/delmar/delmar_intro.html',
             'processing_level':'QA/QC has been performed.',
             'project':'Del Mar, Mooring',
-            'references':'http://www.sccoos.org/data/, http://mooring.ucsd.edu/index.html?/projects/delmar/delmar_intro.html, https://scripps.ucsd.edu/hlab, https://github.com/ioos/qartod',
+            'references':'http://sccoos.org/data/, http://mooring.ucsd.edu/index.html?/projects/delmar/delmar_intro.html, https://scripps.ucsd.edu/hlab, https://github.com/ioos/qartod',
             'summary': 'From February 2006 on, a mooring with a surface buoy has been maintained at a location on the 100-m isobath approximately three miles off Del Mar, CA. Instrumentation on the buoy includes a suite of meteorological sensors, sensors for surface water temperature, salinity, oxygen concentration, fluorescence, nutrients and currents. Further sensors on the mooring wire extend the measurements down into the water column, and much of the data is telemetered to shore in real-time through a radio or cell phone link.' + \
             ' Originally, the platform was developed in collaboration with the Hydraulics Laboratory as a part of the Southern California Coastal Ocean Observing System (SCCOOS). It has since developed into a testbed for instrument development, like for the first GEOCE mooring deployed in August 2008 until November 2009.' + \
             ' The mooring is operational, delivering real-time data, and being serviced annually. Recent servicing trips were incorporated into a university class, where students of the marine sciences and engineering could get hands-on experience with instrumentation, ship operations, and data acquisition.'+ \
             ' at the Scripps Institution of Oceanography.',
-            'comment':'qc parameters are placeholders. general values used for testing',
-            # 'geospatial_lat_resolution':'',  # ?
-            # 'geospatial_lon_resolution':'',  # ?
-            # 'geospatial_vertical_resolution':'',  # ???
+            'comment':'Geospatial lat/lon are a single location. Mooring does have GPS coordinates that could be incorporated or looked up separately.',
+            'geospatial_lat_resolution':'2.77E-4',
+            'geospatial_lon_resolution':'2.77E-4',
+            'geospatial_vertical_resolution':'1',
 
             'platform_vocabulary': 'GCMD Earth Science Keywords. Version 5.3.3',
             'platform': 'mooring with a surface buoy',
@@ -325,15 +342,15 @@ class Moor(sccoos.SCCOOS):
 
     def createNCshell(self, ncName, lookup):
         sn = lookup['sn']
-        dpmt = lookup['dpmt']
+        # dpmt = lookup['dpmt']
         #NOT using: 'pH_aux', 'O2', 'O2sat'
         print "CAF createNCshell"
         ncfile = Dataset(ncName, 'w', format='NETCDF4')
         self.metaDict.update({
             'id':ncName.split('/')[-1], #filename
             'date_created': self.tupToISO(time.gmtime()),
-            "geospatial_vertical_min": self.instrDict[sn][dpmt]['m'],
-            "geospatial_vertical_max": self.instrDict[sn][dpmt]['m']
+            "geospatial_vertical_min": self.instrDict[sn][self.dpmt]['m'],
+            "geospatial_vertical_max": self.instrDict[sn][self.dpmt]['m']
         })
         ncfile.setncatts(self.metaDict)
         #Move to NC/SCCOOS class???
@@ -343,6 +360,7 @@ class Moor(sccoos.SCCOOS):
         flagSec_flag_meanings = 'UNSPECIFIED RANGE FLAT_LINE SPIKE'
         dup_varatts = {
             'source':'insitu observations',
+            'cell_methods': 'time: point longitude: point latitude: point',
             'grid_mapping':'crs',
             'coordinates':'time lat lon depth',
             'platform':'platform1',
@@ -358,14 +376,14 @@ class Moor(sccoos.SCCOOS):
         #     for i in self.instrDict:
         # a depth could change instruments
         # if self.instrDict[sn]['m'] == m:
-        ncGrp = str(int(self.instrDict[sn][dpmt]['m']))+'m'#+str(self.instrDict[sn]['d'])+'d'
+        ncGrp = str(int(self.instrDict[sn][self.dpmt]['m']))+'m'#+str(self.instrDict[sn]['d'])+'d'
         #instrument variables are in the root group
         inst = ncfile.createVariable('instrument1', 'c')
         inst.setncatts(self.instrDict[sn]['meta'])
         # inst.setncatts({
         #     "comment": "serial number: "+str(sn), #What if this changes???
-        #     "geospatial_vertical_min": self.instrDict[sn][dpmt]['m'],
-        #     "geospatial_vertical_max": self.instrDict[sn][dpmt]['m'],
+        #     "geospatial_vertical_min": self.instrDict[sn][self.dpmt]['m'],
+        #     "geospatial_vertical_max": self.instrDict[sn][self.dpmt]['m'],
         # })
 
         # #Create group for each depth/deployment
@@ -395,7 +413,7 @@ class Moor(sccoos.SCCOOS):
             'standard_name':'sea_water_temperature',
             'units':'celsius',
             'instrument':'instrument1'})
-        temperature.setncatts(self.qc_meta('temperature', self.instrDict[sn][dpmt]['qc']['temperature']))
+        temperature.setncatts(self.qc_meta('temperature', self.instrDict[sn][self.dpmt]['qc']['temperature']))
         temperature.setncatts(dup_varatts)
         temperature_flagPrim = ncfile.createVariable(
             'temperature_flagPrimary', 'B', ('time'), zlib=True)
@@ -420,7 +438,7 @@ class Moor(sccoos.SCCOOS):
             'long_name':'sea water salinity',
             'units':'psu',
             'instrument':'instrument1'})
-        temperature.setncatts(self.qc_meta('salinity', self.instrDict[sn][dpmt]['qc']['salinity']))
+        salinity.setncatts(self.qc_meta('salinity', self.instrDict[sn][self.dpmt]['qc']['salinity']))
         salinity.setncatts(dup_varatts)
         salinity_flagPrim = ncfile.createVariable(
             'salinity_flagPrimary', 'B', ('time'), zlib=True)
@@ -450,25 +468,31 @@ class Moor(sccoos.SCCOOS):
         lat = ncfile.createVariable('lat', 'f4')
         lat.setncatts(self.meta_lat)
         lat.setncatts({
-            'valid_min':self.staMeta[dpmt]['lat'],
-            'valid_max':self.staMeta[dpmt]['lat']
+            'data_max': np.float32(self.staMeta[self.dpmt]['lat']),
+            'data_min': np.float32(self.staMeta[self.dpmt]['lat']),
+            'valid_min': np.float32(self.staMeta[self.dpmt]['lat']),
+            'valid_max': np.float32(self.staMeta[self.dpmt]['lat'])
         })
-        ncfile.variables['lat'][0] = self.staMeta[dpmt]['lat']
+        ncfile.variables['lat'][0] = self.staMeta[self.dpmt]['lat']
         lon = ncfile.createVariable('lon', 'f4')
         lon.setncatts(self.meta_lon)
         lon.setncatts({
-            'valid_min':self.staMeta[dpmt]['lon'],
-            'valid_max':self.staMeta[dpmt]['lon']
+            'data_max': np.float32(self.staMeta[self.dpmt]['lon']),
+            'data_min': np.float32(self.staMeta[self.dpmt]['lon']),
+            'valid_min':np.float32(self.staMeta[self.dpmt]['lon']),
+            'valid_max':np.float32(self.staMeta[self.dpmt]['lon'])
         })
-        ncfile.variables['lon'][0] = self.staMeta[dpmt]['lon']
+        ncfile.variables['lon'][0] = self.staMeta[self.dpmt]['lon']
 
         dep = ncfile.createVariable('depth', 'f4')
         dep.setncatts(self.meta_dep)
         lat.setncatts({
-            'valid_min':self.instrDict[sn][dpmt]['m'],
-            'valid_max':self.instrDict[sn][dpmt]['m']
+            'data_max': np.float32(self.instrDict[sn][self.dpmt]['m']),
+            'data_min': np.float32(self.instrDict[sn][self.dpmt]['m']),
+            'valid_min':np.float32(self.instrDict[sn][self.dpmt]['m']),
+            'valid_max':np.float32(self.instrDict[sn][self.dpmt]['m'])
         })
-        ncfile.variables['depth'][0] = self.instrDict[sn][dpmt]['m']
+        ncfile.variables['depth'][0] = self.instrDict[sn][self.dpmt]['m']
 
         # return ncfile
         ncfile.close()
@@ -510,7 +534,7 @@ class Moor(sccoos.SCCOOS):
     #         }
     #         return empty
 
-    def setExtDict(self, dpmt, fnEnd, fnDict):
+    def setExtDict(self, fnEnd, fnDict):
         """fnDict should contain 'latest_file', 'latest_epoch' and 'latest_file_size' """
         # extDict[fnEnd]['latest_file'] = filename
         # extDict[fnEnd]['latest_epoch'] = dfMaxEp
@@ -518,13 +542,13 @@ class Moor(sccoos.SCCOOS):
         ## extDict[fnEnd]['latest_file_mod'] = fnMod
         with open(self.extsDictFn) as json_file:
             extDict = json.load(json_file)
-        if dpmt not in extDict: extDict[dpmt] = {}
-        extDict[dpmt][fnEnd] = fnDict
+        if self.dpmt not in extDict: extDict[self.dpmt] = {}
+        extDict[self.dpmt][fnEnd] = fnDict
         with open(self.extsDictFn, 'w') as json_file:
             json.dump(extDict, json_file, indent=4)
 
-    def logFilepath(self, dpmt, fn):
-        return os.path.join(self.logsdir, dpmt, fn)
+    def logFilepath(self, fn):
+        return os.path.join(self.logsdir, self.dpmt, fn)
 
     # ##Rewrote, edited for depthd
     # def dataToNC(self, ncName, md, subset, lookup):
@@ -549,15 +573,15 @@ class Moor(sccoos.SCCOOS):
     #     ncfile.close()
 
 
-    def text2nc(self, filename, dpmt):
+    def text2nc(self, filename):
         fnEnd = filename.split('.', 1)[-1]
         print 'text2nc', filename, fnEnd
-        log = self.logFilepath(dpmt, filename)
+        log = self.logFilepath(filename)
         fnSz = os.path.getsize(log)
         # with open(self.extsDictFn) as json_file:
         #     extDict = json.load(json_file)
-        if (fnEnd in self.filesDict[dpmt]) and ('reader' in self.filesDict[dpmt][fnEnd]):
-            fDict = self.filesDict[dpmt][fnEnd]
+        if (fnEnd in self.filesDict[self.dpmt]) and ('reader' in self.filesDict[self.dpmt][fnEnd]):
+            fDict = self.filesDict[self.dpmt][fnEnd]
             reader = 'read_csv'+str(fDict['reader'])
             # print 'reader:', reader
             df = eval('self.'+reader)(log, fDict['hdr_cols'])
@@ -581,9 +605,9 @@ class Moor(sccoos.SCCOOS):
                 # print 'Group sn:', repr(sn), '-', str(self.instrDict[sn]['m'])+'m'
                 dfSn = snGrouped.get_group(sn)
                 dfSn.set_index('date_time', inplace=True)
-                for attr in self.instrDict[sn][dpmt]['qc']:
+                for attr in self.instrDict[sn][self.dpmt]['qc']:
                     # print 'QCing', sn, attr
-                    qcIn = self.instrDict[sn][dpmt]['qc'][attr]
+                    qcIn = self.instrDict[sn][self.dpmt]['qc'][attr]
                     # print 'QC input:', qcIn
                     dfSn = self.qc_tests(dfSn, attr,
                         sensor_span=qcIn['sensor_span'], user_span=qcIn['user_span'],
@@ -592,10 +616,10 @@ class Moor(sccoos.SCCOOS):
                 # print dfSn.head(2)
                 groupedYr = dfSn.groupby(dfSn.index.year)
                 for grpYr in groupedYr.indices:
-                    ncGrp = str(int(self.instrDict[sn][dpmt]['m']))+'m'#+str(self.instrDict[sn]['d'])+'d'
+                    ncGrp = str(int(self.instrDict[sn][self.dpmt]['m']))+'m'#+str(self.instrDict[sn]['d'])+'d'
                     ncfilename = self.ncFnPre + ncGrp + '-' + str(grpYr) + '.nc'
                     ncFilepath = os.path.join(self.ncpath, ncfilename)
-                    self.dataToNC(ncFilepath, groupedYr.get_group(grpYr), {'sn': sn, 'dpmt':dpmt})
+                    self.dataToNC(ncFilepath, groupedYr.get_group(grpYr), {'sn': sn}) #'dpmt':dpmt
                     # self.dataToNC(filepath, dfSn, sn)
                     # print 'pre fileSizeChecker'
                     self.fileSizeChecker(ncFilepath)
@@ -611,7 +635,7 @@ class Moor(sccoos.SCCOOS):
             fnDict['latest_file'] = filename
             fnDict['latest_epoch'] = dfMaxEp
             fnDict['latest_file_size'] = fnSz
-            self.setExtDict(dpmt, fnEnd, fnDict)
+            self.setExtDict(fnEnd, fnDict)
             # extDict[fnEnd]['latest_file'] = filename
             # extDict[fnEnd]['latest_epoch'] = dfMaxEp
             # extDict[fnEnd]['latest_file_size'] = fnSz
@@ -622,7 +646,7 @@ class Moor(sccoos.SCCOOS):
         else:
             print 'ignoring file:', filename
 
-    def text2nc_all(self, dpmt):
+    def text2nc_all(self):
         """If starting with all new text files:
         CT1169100u_11691_20160515.002c.sc1 line 31 was a problem line. If taken out,
         the rest run smoothly. """
@@ -634,22 +658,22 @@ class Moor(sccoos.SCCOOS):
         else:
             print 'NO JSON FILE'
             extDict = {}
-        extDict[dpmt] = {}
-        for ext in self.filesDict[dpmt]:
-            # self.setExtDict(dpmt, ext, empty)
-            extDict[dpmt][ext] = {
+        extDict[self.dpmt] = {}
+        for ext in self.filesDict[self.dpmt]:
+            # self.setExtDict(self.dpmt, ext, empty)
+            extDict[self.dpmt][ext] = {
                 "latest_file": "",
                 "latest_epoch": 0,
                 "latest_file_size": 0
             }
         with open(self.extsDictFn, 'w') as json_file:
             json.dump(extDict, json_file, indent=4)
-        print 'REWROTE json for deployment', dpmt
+        print 'REWROTE json for deployment', self.dpmt
 
-        filesArr = os.listdir(os.path.join(self.logsdir, dpmt))
+        filesArr = os.listdir(os.path.join(self.logsdir, self.dpmt))
         filesArr.sort()
         for fn in filesArr:
-            self.text2nc(fn, dpmt)
+            self.text2nc(fn)
         print "DONE! ALL files. Runtime:", time.time()-start
 
 #     def text2nc_append(self):
@@ -685,25 +709,25 @@ class Moor(sccoos.SCCOOS):
     #         LRdt = datetime.datetime.utcfromtimestamp(latestDict[d])
     #         print d, instr, ext, LRdt.timetuple()[0:3]
 
-    def text2nc_append(self, dpmt):
+    def text2nc_append(self):
         with open(self.extsDictFn) as json_file:
             extDict = json.load(json_file)
         print extDict
         loopFlag = 0
         todayStr = time.strftime('%Y%m%d',time.gmtime())
         print 'todayStr:', todayStr
-        for ext in extDict[dpmt]:
-            filename = extDict[dpmt][ext]['latest_file']
-            log = self.logFilepath(dpmt, filename)
+        for ext in extDict[self.dpmt]:
+            filename = extDict[self.dpmt][ext]['latest_file']
+            log = self.logFilepath(filename)
             if os.path.isfile(log):
                 # fnEnd = filename.split('.', 1)[-1]
                 fnDate = filename.split('.', 1)[0].split('_')[-1]
                 print 'filename date:', fnDate
-                prevFnSz = extDict[dpmt][ext]['latest_file_size']
+                prevFnSz = extDict[self.dpmt][ext]['latest_file_size']
                 nowFnSz = os.path.getsize(log)
                 print 'last sizes', prevFnSz, nowFnSz
                 # if the size of the last file recorded has changed, append it
-                if (prevFnSz != nowFnSz): self.text2nc(filename, dpmt)
+                if (prevFnSz != nowFnSz): self.text2nc(filename)
                 # if the last file
                 if (fnDate != todayStr): loopFlag +=1
             else:
@@ -713,27 +737,27 @@ class Moor(sccoos.SCCOOS):
         print 'flag', loopFlag
         if loopFlag > 0:
             #Opt 1
-            filesArr = os.listdir(os.path.join(self.logsdir, dpmt))
+            filesArr = os.listdir(os.path.join(self.logsdir, self.dpmt))
             filesArr.sort()
             # loop through all the files
             for fn in filesArr:
                 fnEnd = fn.split('.', 1)[-1]
                 print fn, fnEnd
-                if (fnEnd in self.filesDict[dpmt]):
+                if (fnEnd in self.filesDict[self.dpmt]):
                     with open(self.extsDictFn) as json_file:
                         extDict = json.load(json_file)
                     print 'fileDate:', fn.split('.', 1)[0].split('_')[-1]
                     fileDate = time.strptime(fn.split('.', 1)[0].split('_')[-1], '%Y%m%d')
-                    lastFile = self.logFilepath(dpmt, extDict[dpmt][fnEnd]['latest_file']) ##asuming dictionary contains filename & isfile
+                    lastFile = self.logFilepath(extDict[self.dpmt][fnEnd]['latest_file']) ##asuming dictionary contains filename & isfile
                     if os.path.isfile(lastFile):
                         print 'lastDate:', lastFile.split('.', 1)[0].split('_')[-1]
                         lastDate = time.strptime(lastFile.split('.', 1)[0].split('_')[-1], '%Y%m%d')
                         # if files are newer than last recorded
                         if fileDate > lastDate:
-                            self.text2nc(fn, dpmt)
+                            self.text2nc(fn)
                         # now = time.gmtime()
                     else:
-                        self.text2nc(fn, dpmt)
+                        self.text2nc(fn)
 
             #Opt 2
             #Or increment from latest_file/ if lates_file is before today
