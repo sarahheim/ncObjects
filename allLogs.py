@@ -18,8 +18,8 @@ print 'codedir:', d.codedir
 d.extsDictFn = os.path.join(d.codedir, r'delmar_mooring_extensions.json')
 print "USING JSON", d.extsDictFn
 #CT1169100u_11691_20160515.002c.sc1 line 31 needs to be removed first!
-d.text2nc_all()
-# d.text2nc_append()
+# d.text2nc_all()
+d.text2nc_append()
 
 # import caf
 # c = caf.CAF()
