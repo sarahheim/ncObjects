@@ -139,12 +139,12 @@ class SASS(sccoos.SCCOOS):
         #print "init sass"
 
         # #test locations
-        self.codedir = '/home/scheim/NCobj/'
+        # self.codedir = '/home/scheim/NCobj/'
         # self.ncpath = '/home/scheim/NCobj/SASS_new'
         # self.ncpath = '/data/Junk/thredds-test/sass_meta'
 
-        # self.codedir = '/data/InSitu/SASS/code/ncobjects'
-        self.ncpath = '/data/InSitu/SASS/netcdfs_new/'
+        self.codedir = '/data/InSitu/SASS/code/ncobjects'
+        self.ncpath = '/data/InSitu/SASS/netcdfs/'
 
         # self.dateformat = '%Y-%m-%dT%H:%M:%S.%fZ'
         self.crontab = True
@@ -367,49 +367,43 @@ class SASS(sccoos.SCCOOS):
             })
 
 
-        self.attr_o2th= MainAttr('O2thermistor',
+        # self.attr_o2th= MainAttr('O2thermistor',
+        self.attr_o2PDv= MainAttr('oxygen_phase_delay_V',
             dtype= 'f4',
             atts={
                 # 'standard_name' : '', #???
-                'long_name' : 'O2 thermistor', #???
-                'units' : 'V', #not psu??
-                # 'ncei_name': '',#??? 'OXYGEN', 'DISSOLVED OXYGEN', ...
+                'long_name' : 'Oxygen thermistor',
+                'units' : 'V',
                 'instrument' : "instrument3",
                 'platform': "platform1"
             }
             #qc
         )
-        self.attr_o2thF1 = FlagAttr('O2thermistor_flagPrimary',
-            atts={
-                'long_name' : ', qc primary flag',
-                # 'standard_name' : 'status_flag'
-            })
-        self.attr_o2thF2 = FlagAttr('O2thermistor_flagSecondary',
-            atts={
-                'long_name' : ', qc secondary flag',
-                # 'standard_name' : 'status_flag'
-            })
-        self.attr_convOxy= MainAttr('convertedOxygen',
+        # self.attr_convOxy= MainAttr('convertedOxygen',
+        self.attr_o2PDus= MainAttr('oxygen_phase_delay_us',
             dtype= 'f4',
             atts={
-                'standard_name' : 'mass_concentration_of_oxygen_in_sea_water',
-                'long_name' : 'converted_oxygen', #'dissolved oxygen (raw)'???
-                'units' : 'mL/L',
+                'long_name' : 'raw oxygen instrument output',
+                'units' : 'us', #microseconds
                 'instrument' : "instrument3",
                 'platform': "platform1"
             }
             #qc
         )
-        self.attr_convOxyF1 = FlagAttr('converted_oxygen_flagPrimary',
+
+        #calculated
+        self.attr_o2= MainAttr('oxygen',
+            dtype= 'f4',
             atts={
-                'long_name' : ', qc primary flag',
-                'standard_name' : 'mass_concentration_of_oxygen_in_sea_water status_flag'
-            })
-        self.attr_convOxyF2 = FlagAttr('converted_oxygen_flagSecondary',
-            atts={
-                'long_name' : ', qc secondary flag',
-                'standard_name' : 'mass_concentration_of_oxygen_in_sea_water status_flag'
-            })
+                # 'standard_name' : 'mass_concentration_of_oxygen_in_sea_water', #???
+                'long_name' : 'dissolved oxygen', #???
+                'units' : 'mL/L', #not psu??
+                'instrument' : "instrument3",
+                'platform': "platform1"
+            }
+            #qc
+        )
+                # 'ncei_name': '',#??? 'OXYGEN', 'DISSOLVED OXYGEN', ...
 
         # = MainAttr('',
         #     dtype= 'f4',
@@ -435,9 +429,9 @@ class SASS(sccoos.SCCOOS):
             })
         self.ch_i2 = CharVariable('instrument2', sta,
             atts={
-                'make_model' : "Seapoint Chlorophyll Fluorometer",
+                'make_model' : "Wetstar Chlorophyll Fluorometer",
                 'long_name': 'Chlorophyll Fluorometer',
-                # 'ncei_name': '', ???
+                'ncei_name': 'fluorometer',
                 'comment' : "Seapoint Chlorophyll Fluorometer with a 0-50 ug/L gain setting.",
                 'ioos_code' : "urn:ioos:sensor:sccoos:"+self.sta.code_name+":chlorophyll"
             })
@@ -446,7 +440,7 @@ class SASS(sccoos.SCCOOS):
                 'make_model' : "Seabird SBE 63 Optical Dissolved Oxygen (DO) Sensor",
                 'long_name': "SBE 63 Optical Dissolved Oxygen (DO) Sensor",
                 # 'comment' : "",
-                # 'ncei_name': '', ???
+                'ncei_name': 'oxygen meter',
                 'ioos_code' : "urn:ioos:sensor:sccoos:"+self.sta.code_name+":oxygen"
             })
 
@@ -808,8 +802,15 @@ class SASS(sccoos.SCCOOS):
                 print 'finished appending file'
 
     def text2nc_all(self, qryMn):
-        """ For now pass '201' to do all years (2013-2017)
+        """ Make netCDFs of 'all' logs. Can be specificed to a specific year or all years.
+
+        .. note: For now pass '201' to do all years (2013-2017). Else, i.e.
+            - qc is done at the end of each text file (take longer as the netCDF grows).
+                Could be made for efficient if all text files were written to
+                netCDFs THEN qc done once at the end.
+
         .. todo: make qryMn default to all without parameter pass.
+
         :param str qryMn: if in folder name, do text2nc. i.e. '2017'"""
         mnArr = os.listdir(self.logsdir)
         mnArr.sort()
@@ -1119,14 +1120,13 @@ class SASS_NPd2(SASS):
         self.attrObjArr = [
             self.attr_temp, self.attr_con, self.attr_pres, self.attr_sal,
             self.attr_chl1, self.attr_chl2,
-            self.attr_o2th, self.attr_convOxy,
+            # self.attr_o2th, self.attr_convOxy,
+            self.attr_o2PDv, self.attr_o2PDus,
             self.attr_tempF1, self.attr_tempF2,
             self.attr_conF1, self.attr_conF2,
             self.attr_presF1, self.attr_presF2,
             self.attr_salF1, self.attr_salF2,
             self.attr_chlF1, self.attr_chlF2,
-            # self.attr_o2thF1, self.attr_o2thF2,
-            # self.attr_convOxyF1, self.attr_convOxyF2,
             self.attr_sigmat, self.attr_dVolt, self.attr_cDr]
 
         self.otherArr = [ self.ch_i1, self.ch_i2, self.ch_i3, self.ch_p1 ]
@@ -1233,8 +1233,9 @@ class SASS_pH(SASS):
 
         self.ch_i1 = CharVariable('instrument1', sta,
             atts={
-                'make_model' : "",
-                'long_name': "",
+                'make_model' : "Honeywell Durafet pH Sensor",
+                'long_name': "pH sensor",
+                'ncei_name': "pH sensors",
                 'comment' : "Instrument for measuring pH",
                 'ioos_code' : "urn:ioos:sensor:sccoos:"+self.sta.code_name+":ph"
             })
@@ -1316,40 +1317,3 @@ class SASS_pH(SASS):
 
         except:
             return None
-
-    # def doCalc(self, row, **kwargs):
-    #     """
-    #     :param object row: row, with columns as attributes
-    #     :param dictionary calcsDict:
-    #     :returns: output from calculation function
-    #     """
-    #     calcsDict = kwargs['calcsDict']
-    #     # col = kwargs['col']
-    #     func = calcsDict[row.calcDate]['function']
-    #     input = calcsDict[row.calcDate]['input']
-    #     return eval('self.'+func)(row, input=input)
-    #
-    # def calculations(self, df, extDict):
-    #     """
-    #     .. note: Separate from SASS_Basic because, calculations needed to be done in a
-    #     specific order (temperature BEFORE ph).
-    #     .. todo: See note^. Merge both calculations methods to single parent.
-    #     Impliment order of calculations (JSON? "calc_order")
-    #     """
-    #     for col in df.columns:
-    #         if col not in ['server_date', 'ip']:
-    #             #ALL might not be float in the future?
-    #             df.loc[:,col] = df.loc[:,col].astype(float)
-    #             #Check if column name has calculations
-    #     for calc in ['temperature', 'ph']: # temperature needs to be done beofre ph
-    #         df['calcDate'] = pd.Series(np.repeat(pd.NaT, len(df)), df.index)
-    #         dates = extDict['calcs'][calc].keys()
-    #         dates.sort()
-    #         #loop through dates and set appropriate date
-    #         for calcDtStr in dates:
-    #             calcDt = pd.to_datetime(calcDtStr, format='%Y-%m-%dT%H:%M:%SZ') #format?
-    #             df['calcDate'] = [calcDtStr if i >= calcDt else df['calcDate'][i] for i in df.index]
-    #         # df.rename(columns={col: col+'_raw'}, inplace=True)
-    #         df[calc] = df.apply(self.doCalc, axis=1, calcsDict=extDict['calcs'][calc])
-    #         df.drop('calcDate', axis=1, inplace=True)
-    #     return df
