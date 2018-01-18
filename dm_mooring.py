@@ -38,7 +38,7 @@ class Moor(sccoos.SCCOOS):
         self.logsdir = r'/data/InSitu/DelMar/data'
         self.ncpath = r'/data/InSitu/DelMar/netcdf'
         self.crontab = True
-        self.codedir = r'/data/InSitu/DelMar/code'
+        self.codedir = r'/data/InSitu/DelMar/code/ncobjects'
         self.extsDictFn = os.path.join(self.codedir, r'delmar_mooring_extensions.json')
         print 'Deployment:', self.dpmt
         print "USING JSON", self.extsDictFn
