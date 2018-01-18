@@ -28,6 +28,6 @@ sass_oop.SASS_Basic(sass_oop.ucsd).text2nc_append()
 sass_oop.SASS_NPd2(sass_oop.uci).text2nc_append()
 
 # Newport ph
-sass_oop.SASS_pH(sass_oop.uci2).text2nc_append()
+# sass_oop.SASS_pH(sass_oop.uci2).text2nc_append()
 
 print "Done!", time.asctime(),"Runtime:", time.time()-start
