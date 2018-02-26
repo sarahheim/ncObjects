@@ -19,7 +19,12 @@ import sass_oop
 # ucsb.ncpath = testdir
 # ucsb.text2nc_append()
 
-sass_oop.SASS_Basic(sass_oop.ucsb).text2nc_append()
+# sass_oop.SASS_Basic(sass_oop.ucsb).text2nc_append()
+ucsb = sass_oop.SASS_Basic(sass_oop.ucsb)
+# Stearns Wharf is now coming in a new port as of 2/26/18
+ucsb.logsdir = r'/data/InSitu/SASS/raw_data/stearns_wharf'
+ucsb.text2nc_append()
+
 # sass_oop.SASS_Basic(sass_oop.ucla).text2nc_append() #No longer running
 sass_oop.SASS_Basic(sass_oop.ucsd).text2nc_append()
 
